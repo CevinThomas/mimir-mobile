@@ -1,27 +1,63 @@
-import { StatusBar } from 'expo-status-bar'
-import { Button, StyleSheet, Text, View } from 'react-native'
-import { useEffect } from 'react'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { NavigationContainer } from '@react-navigation/native'
+import Start from './views/Start'
+import Login from './views/Login'
+import SignUp from './views/SignUp'
+import SignUpConfirmation from './views/SignUpConfirmation'
+import Home from './views/Home'
+import { AuthProvider, useAuthContext } from './context/AuthContext'
+import Profile from './views/Profile'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 
-export default function App() {
-  const fetchDecks = async () => {
-    const response = await fetch(`http://localhost:3001/api/admin/v1/decks`)
-    console.log(response)
-  }
+const Stack = createNativeStackNavigator(RootStack)
+const Tab = createBottomTabNavigator(LoggedInStack)
 
+function RootStack() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app</Text>
-      <StatusBar style="auto" />
-      <Button title={'Fetch Decks'} onPress={fetchDecks}></Button>
-    </View>
+    <Stack.Navigator
+      initialRouteName="Welcome"
+      screenOptions={{
+        headerStyle: { backgroundColor: 'tomato' }
+      }}
+    >
+      <Stack.Screen name="Welcome" component={Start} options={{ title: 'Welcome' }} />
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="SignUpConfirmation" component={SignUpConfirmation} />
+    </Stack.Navigator>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
-})
+function LoggedInStack() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName
+
+          if (route.name === 'Home') {
+            iconName = focused ? 'ios-information-circle' : 'ios-information-circle-outline'
+          } else if (route.name === 'Settings') {
+            iconName = focused ? 'ios-list' : 'ios-list-outline'
+          }
+
+          // You can return any component that you like here!
+        },
+        tabBarActiveTintColor: 'tomato',
+        tabBarInactiveTintColor: 'gray'
+      })}
+    >
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Profile" component={Profile} />
+    </Tab.Navigator>
+  )
+}
+
+export default function App() {
+  const { state, dispatch } = useAuthContext()
+  return (
+    <NavigationContainer>
+      {state.isLoggedIn ? <LoggedInStack /> : <RootStack />}
+    </NavigationContainer>
+  )
+}
