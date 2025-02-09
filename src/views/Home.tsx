@@ -1,13 +1,18 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 export default function Home() {
   return (
     <View style={styles.container}>
-      <Text>
-        This is the home page. If you are seeing this, you have successfully logged in.
-        Congratulations!
-      </Text>
+      <View style={{ flex: 1 }}>
+        <Text>Continue where you left off</Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text>Newly added decks</Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text>Featured decks</Text>
+      </View>
     </View>
   )
 }
@@ -15,8 +20,6 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
+    backgroundColor: '#fff'
   }
 })

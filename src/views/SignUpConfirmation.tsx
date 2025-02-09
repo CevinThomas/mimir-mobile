@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar'
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-import { Button } from '@react-navigation/elements'
+import { StyleSheet, View } from 'react-native'
 import { useAuthContext } from '../context/AuthContext'
+import { Button, Text } from '@rneui/themed'
 
 export default function SignUpConfirmation() {
   const { state, dispatch } = useAuthContext()
@@ -14,11 +14,24 @@ export default function SignUpConfirmation() {
   return (
     <View style={styles.container}>
       <Text>
-        This page will first show a "Please check your email for the confirmation email. Once you
-        have confirmed, please click the button below"
+        We have sent you an email with a confirmation link. Please click on the link to confirm your
+        email address.
       </Text>
 
-      <Button onPress={logIn}>User clicks I have confirmed</Button>
+      <Button type="solid" loading />
+
+      <Button
+        title={'Cancel'}
+        buttonStyle={{
+          backgroundColor: 'rgba(78, 116, 289, 1)',
+          borderRadius: 3
+        }}
+        containerStyle={{
+          width: 200,
+          marginHorizontal: 50,
+          marginVertical: 10
+        }}
+      />
 
       <StatusBar style="auto" />
     </View>

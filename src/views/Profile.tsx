@@ -19,11 +19,16 @@ export default function Profile() {
     }
   }
 
+  const getEmailOfProfile = async () => {
+    const email = SecureStore.getItemAsync('email')
+    return email
+  }
+
   const { state, dispatch } = useAuthContext()
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Profile</Text>
-
+      <Text>{getEmailOfProfile()}</Text>
       <Text>{state.isLoggedIn ? 'Logged in' : 'Not logged in'}</Text>
       <Button onPress={onLogoutPress}>Log out</Button>
     </View>

@@ -1,15 +1,18 @@
 import { StatusBar } from 'expo-status-bar'
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-import { Button } from '@react-navigation/elements'
+import { StyleSheet, View } from 'react-native'
+import { Button, Text } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
+import { Input } from '@rneui/base'
 
 export default function SignUp() {
   const navigation = useNavigation()
   return (
     <View style={styles.container}>
-      <Text>This is where the user enters information about them to sign up</Text>
-      <Text>Name, Email, Password etc</Text>
+      <Input autoCapitalize="none" autoComplete="email" placeholder="Namn" />
+      <Input autoCapitalize="none" autoComplete="email" placeholder="Email" />
+      <Input placeholder="Password" />
+
       <StatusBar style="auto" />
       <Button onPress={() => navigation.navigate('SignUpConfirmation')}>
         User clicks Continue

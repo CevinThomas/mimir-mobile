@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
-import { Button } from '@react-navigation/elements'
+import { StyleSheet, TextInput, View } from 'react-native'
+import { Button, ButtonGroup, withTheme, Text } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
 import { login } from '../api/AuthApi'
 import { useAuthContext } from '../context/AuthContext'
@@ -36,16 +36,13 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text>This is where you enter email and password</Text>
-      <Text>Option to sign up </Text>
-      <Text>{state.isLoggedIn ? 'Logged in' : 'Not logged in'}</Text>
       <Input
         autoCapitalize="none"
         autoComplete="email"
         placeholder="Email"
         onChangeText={setEmail}
       />
-      <Input placeholder="Password" onChangeText={setPassword} />
+      <Input autoCapitalize="none" placeholder="Password" onChangeText={setPassword} />
       <CheckBox title={'Remember me'} checked={rememberMe} onPress={setRememberMe} />
       <StatusBar style="auto" />
       <Button onPress={onLoginPress}>Login</Button>

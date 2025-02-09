@@ -6,18 +6,25 @@ import SignUp from './views/SignUp'
 import SignUpConfirmation from './views/SignUpConfirmation'
 import Home from './views/Home'
 import { AuthProvider, useAuthContext } from './context/AuthContext'
-import Profile from './views/Profile'
+import Deck from './views/Deck'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import Decks from './views/Decks'
+import DeckSession from './views/DeckSession'
+import Profile from './views/Profile'
+import CreateDeck from './views/CreateDeck'
+import CreateCard from './views/CreateCard'
+import ViewAllDecks from './views/ViewAllDecks'
 
 const Stack = createNativeStackNavigator(RootStack)
-const Tab = createBottomTabNavigator(LoggedInStack)
+const Tab = createBottomTabNavigator(TabStack)
 
 function RootStack() {
   return (
     <Stack.Navigator
       initialRouteName="Welcome"
       screenOptions={{
-        headerStyle: { backgroundColor: 'tomato' }
+        headerStyle: { backgroundColor: 'white' },
+        headerShadowVisible: false
       }}
     >
       <Stack.Screen name="Welcome" component={Start} options={{ title: 'Welcome' }} />
@@ -30,8 +37,29 @@ function RootStack() {
 
 function LoggedInStack() {
   return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShadowVisible: false,
+        headerStyle: { backgroundColor: 'white' },
+        headerTitle: ''
+      }}
+    >
+      <Stack.Screen name="Home" component={TabStack} />
+      <Stack.Screen name="Deck" component={Deck} />
+      <Stack.Screen name="DeckSession" component={DeckSession} />
+      <Stack.Screen name="CreateDeck" component={CreateDeck} />
+      <Stack.Screen name="CreateCard" component={CreateCard} options={{ gestureEnabled: false }} />
+      <Stack.Screen name="ViewAllDecks" component={ViewAllDecks} />
+    </Stack.Navigator>
+  )
+}
+
+function TabStack() {
+  return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        headerTitle: '',
+        headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName
 
@@ -48,7 +76,8 @@ function LoggedInStack() {
       })}
     >
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Decks" component={Decks} />
+      <Tab.Screen name="Settings" component={Profile} />
     </Tab.Navigator>
   )
 }

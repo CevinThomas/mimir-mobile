@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-import { Button } from '@react-navigation/elements'
+import { StyleSheet, View } from 'react-native'
+import { Button, ButtonGroup, withTheme, Text } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
 import { login } from '../api/AuthApi'
@@ -37,7 +37,7 @@ export default function Start() {
   }, [])
   return (
     <View style={styles.container}>
-      <Text>Basic start screen</Text>
+      <Text>Start your learning journey today!</Text>
       <StatusBar style="auto" />
       <Button onPress={() => navigation.navigate('Login')}>User clicks Continue or Login</Button>
     </View>
