@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import {
   archiveCard,
   deleteDeckSession,
@@ -8,7 +8,7 @@ import {
   resetDeckSession
 } from '../api/DeckSessionApi'
 import { Button } from '@rneui/themed'
-import { useNavigation, CommonActions } from '@react-navigation/native'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 
 export default function DeckSession(props: {
   route: { params: { deck: { name: string; id: string } } }

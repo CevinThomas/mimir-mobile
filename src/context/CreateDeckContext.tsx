@@ -11,38 +11,59 @@ const initialState = {
   },
   deckName: '',
   deckDescription: '',
+  deckId: '',
   deckCards: []
 }
 
 const createDeckReducer = (state, action) => {
   switch (action.type) {
+    case 'SET_DECK':
+      return {
+        ...state,
+        deckName: action.response.name,
+        deckDescription: action.response.description,
+        deckId: action.response.id,
+        deckCards: action.response.cards || []
+      }
     case 'UPDATE_DECK_KEY':
       return { ...state, [action.key]: action.value }
 
     case 'CLEAR_CURRENT_CARD':
       return { ...state, currentCard: initialState.currentCard }
 
+    case 'SET_CURRENT_CARD':
+      return { ...state, currentCard: action.card }
+
     case 'UPDATE_CURRENT_CARD':
       return { ...state, currentCard: { ...state.currentCard, [action.key]: action.value } }
 
-    case 'ADD_CURRENT_CARD':
-      return { ...state, currentCard: action.card }
-
     case 'ADD_CARD':
-      return { ...state, deckCards: [...state.deckCards, state.currentCard] }
+      return {
+        ...state,
+        deckCards: [...state.deckCards, action.card],
+        currentCard: initialState.currentCard
+      }
 
     case 'UPDATE_CARD':
       return {
         ...state,
-        deckCards: state.deckCards.map((card, index) =>
-          index === action.index ? { ...card, [action.key]: action.value } : card
-        )
+        deckCards: state.deckCards.map((card) => (card.id === action.card.id ? action.card : card)),
+        currentCard: initialState.currentCard
       }
 
     case 'DELETE_CARD':
       return {
         ...state,
-        deckCards: state.deckCards.filter((card, index) => index !== action.index)
+        deckCards: state.deckCards.filter((card) => card.id !== state.currentCard.id)
+      }
+
+    case 'DELETE_CHOICE':
+      return {
+        ...state,
+        currentCard: {
+          ...state.currentCard,
+          choices: state.currentCard.choices.filter((choice) => choice.id !== action.choice.id)
+        }
       }
 
     case 'RESET':
@@ -60,18 +81,12 @@ const createDeckReducer = (state, action) => {
     case 'UPDATE_CHOICE':
       return {
         ...state,
-        deckCards: state.deckCards.map((card, index) =>
-          index === action.index
-            ? {
-                ...card,
-                choices: card.choices.map((choice, choiceIndex) =>
-                  choiceIndex === action.choiceIndex
-                    ? { ...choice, [action.key]: action.value }
-                    : choice
-                )
-              }
-            : card
-        )
+        currentCard: {
+          ...state.currentCard,
+          choices: state.currentCard.choices.map((choice) =>
+            choice.id === action.choice.id ? action.choice : choice
+          )
+        }
       }
 
     default:

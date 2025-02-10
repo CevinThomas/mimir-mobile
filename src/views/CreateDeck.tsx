@@ -1,12 +1,26 @@
-import React, { useRef, useState } from 'react'
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { useNavigation } from '@react-navigation/native'
+import React, { useEffect } from 'react'
+import { Button, StyleSheet, Text, TextInput, View } from 'react-native'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 import { useCreateDeckContext } from '../context/CreateDeckContext'
-import { createDeck } from '../api/DecksApi'
+import { createDeck, updateDeck } from '../api/DecksApi'
 
-export default function CreateDeck() {
+export default function CreateDeck(props: {
+  route: { params: { deck: { name: string; id: string } } }
+}) {
+  useEffect(() => {
+    if (props.route.params?.deck) {
+      console.log(props.route.params.deck)
+      dispatch({
+        type: 'SET_DECK',
+        response: {
+          name: props.route.params.deck.name,
+          description: props.route.params.deck.description,
+          id: props.route.params.deck.id,
+          cards: props.route.params.deck.cards
+        }
+      })
+    }
+  }, [])
   const { state, dispatch } = useCreateDeckContext()
   const navigation = useNavigation()
 
@@ -14,20 +28,31 @@ export default function CreateDeck() {
     dispatch({ type: 'UPDATE_DECK_KEY', key, value })
   }
 
-  const onSaveDeck = async () => {
-    console.log({
-      name: state.deckName,
-      description: state.deckDescription,
-      cards: state.deckCards
-    })
-    await createDeck({
-      name: state.deckName,
-      description: state.deckDescription,
-      cards: state.deckCards
-    })
+  const onNavigateToCreateCard = async () => {
+    if (!state.deckId) {
+      const response = await createDeck({
+        name: state.deckName,
+        description: state.deckDescription,
+        cards: state.deckCards
+      })
+      console.log(response)
+      dispatch({ type: 'SET_DECK', response })
+    }
 
+    navigation.navigate('CreateCard')
+  }
+
+  const onSaveDeck = async () => {
+    await updateDeck(state.deckId, { name: state.deckName, description: state.deckDescription })
     dispatch({ type: 'RESET' })
-    navigation.replace('Home', { screen: 'Decks' })
+    navigation.dispatch(
+      CommonActions.reset({ index: 0, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
+    )
+  }
+
+  const onGoBack = () => {
+    dispatch({ type: 'RESET' })
+    navigation.dispatch(CommonActions.goBack())
   }
 
   return (
@@ -44,14 +69,17 @@ export default function CreateDeck() {
         style={styles.input}
         onChangeText={(text) => onUpdateDeck('deckDescription', text)}
       />
-      {state.deckCards.map((card, index) => (
+      {state.deckCards?.map((card, index) => (
         <View key={index}>
-          <Button title={card.title} />
+          <Button
+            onPress={() => navigation.navigate('CreateCard', { card: card })}
+            title={card.title}
+          />
         </View>
       ))}
-      <Button title="Add Card" onPress={() => navigation.navigate('CreateCard')} />
-      <Button title="Create Deck" onPress={onSaveDeck} />
-      <Button title="Clear" onPress={() => dispatch({ type: 'RESET' })} />
+      <Button title="Add Card" onPress={onNavigateToCreateCard} />
+      {state.deckCards?.length > 0 && <Button title="Save Deck" onPress={onSaveDeck} />}
+      {!state.deckCards?.length > 0 && <Button title="Back" onPress={onGoBack} />}
     </View>
   )
 }

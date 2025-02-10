@@ -5,7 +5,7 @@ import Login from './views/Login'
 import SignUp from './views/SignUp'
 import SignUpConfirmation from './views/SignUpConfirmation'
 import Home from './views/Home'
-import { AuthProvider, useAuthContext } from './context/AuthContext'
+import { useAuthContext } from './context/AuthContext'
 import Deck from './views/Deck'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Decks from './views/Decks'
@@ -47,7 +47,11 @@ function LoggedInStack() {
       <Stack.Screen name="Home" component={TabStack} />
       <Stack.Screen name="Deck" component={Deck} />
       <Stack.Screen name="DeckSession" component={DeckSession} />
-      <Stack.Screen name="CreateDeck" component={CreateDeck} />
+      <Stack.Screen
+        name="CreateDeck"
+        component={CreateDeck}
+        options={{ gestureEnabled: false, headerBackVisible: false }}
+      />
       <Stack.Screen name="CreateCard" component={CreateCard} options={{ gestureEnabled: false }} />
       <Stack.Screen name="ViewAllDecks" component={ViewAllDecks} />
     </Stack.Navigator>

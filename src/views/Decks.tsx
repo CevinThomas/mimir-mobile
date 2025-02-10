@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, RefreshControl } from 'react-native'
+import { RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Button } from '@rneui/themed'
-import { myDecks, ongoingDecks, sharedWithMeDecks } from '../deckData'
+import { myDecks, ongoingDecks } from '../deckData'
 import DeckList from '../components/DeckList'
 import { getAccountDecks, getDecks, getSharedDecks } from '../api/DecksApi'
 import { getDeckSessions } from '../api/DeckSessionApi'
@@ -43,6 +43,7 @@ export default function Decks() {
 
   const fetchAccountDecks = async () => {
     const decks = await getAccountDecks()
+    console.log(decks)
     setAccountDecks(decks)
   }
 

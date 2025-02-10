@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Button, Text } from '@rneui/themed'
+import { Button } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
 import { Input } from '@rneui/base'
 

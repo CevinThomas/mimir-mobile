@@ -26,6 +26,41 @@ export const createDeck = async (deck: any) => {
   return response.data
 }
 
+export const updateDeck = async (deckId: string, deck: any) => {
+  return await axiosInstance.put(`/decks/${deckId}`, { deck: deck })
+}
+
+export const createCard = async (deckId: string, card: any) => {
+  return await axiosInstance.post(`/decks/${deckId}/cards`, { card: card })
+}
+
+export const updateCard = async (deckId: string, cardId: string, card: any) => {
+  return await axiosInstance.put(`/decks/${deckId}/cards/${cardId}`, { card: card })
+}
+
+export const deleteCard = async (deckId: string, cardId: string) => {
+  return await axiosInstance.delete(`/decks/${deckId}/cards/${cardId}`)
+}
+
+export const updateChoice = async (
+  deckId: string,
+  cardId: string,
+  choiceId: string,
+  choice: any
+) => {
+  return await axiosInstance.put(`/decks/${deckId}/cards/${cardId}/choices/${choiceId}`, {
+    choice: choice
+  })
+}
+
+export const createChoice = async (deckId: string, cardId: string, choice: any) => {
+  return await axiosInstance.post(`/decks/${deckId}/cards/${cardId}/choices`, { choice: choice })
+}
+
+export const deleteChoice = async (deckId: string, cardId: string, choiceId: string) => {
+  return await axiosInstance.delete(`/decks/${deckId}/cards/${cardId}/choices/${choiceId}`)
+}
+
 export const getDeck = async (deckId: string) => {
   const response = await axiosInstance.get(`/decks/${deckId}`)
   return response.data
@@ -42,4 +77,12 @@ export const removeSharedDeck = async (deckId: string) => {
 
 export const createPromoteRequest = async (deckId: string) => {
   return await axiosInstance.post(`/decks/${deckId}/request_promote`)
+}
+
+export const favoriteDeck = async (deckId: string) => {
+  return await axiosInstance.post(`/decks/${deckId}/favorite`)
+}
+
+export const deleteDeck = async (deckId: string) => {
+  return await axiosInstance.delete(`/decks/${deckId}`)
 }

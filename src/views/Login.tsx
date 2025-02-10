@@ -1,12 +1,11 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
-import { StyleSheet, TextInput, View } from 'react-native'
-import { Button, ButtonGroup, withTheme, Text } from '@rneui/themed'
+import { StyleSheet, View } from 'react-native'
+import { Button, CheckBox } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
 import { login } from '../api/AuthApi'
 import { useAuthContext } from '../context/AuthContext'
 import * as SecureStore from 'expo-secure-store'
-import { CheckBox } from '@rneui/themed'
 import { Input } from '@rneui/base'
 
 export default function Login() {

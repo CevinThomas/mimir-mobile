@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Button, ButtonGroup, withTheme, Text } from '@rneui/themed'
+import { Button, Text } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
 import { login } from '../api/AuthApi'

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { getDecks, getSharedDecks } from '../api/DecksApi'
 import { getDeckSessions } from '../api/DeckSessionApi'
 import DeckList from '../components/DeckList'
