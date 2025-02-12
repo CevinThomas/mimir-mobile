@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { getDecks, getSharedDecks } from '../api/DecksApi'
 import { getDeckSessions } from '../api/DeckSessionApi'
-import DeckList from '../components/DeckList'
+import { useNavigation } from '@react-navigation/native'
+import NormalText from '../components/Typography/NormalText'
+import MainBackground from '../components/MainBackground'
+import DeckListItem from '../components/DeckListItem'
 
 export default function ViewAllDecks(props: { route: { params: { method: string } } }) {
   const [decks, setDecks] = useState([])
+  const navigation = useNavigation()
   useEffect(() => {
     fetchInit()
   }, [])
@@ -36,16 +40,37 @@ export default function ViewAllDecks(props: { route: { params: { method: string 
   }
 
   const loopDecks = (decks: any[]) => {
-    return decks.map((deck) => {
-      return <DeckList key={deck.id} deck={deck} />
-    })
+    if (props.route.params.method === 'ongoingDecks') {
+      return (
+        <View style={{ padding: 10 }}>
+          <View style={{ marginBottom: 20 }}>
+            <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>Ongoing Decks</NormalText>
+          </View>
+          {decks.map((deck) => {
+            return <DeckListItem key={deck.id} deck={deck.deck} />
+          })}
+        </View>
+      )
+    }
+
+    return (
+      <View style={{ padding: 10 }}>
+        <View style={{ marginBottom: 20 }}>
+          <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>
+            {props.route.params.method === 'myDecks' ? 'My' + ' decks' : 'Shared decks'}
+          </NormalText>
+        </View>
+        {decks.map((deck) => {
+          return (
+            <View>
+              <DeckListItem deck={deck} key={deck.id} />
+            </View>
+          )
+        })}
+      </View>
+    )
   }
-  return (
-    <View style={{ flex: 1 }}>
-      <Text>View All Decks {props.route.params.method}</Text>
-      {loopDecks(decks)}
-    </View>
-  )
+  return <MainBackground>{loopDecks(decks)}</MainBackground>
 }
 
 const styles = StyleSheet.create({

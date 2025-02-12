@@ -10,8 +10,15 @@ export const login = async (email: string, password: string) => {
   return response.data
 }
 
-export const signUp = async (name: string, email: string, password: string) => {
-  const response = await axiosInstance.post('/signup', { name, email, password })
+export const userSignUp = async (email: string, password: string, name: string) => {
+  const response = await axiosInstance.post('/users/registrations', {
+    user: { email, password, name }
+  })
+  return response.data
+}
+
+export const userConfirmed = async (email: string) => {
+  const response = await axiosInstance.get(`/users/verified`, { params: { email } })
   return response.data
 }
 

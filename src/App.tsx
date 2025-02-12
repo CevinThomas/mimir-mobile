@@ -14,39 +14,66 @@ import Profile from './views/Profile'
 import CreateDeck from './views/CreateDeck'
 import CreateCard from './views/CreateCard'
 import ViewAllDecks from './views/ViewAllDecks'
+import { useTheme } from './context/ThemeContext'
+import { Button } from 'react-native'
+import { getColorProperty } from './helpers'
 
 const Stack = createNativeStackNavigator(RootStack)
 const Tab = createBottomTabNavigator(TabStack)
 
 function RootStack() {
+  const { theme, toggleTheme } = useTheme()
+
+  const HeaderButton = () => {
+    return <Button title="Change theme" onPress={toggleTheme} />
+  }
   return (
     <Stack.Navigator
       initialRouteName="Welcome"
       screenOptions={{
-        headerStyle: { backgroundColor: 'white' },
-        headerShadowVisible: false
+        headerStyle: {
+          backgroundColor: getColorProperty(theme, 'background')
+        },
+        headerShadowVisible: false,
+        headerBackButtonDisplayMode: 'minimal',
+        headerRight: () => <HeaderButton />
       }}
     >
-      <Stack.Screen name="Welcome" component={Start} options={{ title: 'Welcome' }} />
+      <Stack.Screen name="Welcome" component={Start} options={{ headerTitle: '' }} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="SignUp" component={SignUp} />
-      <Stack.Screen name="SignUpConfirmation" component={SignUpConfirmation} />
+      <Stack.Screen
+        name="SignUpConfirmation"
+        component={SignUpConfirmation}
+        options={{ gestureEnabled: false, headerBackVisible: false, headerTitle: '' }}
+      />
     </Stack.Navigator>
   )
 }
 
 function LoggedInStack() {
+  const { theme, toggleTheme } = useTheme()
+
+  const HeaderButton = () => {
+    return <Button title="Change theme" onPress={toggleTheme} />
+  }
   return (
     <Stack.Navigator
       screenOptions={{
         headerShadowVisible: false,
-        headerStyle: { backgroundColor: 'white' },
-        headerTitle: ''
+        headerStyle: { backgroundColor: getColorProperty(theme, 'background') },
+        headerTitle: '',
+        headerBackButtonDisplayMode: 'minimal',
+        headerRight: () => <HeaderButton />
       }}
     >
       <Stack.Screen name="Home" component={TabStack} />
-      <Stack.Screen name="Deck" component={Deck} />
-      <Stack.Screen name="DeckSession" component={DeckSession} />
+      <Stack.Screen name="Deck" component={Deck} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="DeckSession"
+        component={DeckSession}
+        options={{ gestureEnabled: false }}
+      />
       <Stack.Screen
         name="CreateDeck"
         component={CreateDeck}
@@ -59,10 +86,19 @@ function LoggedInStack() {
 }
 
 function TabStack() {
+  const { theme, toggleTheme } = useTheme()
+
+  const HeaderButton = () => {
+    return <Button title="Change theme" onPress={toggleTheme} />
+  }
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerTitle: '',
+        tabBarStyle: {
+          backgroundColor: getColorProperty(theme, 'background'),
+          borderTopWidth: 0
+        },
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName

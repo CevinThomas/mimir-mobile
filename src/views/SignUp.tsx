@@ -1,31 +1,66 @@
 import { StatusBar } from 'expo-status-bar'
-import React from 'react'
+import React, { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Button } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
-import { Input } from '@rneui/base'
+import { userSignUp } from '../api/AuthApi'
+import MainBackground from '../components/MainBackground'
+import CustomTextInput from '../components/Forms/Input'
+import MainButton from '../components/Buttons/MainButton'
 
 export default function SignUp() {
   const navigation = useNavigation()
-  return (
-    <View style={styles.container}>
-      <Input autoCapitalize="none" autoComplete="email" placeholder="Namn" />
-      <Input autoCapitalize="none" autoComplete="email" placeholder="Email" />
-      <Input placeholder="Password" />
 
-      <StatusBar style="auto" />
-      <Button onPress={() => navigation.navigate('SignUpConfirmation')}>
-        User clicks Continue
-      </Button>
-    </View>
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const onSignUp = async () => {
+    try {
+      await userSignUp(email, password, name)
+      navigation.navigate('SignUpConfirmation', { email, password })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  return (
+    <MainBackground>
+      <View style={styles.container}>
+        <View style={styles.form}>
+          <CustomTextInput label={'Namn'} value={name} onChangeText={(value) => setName(value)} />
+          <CustomTextInput
+            label={'Email'}
+            value={email}
+            onChangeText={(value) => setEmail(value)}
+          />
+          <CustomTextInput
+            label={'Password'}
+            value={password}
+            secureTextEntry={true}
+            onChangeText={(value) => setPassword(value)}
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <StatusBar style="auto" />
+          <MainButton type={'filled'} onPress={onSignUp}>
+            Create account
+          </MainButton>
+        </View>
+      </View>
+    </MainBackground>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center'
+  },
+  form: {
+    marginBottom: 20,
+    flex: 3,
+    justifyContent: 'center'
+  },
+  buttonContainer: {
+    flex: 1
   }
 })

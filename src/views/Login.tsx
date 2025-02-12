@@ -1,16 +1,21 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Button, CheckBox } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
 import { login } from '../api/AuthApi'
 import { useAuthContext } from '../context/AuthContext'
 import * as SecureStore from 'expo-secure-store'
-import { Input } from '@rneui/base'
+import { getAccountInfo } from '../api/AccountsApi'
+import { useUserContext } from '../context/UserContext'
+import MainBackground from '../components/MainBackground'
+import CustomTextInput from '../components/Forms/Input'
+import MainButton from '../components/Buttons/MainButton'
+import CustomCheckBox from '../components/Forms/Checkbox'
 
 export default function Login() {
   const navigation = useNavigation()
   const { state, dispatch } = useAuthContext()
+  const { state: userState, dispatch: userDispatch } = useUserContext()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,6 +31,8 @@ export default function Login() {
       }
 
       if (response.status.code === 200) {
+        const accountResponse = await getAccountInfo()
+        userDispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
         dispatch({ type: 'LOG_IN' })
       }
     } catch (error) {
@@ -34,27 +41,40 @@ export default function Login() {
   }
 
   return (
-    <View style={styles.container}>
-      <Input
-        autoCapitalize="none"
-        autoComplete="email"
-        placeholder="Email"
-        onChangeText={setEmail}
-      />
-      <Input autoCapitalize="none" placeholder="Password" onChangeText={setPassword} />
-      <CheckBox title={'Remember me'} checked={rememberMe} onPress={setRememberMe} />
-      <StatusBar style="auto" />
-      <Button onPress={onLoginPress}>Login</Button>
-      <Button onPress={() => navigation.navigate('SignUp')}>User clicks Sign Up</Button>
-    </View>
+    <MainBackground>
+      <View style={styles.container}>
+        <View style={styles.inputContainer}>
+          <CustomTextInput label="Email" onChangeText={setEmail} />
+          <CustomTextInput label="Password" secureTextEntry onChangeText={setPassword} />
+          <CustomCheckBox
+            label={'Remember me'}
+            checked={rememberMe}
+            onPress={() => setRememberMe(!rememberMe)}
+          />
+          <StatusBar style="auto" />
+        </View>
+
+        <View style={styles.signUpContainer}>
+          <MainButton type={'filled'} onPress={onLoginPress}>
+            Log in
+          </MainButton>
+        </View>
+      </View>
+    </MainBackground>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    flex: 1
+  },
+  inputContainer: {
+    flex: 5,
     justifyContent: 'center'
+  },
+  signUpContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })

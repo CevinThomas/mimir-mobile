@@ -1,9 +1,10 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { useAuthContext } from '../context/AuthContext'
 import { Button } from '@react-navigation/elements'
 import * as SecureStore from 'expo-secure-store'
 import { logout } from '../api/AuthApi'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function Profile() {
   const onLogoutPress = async () => {
@@ -30,6 +31,7 @@ export default function Profile() {
       <Text style={styles.text}>Profile</Text>
       <Text>{getEmailOfProfile()}</Text>
       <Text>{state.isLoggedIn ? 'Logged in' : 'Not logged in'}</Text>
+      <ThemeToggle />
       <Button onPress={onLogoutPress}>Log out</Button>
     </View>
   )

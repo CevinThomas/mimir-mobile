@@ -1,15 +1,20 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Button, Text } from '@rneui/themed'
 import { useNavigation } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
 import { login } from '../api/AuthApi'
 import { useAuthContext } from '../context/AuthContext'
+import { getAccountInfo } from '../api/AccountsApi'
+import { useUserContext } from '../context/UserContext'
+import MainBackground from '../components/MainBackground'
+import NormalText from '../components/Typography/NormalText'
+import MainButton from '../components/Buttons/MainButton'
 
 export default function Start() {
   const navigation = useNavigation()
   const { state, dispatch } = useAuthContext()
+  const { state: userState, dispatch: userDispatch } = useUserContext()
 
   const rememberKey = async () => {
     return await SecureStore.getItemAsync('rememberMe')
@@ -28,6 +33,8 @@ export default function Start() {
         const { email, password } = await emailAndPassword()
         const response = await login(email, password)
         if (response.status.code === 200) {
+          const accountResponse = await getAccountInfo()
+          userDispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
           dispatch({ type: 'LOG_IN' })
         }
       }
@@ -36,19 +43,50 @@ export default function Start() {
     autoLogin()
   }, [])
   return (
-    <View style={styles.container}>
-      <Text>Start your learning journey today!</Text>
-      <StatusBar style="auto" />
-      <Button onPress={() => navigation.navigate('Login')}>User clicks Continue or Login</Button>
-    </View>
+    <MainBackground>
+      <View style={styles.container}>
+        <View style={styles.textContainer}>
+          <NormalText fontSize={36}>APP NAME</NormalText>
+        </View>
+        <View style={styles.buttonsContainer}>
+          <StatusBar style="auto" />
+          <View>
+            <MainButton type={'filled'} onPress={() => navigation.navigate('SignUp')}>
+              Create account
+            </MainButton>
+            <View style={styles.userText}>
+              <NormalText>Already a user?</NormalText>
+            </View>
+
+            <MainButton type={'clear'} onPress={() => navigation.navigate('Login')}>
+              Login
+            </MainButton>
+          </View>
+        </View>
+      </View>
+    </MainBackground>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  textContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonsContainer: {
+    flex: 2,
+    justifyContent: 'center'
+  },
+  userText: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom: 10
   }
 })

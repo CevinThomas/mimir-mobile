@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { Button, CheckBox } from '@rneui/themed'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import { createDeckSession } from '../api/DeckSessionApi'
+import MainButton from '../components/Buttons/MainButton'
 
+import { getColorProperty } from '../helpers'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import {
@@ -15,13 +16,21 @@ import {
   removeSharedDeck,
   shareDeck
 } from '../api/DecksApi'
+import { useTheme } from '../context/ThemeContext'
+import NormalText from '../components/Typography/NormalText'
+import InvisibleButton from '../components/Buttons/InvisibleButton'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import CheckboxClickItem from '../components/CheckboxClickItem'
+import DeckBackground from '../svgs/DeckBackground'
 
 export default function Deck(props: { route: { params: { deck: { name: string; id: string } } } }) {
+  const { theme } = useTheme()
   const navigation = useNavigation()
   const [displayShare, setDisplayShare] = useState(false)
   const [users, setUsers] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
   const [deck, setDeck] = useState({})
+
   const [favorite, setFavorite] = useState(false)
   const [promoteRequest, setPromoteRequest] = useState({})
   const [sharedFrom, setSharedFrom] = useState({})
@@ -81,10 +90,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
   const handleFavoritePress = async () => {
     const response = await favoriteDeck(props.route.params.deck.id)
     if (response.status === 200 || response.status === 204) {
-      alert('Deck favorited successfully')
       fetchDeckInfo()
-    } else {
-      alert('Failed to favorite deck')
     }
   }
 
@@ -126,6 +132,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
     const response = await createPromoteRequest(props.route.params.deck.id)
     if (response.status === 200 || response.status === 204) {
       alert('Promote request sent')
+      fetchDeckInfo()
     } else {
       alert('Failed to send promote request')
     }
@@ -136,25 +143,82 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
   }
 
   return (
-    <View style={styles.container}>
-      <GestureHandlerRootView style={styles.container}>
-        <Text>{props.route.params.deck.name}</Text>
-        {sharedFrom && <Text>Shared from: {sharedFrom.email}</Text>}
-        {promoteRequest && !deck.account_id && <Text>Promote status {promoteRequest.status}</Text>}
-        <Button onPress={handleStartPress}>Start</Button>
-        <Button onPress={handleFavoritePress}>Favorite</Button>
-        {sharedFrom && <Button onPress={handleRemovePress}>Unshare Deck</Button>}
-        {!sharedFrom && !deck.account_id && <Button onPress={handleSharePress}>Share Deck</Button>}
-        {!promoteRequest && !sharedFrom && (
-          <Button onPress={handlePromoteRequest}>Request to promote</Button>
-        )}
-        {!deck.account_id && !sharedFrom && (
-          <Button onPress={handleDeletePress}>Delete Deck</Button>
-        )}
-        {!deck.account_id && !sharedFrom && <Button onPress={handleEditPress}>Edit Deck</Button>}
+    <GestureHandlerRootView style={styles.container}>
+      <View
+        style={{ position: 'absolute', top: 50, left: 0, right: 0, zIndex: 1, paddingLeft: 20 }}
+      >
+        <NormalText onPress={() => navigation.goBack()}>Back</NormalText>
+      </View>
+      <View style={styles.banner}>
+        <DeckBackground />
+      </View>
+      <View style={[styles.info, { backgroundColor: getColorProperty(theme, 'background') }]}>
+        <View style={{ flex: 5 }}>
+          <View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
+                marginTop: 20
+              }}
+            >
+              <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>
+                {props.route.params.deck.name}
+              </NormalText>
+              {favorite ? (
+                <Ionicons onPress={handleFavoritePress} name="star" size={24} color="white" />
+              ) : (
+                <Ionicons
+                  onPress={handleFavoritePress}
+                  name={'star-outline'}
+                  size={24}
+                  color={'white'}
+                />
+              )}
+            </View>
 
-        <Text>Favorited</Text>
-        <CheckBox checked={favorite} />
+            {deck.account?.id && (
+              <NormalText style={{ marginBottom: 10 }}>Created by {deck.account.name}</NormalText>
+            )}
+            {sharedFrom && <NormalText>Shared from: {sharedFrom.email}</NormalText>}
+            {promoteRequest && !deck.account?.id && (
+              <NormalText>Promote status {promoteRequest.status}</NormalText>
+            )}
+            {deck.description && <NormalText>{deck.description}</NormalText>}
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+            {!sharedFrom && !deck.account?.id && (
+              <InvisibleButton onPress={handleSharePress}>Share</InvisibleButton>
+            )}
+
+            {sharedFrom && (
+              <InvisibleButton onPress={handleRemovePress}>Unshare Deck</InvisibleButton>
+            )}
+
+            {!promoteRequest && !sharedFrom && (
+              <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
+            )}
+          </View>
+          <View
+            style={{
+              marginTop: 100
+            }}
+          >
+            {!deck.account?.id && !sharedFrom && (
+              <MainButton type={'clear'} onPress={handleEditPress}>
+                Edit Deck
+              </MainButton>
+            )}
+          </View>
+        </View>
+
+        <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 10 }}>
+          <MainButton type={'filled'} onPress={handleStartPress}>
+            Start deck
+          </MainButton>
+        </View>
 
         {displayShare && (
           <BottomSheet
@@ -164,40 +228,54 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
             enablePanDownToClose={true}
             snapPoints={[800, 800]}
             ref={bottomSheetRef}
+            backgroundStyle={{ backgroundColor: getColorProperty(theme, 'background') }}
           >
-            <BottomSheetView style={styles.contentContainer}>
+            <BottomSheetView style={[styles.contentContainer]}>
+              <NormalText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 20 }}>
+                Share this deck
+              </NormalText>
               {users.map((user: any) => (
-                <View key={user.id}>
-                  <CheckBox
-                    checked={selectedUsers.includes(user.id)}
+                <View style={{ flex: 1, width: '100%' }} key={user.id}>
+                  <CheckboxClickItem
                     onPress={() => handleShareChecked(user.id)}
-                    // Use ThemeProvider to make change for all checkbox
-                    iconType="material-community"
-                    checkedIcon="checkbox-marked"
-                    uncheckedIcon="checkbox-blank-outline"
-                    checkedColor="red"
+                    title={user.email}
+                    key={user.id}
+                    checked={selectedUsers.includes(user.id)}
                   />
-                  <Text key={user.id}>{user.email}</Text>
                 </View>
               ))}
-              <Button onPress={handleShare}>Share with selected users</Button>
+              {users.length > 0 ? (
+                <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
+                  <MainButton onPress={handleShare}>Share with selected users</MainButton>
+                </View>
+              ) : (
+                <Text>You have no one to share with :(</Text>
+              )}
             </BottomSheetView>
           </BottomSheet>
         )}
-      </GestureHandlerRootView>
-    </View>
+      </View>
+    </GestureHandlerRootView>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 10
-  },
   contentContainer: {
     flex: 1,
-    padding: 36,
-    alignItems: 'center'
+    padding: 10,
+    alignItems: 'flex-start'
+  },
+  container: {
+    flex: 1
+  },
+  banner: {
+    flex: 4
+  },
+  info: {
+    flex: 9,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    padding: 20,
+    zIndex: 1
   }
 })

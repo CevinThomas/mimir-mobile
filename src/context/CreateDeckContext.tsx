@@ -12,6 +12,7 @@ const initialState = {
   deckName: '',
   deckDescription: '',
   deckId: '',
+  active: false,
   deckCards: []
 }
 
@@ -23,7 +24,8 @@ const createDeckReducer = (state, action) => {
         deckName: action.response.name,
         deckDescription: action.response.description,
         deckId: action.response.id,
-        deckCards: action.response.cards || []
+        deckCards: action.response.cards || [],
+        active: action.response.active || false
       }
     case 'UPDATE_DECK_KEY':
       return { ...state, [action.key]: action.value }

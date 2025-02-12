@@ -1,48 +1,127 @@
 import { StatusBar } from 'expo-status-bar'
-import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import React, { useRef } from 'react'
+import { AppState, StyleSheet, View } from 'react-native'
 import { useAuthContext } from '../context/AuthContext'
-import { Button, Text } from '@rneui/themed'
+import { Button } from '@rneui/themed'
+import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
+import { login, userConfirmed } from '../api/AuthApi'
+import * as SecureStore from 'expo-secure-store'
+import { getAccountInfo } from '../api/AccountsApi'
+import { useUserContext } from '../context/UserContext'
+import useDenyBackButton from '../hooks/useDenyBackButton'
+import MainBackground from '../components/MainBackground'
+import NormalText from '../components/Typography/NormalText'
+import MainButton from '../components/Buttons/MainButton'
 
-export default function SignUpConfirmation() {
+export default function SignUpConfirmation(props: {
+  route: { params: { email: string; password: string } }
+}) {
   const { state, dispatch } = useAuthContext()
+  const { state: userState, dispatch: userDispatch } = useUserContext()
+  const navigation = useNavigation()
+  const intervalIdRef = useRef(null)
 
-  const logIn = (id) => {
+  useDenyBackButton()
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const startPolling = () => {
+        intervalIdRef.current = setInterval(async () => {
+          const response = await userConfirmed(props.route.params.email)
+          if (response.is_verified === true) {
+            stopPolling()
+            onVerified()
+          }
+        }, 2000)
+      }
+
+      const stopPolling = () => {
+        if (intervalIdRef.current) {
+          clearInterval(intervalIdRef.current)
+          intervalIdRef.current = null
+        }
+      }
+
+      const handleAppStateChange = (nextAppState: any) => {
+        if (nextAppState === 'active') {
+          return startPolling()
+        }
+        stopPolling()
+      }
+
+      const subscription = AppState.addEventListener('change', handleAppStateChange)
+      startPolling()
+      return () => {
+        subscription.remove()
+        stopPolling()
+      }
+    }, [])
+  )
+
+  const onVerified = async () => {
+    await SecureStore.setItemAsync('email', props.route.params.email)
+    await SecureStore.setItemAsync('password', props.route.params.password)
+    await login(props.route.params.email, props.route.params.password)
+    const account = await getAccountInfo()
+    userDispatch({ type: 'SET_ACCOUNT', payload: account })
+
     dispatch({ type: 'LOG_IN' })
   }
 
+  const onCancelPress = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }]
+      })
+    )
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>
-        We have sent you an email with a confirmation link. Please click on the link to confirm your
-        email address.
-      </Text>
+    <MainBackground>
+      <View style={styles.container}>
+        <View style={styles.textContainer}>
+          <NormalText style={{ textAlign: 'center' }}>
+            We have sent you an email with a confirmation link. Please click on the link to confirm
+            your email address.
+          </NormalText>
+        </View>
 
-      <Button type="solid" loading />
+        <View style={styles.buttonContainer}>
+          <Button type="clear" loading size={'lg'} />
+        </View>
 
-      <Button
-        title={'Cancel'}
-        buttonStyle={{
-          backgroundColor: 'rgba(78, 116, 289, 1)',
-          borderRadius: 3
-        }}
-        containerStyle={{
-          width: 200,
-          marginHorizontal: 50,
-          marginVertical: 10
-        }}
-      />
+        <View style={styles.cancelContainer}>
+          <MainButton type={'clear'} onPress={onCancelPress}>
+            Cancel
+          </MainButton>
+        </View>
 
-      <StatusBar style="auto" />
-    </View>
+        <StatusBar style="auto" />
+      </View>
+    </MainBackground>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  textContainer: {
+    flex: 3,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  cancelContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })

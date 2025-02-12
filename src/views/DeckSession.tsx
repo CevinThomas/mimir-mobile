@@ -7,8 +7,12 @@ import {
   getDeckSession,
   resetDeckSession
 } from '../api/DeckSessionApi'
-import { Button } from '@rneui/themed'
 import { CommonActions, useNavigation } from '@react-navigation/native'
+import useDenyBackButton from '../hooks/useDenyBackButton'
+import MainBackground from '../components/MainBackground'
+import NormalText from '../components/Typography/NormalText'
+import Choice from '../components/Choice'
+import MainButton from '../components/Buttons/MainButton'
 
 export default function DeckSession(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -23,9 +27,13 @@ export default function DeckSession(props: {
 
   const navigation = useNavigation()
 
+  useDenyBackButton()
+
   useEffect(() => {
     const sessionInit = async () => {
       const response = await getDeckSession(props.route.params.deck.id)
+      console.log(response)
+
       setDeckSessionId(response.deck_session.id)
       setCards(response.cards)
 
@@ -34,36 +42,6 @@ export default function DeckSession(props: {
     }
     sessionInit()
   }, [])
-
-  const displayCard = () => {
-    if (!currentCard) return
-    return (
-      <View>
-        <Text>{currentCard.name}</Text>
-        <View>
-          {currentCard.choices.map((choice: any) => {
-            const answeredChoice = answeredChoiceId === choice.id
-            return (
-              <Button
-                key={choice.id}
-                disabled={(answeredState === 1 || answeredState === 0) && !answeredChoice}
-                color={
-                  answeredState === 0 && answeredChoice
-                    ? 'green'
-                    : answeredState === 1 && answeredChoice
-                      ? 'red'
-                      : 'primary'
-                }
-                onPress={() => answerCard(choice)}
-              >
-                <Text>{choice.name}</Text>
-              </Button>
-            )
-          })}
-        </View>
-      </View>
-    )
-  }
 
   const answerCard = (choice: any) => {
     setAnsweredId(choice.id)
@@ -137,33 +115,90 @@ export default function DeckSession(props: {
 
   useEffect(() => {
     if (!initLoaded) return
-    console.log('Setting current card', currentCardIndex, cards)
     setCurrentCard(cards[currentCardIndex])
   }, [currentCardIndex, setInitLoaded])
 
+  const onEndSessionPress = () => {
+    navigation.dispatch(
+      CommonActions.reset({ index: 1, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
+    )
+  }
+
+  const displayCard = () => {
+    if (!currentCard) return
+    return (
+      <View>
+        <NormalText>{currentCard.title}</NormalText>
+        <View>
+          {currentCard.choices.map((choice: any) => {
+            const answeredChoice = answeredChoiceId === choice.id
+            return (
+              <Choice
+                key={choice.id}
+                choice={choice}
+                answeredChoice={answeredChoice}
+                answeredState={answeredState}
+                answerCard={() => answerCard(choice)}
+              />
+            )
+          })}
+        </View>
+      </View>
+    )
+  }
+
   return (
-    <View style={styles.container}>
-      {displayCard()}
-      {answeredState === 1 && <Button onPress={nextCard}>Next</Button>}
-      {displayExplanation()}
-      <Button disabled={cards.length === 1} onPress={archiveCardPress}>
-        Archive Card
-      </Button>
-      <Button onPress={resetSession}>Reset Session</Button>
-      <Button onPress={deleteSession}>Delete Session</Button>
-    </View>
+    <MainBackground>
+      <View style={styles.container}>
+        <NormalText>{props.route.params.deck?.name}</NormalText>
+        <View style={{ flex: 3 }}>
+          {displayCard()}
+          {displayExplanation()}
+        </View>
+        <View></View>
+
+        <View
+          style={{
+            flex: 1,
+            flexWrap: 'wrap',
+            flexDirection: 'row'
+          }}
+        >
+          <View style={{ flex: 2, justifyContent: 'flex-end' }}>
+            <MainButton
+              buttonStyling={{ paddingHorizontal: 0, borderRadius: 10 }}
+              titleProps={{ numberOfLines: 0 }}
+              titleStyling={{ fontSize: 12 }}
+              type={'filled'}
+              outline
+              disabled={cards.length === 1}
+              onPress={archiveCardPress}
+            >
+              Skip this card next time
+            </MainButton>
+          </View>
+          {answeredState === 1 && (
+            <View style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
+              <MainButton
+                buttonStyling={{ paddingHorizontal: 0, borderRadius: 10 }}
+                titleProps={{ numberOfLines: 0 }}
+                titleStyling={{ fontSize: 12 }}
+                type={'filled'}
+                onPress={nextCard}
+              >
+                Next
+              </MainButton>
+            </View>
+          )}
+        </View>
+      </View>
+    </MainBackground>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
-  },
-  correct: {
-    backgroundColor: 'green'
-  },
-  incorrect: {
-    backgroundColor: 'red'
+    padding: 10
   }
 })

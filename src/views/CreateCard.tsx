@@ -207,12 +207,6 @@ export default function CreateCard(props: {
           snapPoints={['100%', '100%']}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <Text>Choice Name</Text>
-            <TextInput
-              value={currentChoice.title}
-              style={styles.input}
-              onChangeText={(text) => onUpdateChoice('name', text)}
-            />
             <Text>Choice Title</Text>
             <TextInput
               value={currentChoice.title}

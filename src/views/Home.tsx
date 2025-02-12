@@ -1,25 +1,28 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import MainBackground from '../components/MainBackground'
+import NormalText from '../components/Typography/NormalText'
 
 export default function Home() {
   return (
-    <View style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <Text>Continue where you left off</Text>
+    <MainBackground>
+      <View style={styles.container}>
+        <NormalText style={{ flex: 1, fontWeight: 'bold' }}>
+          <Text>Continue</Text>
+        </NormalText>
+        <NormalText style={{ flex: 1, fontWeight: 'bold' }}>
+          <Text>New decks</Text>
+        </NormalText>
+        <NormalText style={{ flex: 1, fontWeight: 'bold' }}>
+          <Text>Featured</Text>
+        </NormalText>
       </View>
-      <View style={{ flex: 1 }}>
-        <Text>Newly added decks</Text>
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text>Featured decks</Text>
-      </View>
-    </View>
+    </MainBackground>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff'
+    flex: 1
   }
 })
