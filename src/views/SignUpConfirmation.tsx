@@ -2,7 +2,6 @@ import { StatusBar } from 'expo-status-bar'
 import React, { useRef } from 'react'
 import { AppState, StyleSheet, View } from 'react-native'
 import { useAuthContext } from '../context/AuthContext'
-import { Button } from '@rneui/themed'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { login, userConfirmed } from '../api/AuthApi'
 import * as SecureStore from 'expo-secure-store'
@@ -12,6 +11,7 @@ import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import ClearButton from '../components/Buttons/ClearButton'
+import LottieView from 'lottie-react-native'
 
 export default function SignUpConfirmation(props: {
   route: { params: { email: string; password: string } }
@@ -20,6 +20,7 @@ export default function SignUpConfirmation(props: {
   const { state: userState, dispatch: userDispatch } = useUserContext()
   const navigation = useNavigation()
   const intervalIdRef = useRef(null)
+  const animation = useRef<LottieView>(null)
 
   useDenyBackButton()
 
@@ -87,7 +88,16 @@ export default function SignUpConfirmation(props: {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button type="clear" loading size={'lg'} />
+        <LottieView
+          autoPlay
+          ref={animation}
+          style={{
+            width: 200,
+            height: 200,
+            backgroundColor: 'transparent'
+          }}
+          source={require('../../assets/lottie/loading.json')}
+        />
       </View>
 
       <View style={styles.cancelContainer}>

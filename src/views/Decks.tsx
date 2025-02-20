@@ -96,52 +96,60 @@ export default function Decks() {
 
           {selectedDeckSettings === 'private' ? (
             <View style={styles.privateSettingContainer}>
-              <View style={styles.onGoingContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
-                  <InvisibleButton
-                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'ongoingDecks' })}
-                  >
-                    view all
-                  </InvisibleButton>
-                </View>
+              {ongoingDecks.length > 0 && (
+                <View style={styles.onGoingContainer}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
+                    <InvisibleButton
+                      onPress={() =>
+                        navigation.navigate('ViewAllDecks', { method: 'ongoingDecks' })
+                      }
+                    >
+                      view all
+                    </InvisibleButton>
+                  </View>
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {ongoingDecks.map((deck, index) => {
-                    const isEven = index % 2 === 0
-                    return (
-                      <View
-                        key={deck.deck.id}
-                        style={{
-                          flex: 1,
-                          width: '50%',
-                          marginRight: isEven ? 5 : 0,
-                          marginLeft: isEven ? 0 : 5
-                        }}
-                      >
-                        <ClickButton
-                          onPress={() => navigation.navigate('DeckSession', { deck })}
-                          short
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                    {ongoingDecks.map((deck, index) => {
+                      const isEven = index % 2 === 0
+                      return (
+                        <View
+                          key={deck.deck.id}
+                          style={{
+                            flex: 1,
+                            width: '50%',
+                            marginRight: isEven ? 5 : 0,
+                            marginLeft: isEven ? 0 : 5
+                          }}
                         >
-                          {deck.deck.name}
-                        </ClickButton>
-                      </View>
-                    )
-                  })}
+                          <ClickButton
+                            onPress={() => navigation.navigate('DeckSession', { deck })}
+                            short
+                          >
+                            {deck.deck.name}
+                          </ClickButton>
+                        </View>
+                      )
+                    })}
+                  </View>
                 </View>
-              </View>
-              <View style={styles.myDecksContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
-                  <InvisibleButton
-                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'myDecks' })}
-                  >
-                    view all
-                  </InvisibleButton>
-                </View>
+              )}
 
-                {loopDecks(decks)}
-              </View>
+              {decks.length > 0 && (
+                <View style={styles.myDecksContainer}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
+                    <InvisibleButton
+                      onPress={() => navigation.navigate('ViewAllDecks', { method: 'myDecks' })}
+                    >
+                      view all
+                    </InvisibleButton>
+                  </View>
+
+                  {loopDecks(decks)}
+                </View>
+              )}
+
               {sharedWithMeDecks.length > 0 && (
                 <View style={styles.sharedDecksContainer}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -159,6 +167,14 @@ export default function Decks() {
                 </View>
               )}
 
+              {decks.length === 0 &&
+                sharedWithMeDecks.length === 0 &&
+                ongoingDecks.length === 0 && (
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
+                  </View>
+                )}
+
               <View style={styles.createDeckContainer}>
                 <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
                   Create new deck
@@ -167,41 +183,18 @@ export default function Decks() {
             </View>
           ) : (
             <View style={styles.accountSettingContainer}>
-              <View style={styles.onGoingAccountContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
-                  <InvisibleButton
-                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'ongoingDecks' })}
-                  >
-                    view all
-                  </InvisibleButton>
+              {accountDecks.length === 0 ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
                 </View>
-
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {ongoingDecks.map((deck, index) => {
-                    const isEven = index % 2 === 0
-                    return (
-                      <View
-                        key={deck.deck.id}
-                        style={{
-                          flex: 1,
-                          width: '50%',
-                          marginRight: isEven ? 5 : 0,
-                          marginLeft: isEven ? 0 : 5
-                        }}
-                      >
-                        <ClickButton short>{deck.deck.name}</ClickButton>
-                      </View>
-                    )
-                  })}
+              ) : (
+                <View style={styles.accountDecks}>
+                  <NormalText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
+                    Account decks
+                  </NormalText>
+                  {loopDecks(accountDecks)}
                 </View>
-              </View>
-              <View style={styles.accountDecks}>
-                <NormalText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
-                  Account decks
-                </NormalText>
-                {loopDecks(accountDecks)}
-              </View>
+              )}
             </View>
           )}
         </View>
@@ -238,11 +231,8 @@ const styles = StyleSheet.create({
     flex: 8
   },
   createDeckContainer: {
-    flex: 1
-  },
-
-  onGoingAccountContainer: {
-    flex: 2
+    flex: 1,
+    justifyContent: 'flex-end'
   },
 
   accountDecks: {
