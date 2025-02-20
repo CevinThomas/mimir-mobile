@@ -9,8 +9,8 @@ import { getAccountInfo } from '../api/AccountsApi'
 import { useUserContext } from '../context/UserContext'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
-import MainButton from '../components/Buttons/MainButton'
 import CustomCheckBox from '../components/Forms/Checkbox'
+import FilledButton from '../components/Buttons/FilledButton'
 
 export default function Login() {
   const navigation = useNavigation()
@@ -42,23 +42,19 @@ export default function Login() {
 
   return (
     <MainBackground>
-      <View style={styles.container}>
-        <View style={styles.inputContainer}>
-          <CustomTextInput label="Email" onChangeText={setEmail} />
-          <CustomTextInput label="Password" secureTextEntry onChangeText={setPassword} />
-          <CustomCheckBox
-            label={'Remember me'}
-            checked={rememberMe}
-            onPress={() => setRememberMe(!rememberMe)}
-          />
-          <StatusBar style="auto" />
-        </View>
+      <View style={styles.inputContainer}>
+        <CustomTextInput label="Email" onChangeText={setEmail} />
+        <CustomTextInput label="Password" secureTextEntry onChangeText={setPassword} />
+        <CustomCheckBox
+          label={'Remember me'}
+          checked={rememberMe}
+          onPress={() => setRememberMe(!rememberMe)}
+        />
+        <StatusBar style="auto" />
+      </View>
 
-        <View style={styles.signUpContainer}>
-          <MainButton type={'filled'} onPress={onLoginPress}>
-            Log in
-          </MainButton>
-        </View>
+      <View style={styles.signUpContainer}>
+        <FilledButton onPress={onLoginPress}>Log in</FilledButton>
       </View>
     </MainBackground>
   )
@@ -75,6 +71,6 @@ const styles = StyleSheet.create({
   signUpContainer: {
     flex: 2,
     justifyContent: 'center',
-    alignItems: 'center'
+    paddingHorizontal: 10
   }
 })

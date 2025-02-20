@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import {
   archiveCard,
   deleteDeckSession,
@@ -12,7 +12,8 @@ import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import Choice from '../components/Choice'
-import MainButton from '../components/Buttons/MainButton'
+import OutlineButton from '../components/Buttons/OutlineButton'
+import FilledButton from '../components/Buttons/FilledButton'
 
 export default function DeckSession(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -24,6 +25,7 @@ export default function DeckSession(props: {
   const [answeredState, setAnsweredState] = useState(2)
   const [answeredChoiceId, setAnsweredId] = useState()
   const [deckSessionId, setDeckSessionId] = useState()
+  const [refreshing, setRefreshing] = useState(false)
 
   const navigation = useNavigation()
 
@@ -32,7 +34,6 @@ export default function DeckSession(props: {
   useEffect(() => {
     const sessionInit = async () => {
       const response = await getDeckSession(props.route.params.deck.id)
-      console.log(response)
 
       setDeckSessionId(response.deck_session.id)
       setCards(response.cards)
@@ -76,8 +77,8 @@ export default function DeckSession(props: {
   const displayExplanation = () => {
     if (answeredState === 1) {
       return (
-        <View>
-          <Text>{currentCard.explanation}</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <NormalText>{currentCard.explanation}</NormalText>
         </View>
       )
     }
@@ -95,7 +96,6 @@ export default function DeckSession(props: {
 
   const fetchNextCardBatch = async () => {
     const response = await getCardBatch(deckSessionId)
-    console.log(response.cards)
     setCards(response.cards)
     setCurrentCard(response.cards[0])
     setCurrentCardIndex(0)
@@ -128,7 +128,9 @@ export default function DeckSession(props: {
     if (!currentCard) return
     return (
       <View>
-        <NormalText>{currentCard.title}</NormalText>
+        <View style={{ marginBottom: 10 }}>
+          <NormalText fontSize={32}>{currentCard.title}</NormalText>
+        </View>
         <View>
           {currentCard.choices.map((choice: any) => {
             const answeredChoice = answeredChoiceId === choice.id
@@ -149,49 +151,45 @@ export default function DeckSession(props: {
 
   return (
     <MainBackground>
-      <View style={styles.container}>
-        <NormalText>{props.route.params.deck?.name}</NormalText>
-        <View style={{ flex: 3 }}>
-          {displayCard()}
-          {displayExplanation()}
-        </View>
-        <View></View>
-
-        <View
-          style={{
-            flex: 1,
-            flexWrap: 'wrap',
-            flexDirection: 'row'
-          }}
-        >
-          <View style={{ flex: 2, justifyContent: 'flex-end' }}>
-            <MainButton
-              buttonStyling={{ paddingHorizontal: 0, borderRadius: 10 }}
-              titleProps={{ numberOfLines: 0 }}
-              titleStyling={{ fontSize: 12 }}
-              type={'filled'}
-              outline
-              disabled={cards.length === 1}
-              onPress={archiveCardPress}
-            >
-              Skip this card next time
-            </MainButton>
+      <ScrollView
+        contentContainerStyle={{ flex: 1 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={resetSession} />}
+      >
+        <View style={styles.container}>
+          <View style={{ flex: 3 }}>
+            {displayCard()}
+            {displayExplanation()}
           </View>
-          {answeredState === 1 && (
-            <View style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
-              <MainButton
-                buttonStyling={{ paddingHorizontal: 0, borderRadius: 10 }}
-                titleProps={{ numberOfLines: 0 }}
-                titleStyling={{ fontSize: 12 }}
-                type={'filled'}
-                onPress={nextCard}
-              >
-                Next
-              </MainButton>
+          <View></View>
+
+          <View
+            style={{
+              flex: 1,
+              flexWrap: 'wrap',
+              flexDirection: 'row'
+            }}
+          >
+            <View style={{ flex: 2, justifyContent: 'flex-end' }}>
+              <OutlineButton disabled={cards.length === 1} onPress={archiveCardPress}>
+                Skip this card next time
+              </OutlineButton>
             </View>
-          )}
+            {answeredState === 1 && (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                  paddingHorizontal: 5
+                }}
+              >
+                <FilledButton fontSize={14} onPress={nextCard}>
+                  Next
+                </FilledButton>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </MainBackground>
   )
 }
@@ -199,6 +197,7 @@ export default function DeckSession(props: {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10
+    paddingVertical: 15,
+    paddingHorizontal: 10
   }
 })

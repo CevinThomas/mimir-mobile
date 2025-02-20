@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   buttonContainer: {
-    flex: 1
+    flex: 1,
+    paddingHorizontal: 10
   }
 })

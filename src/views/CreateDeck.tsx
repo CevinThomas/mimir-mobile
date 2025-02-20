@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react'
-import { Button, StyleSheet, View } from 'react-native'
-import { CommonActions, useNavigation } from '@react-navigation/native'
+import { BackHandler, View } from 'react-native'
+import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useCreateDeckContext } from '../context/CreateDeckContext'
 import { createDeck, updateDeck } from '../api/DecksApi'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import NormalText from '../components/Typography/NormalText'
-import MainButton from '../components/Buttons/MainButton'
 import ClickButton from '../components/Buttons/ClickButton'
+import SideActionButton from '../components/Buttons/SideActionButton'
+import ClearButton from '../components/Buttons/ClearButton'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -26,6 +27,17 @@ export default function CreateDeck(props: {
       })
     }
   }, [])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        onGoBack()
+        return true
+      }
+      BackHandler.addEventListener('hardwareBackPress', onBackPress)
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress)
+    }, [])
+  )
   const { state, dispatch } = useCreateDeckContext()
   const navigation = useNavigation()
 
@@ -40,7 +52,6 @@ export default function CreateDeck(props: {
         description: state.deckDescription,
         cards: state.deckCards
       })
-      console.log(response)
       dispatch({ type: 'SET_DECK', response })
     }
 
@@ -74,14 +85,19 @@ export default function CreateDeck(props: {
 
   return (
     <MainBackground>
-      <CustomTextInput label={'Title'} onChangeText={(text) => onUpdateDeck('deckName', text)} />
+      <CustomTextInput
+        value={state.deckName}
+        label={'Title'}
+        onChangeText={(text) => onUpdateDeck('deckName', text)}
+      />
 
       <CustomTextInput
+        value={state.deckDescription}
         label={'Description'}
         style={{ height: 100 }}
         onChangeText={(text) => onUpdateDeck('deckDescription', text)}
       />
-      <View style={{ flex: 1, padding: 10 }}>
+      <View style={{ flex: 3, padding: 10 }}>
         <View
           style={{
             flex: 1,
@@ -94,18 +110,12 @@ export default function CreateDeck(props: {
             <NormalText>Cards</NormalText>
           </View>
           <View>
-            <MainButton
-              buttonStyling={{ paddingHorizontal: 0 }}
-              titleStyling={{ fontSize: 12 }}
-              type={'filled'}
-              title="Add Card"
-              onPress={() => onNavigateToCreateCard()}
-            />
+            <SideActionButton onPress={() => onNavigateToCreateCard()}>Add card</SideActionButton>
           </View>
         </View>
         <View style={{ flex: 5 }}>
           {state.deckCards?.map((card, index) => (
-            <View style={{ flex: 1 }} key={index}>
+            <View style={{ marginBottom: 10 }} key={index}>
               <ClickButton onPress={() => navigation.navigate('CreateCard', { card: card })}>
                 {card.title}
               </ClickButton>
@@ -114,30 +124,19 @@ export default function CreateDeck(props: {
         </View>
       </View>
 
-      {state.deckCards?.length > 0 && <Button title="Save Deck" onPress={onSaveDeck} />}
-      {state.deckCards.length > 0 && !state.active && (
-        <Button title="Publish deck" onPress={onPublishDeck} />
+      {state.deckId && (
+        <View style={{ flex: 1, flexWrap: 'wrap', flexDirection: 'row', marginBottom: 20 }}>
+          {/*
+          <View style={{ flex: 2, justifyContent: 'flex-end' }}>
+            <FilledButton onPress={onPublishDeck}>Publish deck</FilledButton>
+          </View>
+          */}
+
+          <View style={{ flex: 2, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
+            <ClearButton onPress={onSaveDeck}>Save deck</ClearButton>
+          </View>
+        </View>
       )}
-      {!state.deckCards?.length > 0 && <Button title="Back" onPress={onGoBack} />}
-      <Button title={'Ignore changes'} onPress={onGoBack} />
     </MainBackground>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10
-  },
-  contentContainer: {
-    flex: 1,
-    padding: 36
-  }
-})

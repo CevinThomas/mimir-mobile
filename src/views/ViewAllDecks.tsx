@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native'
 import NormalText from '../components/Typography/NormalText'
 import MainBackground from '../components/MainBackground'
 import DeckListItem from '../components/DeckListItem'
+import ClickButton from '../components/Buttons/ClickButton'
 
 export default function ViewAllDecks(props: { route: { params: { method: string } } }) {
   const [decks, setDecks] = useState([])
@@ -47,7 +48,17 @@ export default function ViewAllDecks(props: { route: { params: { method: string 
             <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>Ongoing Decks</NormalText>
           </View>
           {decks.map((deck) => {
-            return <DeckListItem key={deck.id} deck={deck.deck} />
+            console.log(deck.deck.name)
+            return (
+              <View style={{ height: 60 }}>
+                <ClickButton
+                  onPress={() => navigation.navigate('DeckSession', { deck })}
+                  key={deck.id}
+                >
+                  {deck.deck.name}
+                </ClickButton>
+              </View>
+            )
           })}
         </View>
       )

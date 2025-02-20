@@ -11,7 +11,7 @@ import { useUserContext } from '../context/UserContext'
 import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
-import MainButton from '../components/Buttons/MainButton'
+import ClearButton from '../components/Buttons/ClearButton'
 
 export default function SignUpConfirmation(props: {
   route: { params: { email: string; password: string } }
@@ -79,26 +79,22 @@ export default function SignUpConfirmation(props: {
 
   return (
     <MainBackground>
-      <View style={styles.container}>
-        <View style={styles.textContainer}>
-          <NormalText style={{ textAlign: 'center' }}>
-            We have sent you an email with a confirmation link. Please click on the link to confirm
-            your email address.
-          </NormalText>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <Button type="clear" loading size={'lg'} />
-        </View>
-
-        <View style={styles.cancelContainer}>
-          <MainButton type={'clear'} onPress={onCancelPress}>
-            Cancel
-          </MainButton>
-        </View>
-
-        <StatusBar style="auto" />
+      <View style={styles.textContainer}>
+        <NormalText style={{ textAlign: 'center' }}>
+          We have sent you an email with a confirmation link. Please click on the link to confirm
+          your email address.
+        </NormalText>
       </View>
+
+      <View style={styles.buttonContainer}>
+        <Button type="clear" loading size={'lg'} />
+      </View>
+
+      <View style={styles.cancelContainer}>
+        <ClearButton onPress={onCancelPress}>Cancel</ClearButton>
+      </View>
+
+      <StatusBar style="auto" />
     </MainBackground>
   )
 }
@@ -122,6 +118,6 @@ const styles = StyleSheet.create({
   cancelContainer: {
     flex: 2,
     justifyContent: 'center',
-    alignItems: 'center'
+    paddingHorizontal: 10
   }
 })

@@ -22,6 +22,8 @@ import InvisibleButton from '../components/Buttons/InvisibleButton'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import CheckboxClickItem from '../components/CheckboxClickItem'
 import DeckBackground from '../svgs/DeckBackground'
+import FilledButton from '../components/Buttons/FilledButton'
+import ClearButton from '../components/Buttons/ClearButton'
 
 export default function Deck(props: { route: { params: { deck: { name: string; id: string } } } }) {
   const { theme } = useTheme()
@@ -201,23 +203,15 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
             )}
           </View>
-          <View
-            style={{
-              marginTop: 100
-            }}
-          >
-            {!deck.account?.id && !sharedFrom && (
-              <MainButton type={'clear'} onPress={handleEditPress}>
-                Edit Deck
-              </MainButton>
-            )}
-          </View>
         </View>
 
         <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 10 }}>
-          <MainButton type={'filled'} onPress={handleStartPress}>
-            Start deck
-          </MainButton>
+          {!deck.account?.id && !sharedFrom && (
+            <View style={{ marginBottom: 15 }}>
+              <ClearButton onPress={handleEditPress}>Edit Deck</ClearButton>
+            </View>
+          )}
+          <FilledButton onPress={handleStartPress}>Start deck</FilledButton>
         </View>
 
         {displayShare && (

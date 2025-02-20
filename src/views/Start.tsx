@@ -9,7 +9,8 @@ import { getAccountInfo } from '../api/AccountsApi'
 import { useUserContext } from '../context/UserContext'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
-import MainButton from '../components/Buttons/MainButton'
+import FilledButton from '../components/Buttons/FilledButton'
+import ClearButton from '../components/Buttons/ClearButton'
 
 export default function Start() {
   const navigation = useNavigation()
@@ -51,16 +52,14 @@ export default function Start() {
         <View style={styles.buttonsContainer}>
           <StatusBar style="auto" />
           <View>
-            <MainButton type={'filled'} onPress={() => navigation.navigate('SignUp')}>
+            <FilledButton onPress={() => navigation.navigate('SignUp')}>
               Create account
-            </MainButton>
+            </FilledButton>
             <View style={styles.userText}>
               <NormalText>Already a user?</NormalText>
             </View>
 
-            <MainButton type={'clear'} onPress={() => navigation.navigate('Login')}>
-              Login
-            </MainButton>
+            <ClearButton onPress={() => navigation.navigate('Login')}>Login</ClearButton>
           </View>
         </View>
       </View>
@@ -81,7 +80,9 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flex: 2,
-    justifyContent: 'center'
+    justifyContent: 'center',
+    width: '100%',
+    paddingHorizontal: 10
   },
   userText: {
     justifyContent: 'center',

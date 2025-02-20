@@ -5,7 +5,6 @@ const CreateDeckContext = createContext()
 const initialState = {
   currentCard: {
     title: '',
-    description: '',
     explanation: '',
     choices: []
   },

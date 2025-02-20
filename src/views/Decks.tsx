@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
-import { ongoingDecks } from '../deckData'
 import { getAccountDecks, getDecks, getSharedDecks } from '../api/DecksApi'
 import { getDeckSessions } from '../api/DeckSessionApi'
 import { useNavigation } from '@react-navigation/native'
 import { useUserContext } from '../context/UserContext'
 import MainBackground from '../components/MainBackground'
-import MainButton from '../components/Buttons/MainButton'
 import DeckListItem from '../components/DeckListItem'
 import NormalText from '../components/Typography/NormalText'
 import ClickButton from '../components/Buttons/ClickButton'
 import TabSelectButton from '../components/Buttons/TabSelectButton'
 import InvisibleButton from '../components/Buttons/InvisibleButton'
+import FilledButton from '../components/Buttons/FilledButton'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -121,9 +120,8 @@ export default function Decks() {
                         }}
                       >
                         <ClickButton
-                          key={deck.deck.id}
-                          buttonStyle={{ justifyContent: 'flex-start' }}
-                          titleStyle={{ width: '50%' }}
+                          onPress={() => navigation.navigate('DeckSession', { deck })}
+                          short
                         >
                           {deck.deck.name}
                         </ClickButton>
@@ -162,9 +160,9 @@ export default function Decks() {
               )}
 
               <View style={styles.createDeckContainer}>
-                <MainButton type={'filled'} onPress={() => navigation.navigate('CreateDeck')}>
+                <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
                   Create new deck
-                </MainButton>
+                </FilledButton>
               </View>
             </View>
           ) : (
@@ -184,6 +182,7 @@ export default function Decks() {
                     const isEven = index % 2 === 0
                     return (
                       <View
+                        key={deck.deck.id}
                         style={{
                           flex: 1,
                           width: '50%',
@@ -191,13 +190,7 @@ export default function Decks() {
                           marginLeft: isEven ? 0 : 5
                         }}
                       >
-                        <ClickButton
-                          key={deck.deck.id}
-                          buttonStyle={{ justifyContent: 'flex-start' }}
-                          titleStyle={{ width: '50%' }}
-                        >
-                          {deck.deck.name}
-                        </ClickButton>
+                        <ClickButton short>{deck.deck.name}</ClickButton>
                       </View>
                     )
                   })}
@@ -223,8 +216,7 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    width: '100%',
-    paddingHorizontal: 10
+    width: '100%'
   },
   settingsContainer: {
     flex: 1,

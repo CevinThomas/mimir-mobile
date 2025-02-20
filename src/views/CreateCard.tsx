@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react'
-import { Alert, Button, Text, TextInput, View } from 'react-native'
+import { Alert, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { CheckBox } from '@rneui/themed'
 import { useFocusEffect, useNavigation, usePreventRemove } from '@react-navigation/native'
 import { useCreateDeckContext } from '../context/CreateDeckContext'
 import {
@@ -13,10 +12,21 @@ import {
   updateCard,
   updateChoice
 } from '../api/DecksApi'
+import NormalText from '../components/Typography/NormalText'
+import CustomTextInput from '../components/Forms/Input'
+import MainBackground from '../components/MainBackground'
+import ClickButton from '../components/Buttons/ClickButton'
+import { getColorProperty } from '../helpers'
+import { useTheme } from '../context/ThemeContext'
+import CustomCheckBox from '../components/Forms/Checkbox'
+import SideActionButton from '../components/Buttons/SideActionButton'
+import FilledButton from '../components/Buttons/FilledButton'
+import ClearButton from '../components/Buttons/ClearButton'
 
 export default function CreateCard(props: {
   route: { params: { card: { name: string; id: string } } }
 }) {
+  const { theme } = useTheme()
   useFocusEffect(
     React.useCallback(() => {
       if (props.route.params?.card) {
@@ -52,14 +62,13 @@ export default function CreateCard(props: {
   const [addingChoice, setAddingChoice] = useState(false)
   const [currentChoice, setCurrentChoice] = useState({
     title: '',
-    description: '',
     correct: false
   })
   const bottomSheetRef = useRef<BottomSheet>(null)
 
   const handleClose = () => {
     bottomSheetRef.current?.close()
-    setCurrentChoice({ title: '', description: '', correct: false })
+    setCurrentChoice({ title: '', correct: false })
     setAddingChoice(false)
   }
 
@@ -71,7 +80,6 @@ export default function CreateCard(props: {
         card: {
           id: response.data.id,
           title: response.data.title,
-          description: response.data.description,
           explanation: response.data.explanation,
           choices: response.data.choices
         }
@@ -81,7 +89,6 @@ export default function CreateCard(props: {
         card: {
           id: response.data.id,
           title: response.data.title,
-          description: response.data.description,
           explanation: response.data.explanation,
           choices: response.data.choices
         }
@@ -115,7 +122,6 @@ export default function CreateCard(props: {
       const response = await updateCard(state.deckId, state.currentCard.id, state.currentCard)
       dispatch({ type: 'UPDATE_CARD', card: response.data })
     } else {
-      console.log(state)
       const response = await createCard(state.deckId, state.currentCard)
       dispatch({ type: 'ADD_CARD', card: response.data })
     }
@@ -144,7 +150,6 @@ export default function CreateCard(props: {
 
   const onEditChoicePress = (id: string) => {
     const choice = state.currentCard.choices.find((choice) => choice.id === id)
-    console.log('CHOICE TO EDIT', choice)
 
     if (choice) {
       setCurrentChoice(choice)
@@ -174,73 +179,120 @@ export default function CreateCard(props: {
   }
 
   return (
-    <GestureHandlerRootView>
-      <Text>Create Card</Text>
-      <Text>Card Title</Text>
-      <TextInput
-        value={state.currentCard.title}
-        style={styles.input}
-        onChangeText={(text) => onUpdateCard('title', text)}
-      />
-      <Text>Card Description</Text>
-      <TextInput
-        value={state.currentCard.description}
-        style={styles.input}
-        onChangeText={(text) => onUpdateCard('description', text)}
-      />
-      {state.currentCard.choices.length > 0 &&
-        state.currentCard.choices.map((choice, index) => (
-          <View key={index}>
-            <Button onPress={() => onEditChoicePress(choice.id)} title={choice.title} />
+    <MainBackground>
+      <GestureHandlerRootView>
+        <View style={{ flex: 3 }}>
+          <View style={{ marginBottom: 30, paddingHorizontal: 10 }}>
+            <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>
           </View>
-        ))}
-      <Button title={'Add choice'} onPress={onAddChoice} />
-      <Button title="Save Card" onPress={onSaveCard} />
-      {editingCard && <Button title={'Remove card'} onPress={onRemoveCard} />}
-      {addingChoice && (
-        <BottomSheet
-          ref={bottomSheetRef}
-          onClose={handleClose}
-          enablePanDownToClose={true}
-          enableDynamicSizing={false}
-          index={0}
-          snapPoints={['100%', '100%']}
-        >
-          <BottomSheetView style={styles.contentContainer}>
-            <Text>Choice Title</Text>
-            <TextInput
-              value={currentChoice.title}
-              style={styles.input}
-              onChangeText={(text) => onUpdateChoice('title', text)}
-            />
-            <CheckBox
-              title="Correct"
-              checked={currentChoice.correct}
-              onPress={() =>
-                setCurrentChoice({ ...currentChoice, correct: !currentChoice.correct })
-              }
-              iconType="material-community"
-              checkedIcon="checkbox-marked"
-              uncheckedIcon="checkbox-blank-outline"
-              checkedColor="red"
-            />
-            <Button title="Save choice" onPress={onSaveChoice} />
-            {editingChoice && <Button onPress={onRemoveChoicePress} title={'Remove choice'} />}
-          </BottomSheetView>
-        </BottomSheet>
-      )}
-    </GestureHandlerRootView>
+
+          <CustomTextInput
+            label={'Question *'}
+            value={state.currentCard.title}
+            style={styles.input}
+            onChangeText={(text) => onUpdateCard('title', text)}
+          />
+
+          <CustomTextInput
+            label={'Explanation'}
+            value={state.currentCard.explanation}
+            style={styles.input}
+            onChangeText={(text) => onUpdateCard('explanation', text)}
+          />
+        </View>
+
+        <View style={{ flex: 6, padding: 10 }}>
+          <View
+            style={{
+              flex: 3,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <View>
+              <NormalText>Choices</NormalText>
+            </View>
+            <View>
+              <SideActionButton onPress={onAddChoice}>Add choice</SideActionButton>
+            </View>
+          </View>
+          <View style={{ flex: 10 }}>
+            {state.currentCard.choices.length > 0 &&
+              state.currentCard.choices.map((choice, index) => {
+                const background = choice.correct
+                  ? '#6FC368'
+                  : getColorProperty(theme, 'inputBackground')
+                return (
+                  <View style={{ marginBottom: 10 }} key={index}>
+                    <ClickButton
+                      background={background}
+                      onPress={() => onEditChoicePress(choice.id)}
+                    >
+                      {choice.title}
+                    </ClickButton>
+                  </View>
+                )
+              })}
+          </View>
+        </View>
+
+        <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
+          {editingCard && (
+            <View style={{ marginBottom: 10 }}>
+              <ClearButton onPress={onRemoveCard}>Remove card</ClearButton>
+            </View>
+          )}
+          <FilledButton onPress={onSaveCard}>Save card</FilledButton>
+        </View>
+
+        {addingChoice && (
+          <BottomSheet
+            backgroundStyle={{ backgroundColor: getColorProperty(theme, 'background') }}
+            ref={bottomSheetRef}
+            onClose={handleClose}
+            enablePanDownToClose={true}
+            enableDynamicSizing={false}
+            index={0}
+            snapPoints={['100%', '100%']}
+          >
+            <BottomSheetView style={styles.contentContainer}>
+              <View style={{ flex: 1 }}>
+                <CustomTextInput
+                  label={'Choice Title'}
+                  value={currentChoice.title}
+                  onChangeText={(text) => onUpdateChoice('title', text)}
+                />
+                <CustomCheckBox
+                  label="Correct"
+                  checked={currentChoice.correct}
+                  onPress={() =>
+                    setCurrentChoice({ ...currentChoice, correct: !currentChoice.correct })
+                  }
+                  iconType="material-community"
+                  checkedIcon="checkbox-marked"
+                  uncheckedIcon="checkbox-blank-outline"
+                />
+              </View>
+
+              <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
+                {editingChoice && (
+                  <View style={{ marginBottom: 10 }}>
+                    <FilledButton onPress={onRemoveChoicePress}>Remove choice</FilledButton>
+                  </View>
+                )}
+                <ClearButton onPress={onSaveChoice}>Add choice</ClearButton>
+              </View>
+            </BottomSheetView>
+          </BottomSheet>
+        )}
+      </GestureHandlerRootView>
+    </MainBackground>
   )
 }
 
 const styles = {
-  input: {
-    borderWidth: 1,
-    borderColor: 'black',
-    padding: 10,
-    margin: 10
-  },
   contentContainer: {
-    padding: 36
+    flex: 1
   }
 }

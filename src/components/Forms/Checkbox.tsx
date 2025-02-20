@@ -17,6 +17,7 @@ export default function CustomCheckBox({ label, style, ...props }: CheckboxProps
         containerStyle={styles.checkboxContainer}
         textStyle={[styles.label, { color: textColor }]}
         title={label}
+        checkedColor={'white'}
       />
     </View>
   )

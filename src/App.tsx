@@ -74,11 +74,7 @@ function LoggedInStack() {
         component={DeckSession}
         options={{ gestureEnabled: false }}
       />
-      <Stack.Screen
-        name="CreateDeck"
-        component={CreateDeck}
-        options={{ gestureEnabled: false, headerBackVisible: false }}
-      />
+      <Stack.Screen name="CreateDeck" component={CreateDeck} />
       <Stack.Screen name="CreateCard" component={CreateCard} options={{ gestureEnabled: false }} />
       <Stack.Screen name="ViewAllDecks" component={ViewAllDecks} />
     </Stack.Navigator>
