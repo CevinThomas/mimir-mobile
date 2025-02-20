@@ -35,7 +35,9 @@ export default function CreateDeck(props: {
         return true
       }
       BackHandler.addEventListener('hardwareBackPress', onBackPress)
-      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress)
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress)
+      }
     }, [])
   )
   const { state, dispatch } = useCreateDeckContext()
@@ -46,11 +48,11 @@ export default function CreateDeck(props: {
   }
 
   const onNavigateToCreateCard = async () => {
-    if (!state.deckId) {
+    if (!state.id) {
       const response = await createDeck({
-        name: state.deckName,
-        description: state.deckDescription,
-        cards: state.deckCards
+        name: state.name,
+        description: state.description,
+        cards: state.cards
       })
       dispatch({ type: 'SET_DECK', response })
     }
@@ -59,7 +61,7 @@ export default function CreateDeck(props: {
   }
 
   const onSaveDeck = async () => {
-    await updateDeck(state.deckId, { name: state.deckName, description: state.deckDescription })
+    await updateDeck(state.id, { name: state.name, description: state.description })
     dispatch({ type: 'RESET' })
     navigation.dispatch(
       CommonActions.reset({ index: 0, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
@@ -72,9 +74,9 @@ export default function CreateDeck(props: {
   }
 
   const onPublishDeck = async () => {
-    await updateDeck(state.deckId, {
-      name: state.deckName,
-      description: state.deckDescription,
+    await updateDeck(state.id, {
+      name: state.name,
+      description: state.description,
       active: true
     })
     dispatch({ type: 'RESET' })
@@ -86,16 +88,16 @@ export default function CreateDeck(props: {
   return (
     <MainBackground>
       <CustomTextInput
-        value={state.deckName}
-        label={'Title'}
-        onChangeText={(text) => onUpdateDeck('deckName', text)}
+        value={state.name}
+        placeholder={'Title'}
+        onChangeText={(text) => onUpdateDeck('name', text)}
       />
 
       <CustomTextInput
-        value={state.deckDescription}
-        label={'Description'}
+        value={state.description}
+        placeholder={'Description'}
         style={{ height: 100 }}
-        onChangeText={(text) => onUpdateDeck('deckDescription', text)}
+        onChangeText={(text) => onUpdateDeck('description', text)}
       />
       <View style={{ flex: 3, padding: 10 }}>
         <View
@@ -114,7 +116,7 @@ export default function CreateDeck(props: {
           </View>
         </View>
         <View style={{ flex: 5 }}>
-          {state.deckCards?.map((card, index) => (
+          {state.cards?.map((card, index) => (
             <View style={{ marginBottom: 10 }} key={index}>
               <ClickButton onPress={() => navigation.navigate('CreateCard', { card: card })}>
                 {card.title}
@@ -124,7 +126,7 @@ export default function CreateDeck(props: {
         </View>
       </View>
 
-      {state.deckId && (
+      {state.id && (
         <View style={{ flex: 1, flexWrap: 'wrap', flexDirection: 'row', marginBottom: 20 }}>
           {/*
           <View style={{ flex: 2, justifyContent: 'flex-end' }}>
