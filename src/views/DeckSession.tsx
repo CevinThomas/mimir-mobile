@@ -170,7 +170,10 @@ export default function DeckSession(props: {
             }}
           >
             <View style={{ flex: 2, justifyContent: 'flex-end' }}>
-              <OutlineButton disabled={cards.length === 1} onPress={archiveCardPress}>
+              <OutlineButton
+                disabled={cards.length === 1 || answeredState === 1}
+                onPress={archiveCardPress}
+              >
                 Skip this card next time
               </OutlineButton>
             </View>
