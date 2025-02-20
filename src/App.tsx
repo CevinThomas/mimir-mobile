@@ -15,8 +15,11 @@ import CreateDeck from './views/CreateDeck'
 import CreateCard from './views/CreateCard'
 import ViewAllDecks from './views/ViewAllDecks'
 import { useTheme } from './context/ThemeContext'
-import { Button } from 'react-native'
+import { Button, View } from 'react-native'
 import { getColorProperty } from './helpers'
+import DeckIcon from './svgs/DeckIcon'
+import HomeIcon from './svgs/HomeIcon'
+import SettingsIcon from './svgs/SettingsIcon'
 
 const Stack = createNativeStackNavigator(RootStack)
 const Tab = createBottomTabNavigator(TabStack)
@@ -96,19 +99,36 @@ function TabStack() {
           borderTopWidth: 0
         },
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName
+          const focusedColor = getColorProperty(theme, 'primary')
+
+          if (route.name === 'Decks') {
+            return (
+              <View style={{ marginTop: 20 }}>
+                <DeckIcon fill={focused ? focusedColor : '#FAF9F6'} />
+              </View>
+            )
+          }
 
           if (route.name === 'Home') {
-            iconName = focused ? 'ios-information-circle' : 'ios-information-circle-outline'
-          } else if (route.name === 'Settings') {
-            iconName = focused ? 'ios-list' : 'ios-list-outline'
+            return (
+              <View style={{ marginTop: 20 }}>
+                <HomeIcon fill={focused ? focusedColor : '#FAF9F6'} />
+              </View>
+            )
+          }
+
+          if (route.name === 'Settings') {
+            return (
+              <View style={{ marginTop: 20 }}>
+                <SettingsIcon fill={focused ? focusedColor : '#FAF9F6'} />
+              </View>
+            )
           }
 
           // You can return any component that you like here!
-        },
-        tabBarActiveTintColor: 'tomato',
-        tabBarInactiveTintColor: 'gray'
+        }
       })}
     >
       <Tab.Screen name="Home" component={Home} />
