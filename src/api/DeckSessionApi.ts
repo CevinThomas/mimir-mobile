@@ -24,7 +24,6 @@ export const getDeckSessions = async () => {
 
 export const getDeckSession = async (deckSessionId: string) => {
   const response = await axiosInstance.get(`/deck_sessions/${deckSessionId}`)
-  console.log(response)
   return response.data
 }
 

@@ -29,6 +29,10 @@ export default function TabSelectButton({ children, ...props }) {
           color: getColorProperty(theme, 'text'),
           fontSize: 14
         }}
+        titleProps={{
+          ellipsizeMode: 'tail',
+          numberOfLines: 1
+        }}
         {...props}
       />
     </View>

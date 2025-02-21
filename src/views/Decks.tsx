@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import { getAccountDecks, getDecks, getSharedDecks } from '../api/DecksApi'
-import { getDeckSessions } from '../api/DeckSessionApi'
+import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import { useNavigation } from '@react-navigation/native'
 import { useUserContext } from '../context/UserContext'
 import MainBackground from '../components/MainBackground'
 import DeckListItem from '../components/DeckListItem'
 import NormalText from '../components/Typography/NormalText'
-import ClickButton from '../components/Buttons/ClickButton'
 import TabSelectButton from '../components/Buttons/TabSelectButton'
 import InvisibleButton from '../components/Buttons/InvisibleButton'
 import FilledButton from '../components/Buttons/FilledButton'
+import DeleteButtonAnimated from '../components/DeleteButtonAnimated'
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -27,8 +33,24 @@ export default function Decks() {
     })
   }
 
+  const animationWidth = useSharedValue(1)
+  const config = {
+    duration: 500,
+    easing: Easing.bezier(0.5, 0.01, 0, 1)
+  }
+  const animationStyle = useAnimatedStyle(() => {
+    return {
+      width: withTiming(`${animationWidth.value}%`, config)
+    }
+  })
+
   const setDeckSettings = (settings: 'private' | 'account') => {
     setSelectedDeckSettings(settings)
+  }
+
+  const deleteSession = async (deckSessionId: number) => {
+    await deleteDeckSession(deckSessionId)
+    fetchOnGoingDecks()
   }
 
   const fetchDecks = async () => {
@@ -81,7 +103,7 @@ export default function Decks() {
                 onPress={() => setDeckSettings('private')}
                 selected={selectedDeckSettings === 'private'}
               >
-                Private Decks
+                Private
               </TabSelectButton>
             </View>
             <View style={{ flex: 1 }}>
@@ -89,7 +111,7 @@ export default function Decks() {
                 onPress={() => setDeckSettings('account')}
                 selected={selectedDeckSettings === 'account'}
               >
-                {userState.account?.name}'s Decks
+                {userState.account?.name}
               </TabSelectButton>
             </View>
           </View>
@@ -111,23 +133,23 @@ export default function Decks() {
 
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
                     {ongoingDecks.map((deck, index) => {
-                      const isEven = index % 2 === 0
                       return (
                         <View
                           key={deck.deck.id}
-                          style={{
-                            flex: 1,
-                            width: '50%',
-                            marginRight: isEven ? 5 : 0,
-                            marginLeft: isEven ? 0 : 5
-                          }}
+                          style={[
+                            {
+                              flex: 1
+                            }
+                          ]}
                         >
-                          <ClickButton
+                          <DeleteButtonAnimated
                             onPress={() => navigation.navigate('DeckSession', { deck })}
-                            short
+                            onDelete={() => {
+                              deleteSession(deck.id)
+                            }}
                           >
                             {deck.deck.name}
-                          </ClickButton>
+                          </DeleteButtonAnimated>
                         </View>
                       )
                     })}
@@ -149,6 +171,8 @@ export default function Decks() {
                   {loopDecks(decks)}
                 </View>
               )}
+
+              <Animated.View style={animationStyle} />
 
               {sharedWithMeDecks.length > 0 && (
                 <View style={styles.sharedDecksContainer}>

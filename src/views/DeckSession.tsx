@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
-import {
-  archiveCard,
-  deleteDeckSession,
-  getCardBatch,
-  getDeckSession,
-  resetDeckSession
-} from '../api/DeckSessionApi'
+import { archiveCard, getCardBatch, getDeckSession, resetDeckSession } from '../api/DeckSessionApi'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
@@ -24,7 +18,7 @@ export default function DeckSession(props: {
   const [initLoaded, setInitLoaded] = useState(false)
   const [answeredState, setAnsweredState] = useState(2)
   const [answeredChoiceId, setAnsweredId] = useState()
-  const [deckSessionId, setDeckSessionId] = useState()
+  const [deckSessionId, setDeckSessionId] = useState<number>()
   const [refreshing, setRefreshing] = useState(false)
 
   const navigation = useNavigation()
@@ -104,13 +98,6 @@ export default function DeckSession(props: {
   const resetSession = async () => {
     await resetDeckSession(deckSessionId)
     fetchNextCardBatch()
-  }
-
-  const deleteSession = async () => {
-    await deleteDeckSession(deckSessionId)
-    navigation.dispatch(
-      CommonActions.reset({ index: 1, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
-    )
   }
 
   useEffect(() => {

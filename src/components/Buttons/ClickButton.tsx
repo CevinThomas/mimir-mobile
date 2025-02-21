@@ -7,7 +7,7 @@ import { useTheme } from '../../context/ThemeContext'
 export default function ClickButton({ children, onPress, short, background }) {
   const { theme } = useTheme()
   return (
-    <View style={[styles.container, theme === 'light' ? styles.shadowStyles : {}]}>
+    <View style={[theme === 'light' ? styles.shadowStyles : {}]}>
       <Button
         onPress={onPress}
         buttonStyle={[
