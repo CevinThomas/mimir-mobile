@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BackHandler, View } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useCreateDeckContext } from '../context/CreateDeckContext'
@@ -9,10 +9,14 @@ import NormalText from '../components/Typography/NormalText'
 import ClickButton from '../components/Buttons/ClickButton'
 import SideActionButton from '../components/Buttons/SideActionButton'
 import ClearButton from '../components/Buttons/ClearButton'
+import Dropdown from '../components/Dropdown'
+import { getFolders } from '../api/FoldersApi'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
 }) {
+  const [folders, setFolders] = useState([])
+  const [selectedFolder, setSelectedFolder] = useState(null)
   useEffect(() => {
     if (props.route.params?.deck) {
       dispatch({
@@ -26,7 +30,13 @@ export default function CreateDeck(props: {
         }
       })
     }
+    fetchFolders()
   }, [])
+
+  const fetchFolders = async () => {
+    const folders = await getFolders()
+    setFolders(folders)
+  }
 
   useFocusEffect(
     React.useCallback(() => {
@@ -49,11 +59,14 @@ export default function CreateDeck(props: {
 
   const onNavigateToCreateCard = async () => {
     if (!state.id) {
+      console.log('HELLO')
       const response = await createDeck({
         name: state.name,
         description: state.description,
-        cards: state.cards
+        cards: state.cards,
+        folder_id: state.folder_id
       })
+      console.log('RESPONSE', response)
       dispatch({ type: 'SET_DECK', response })
     }
 
@@ -99,6 +112,12 @@ export default function CreateDeck(props: {
         style={{ height: 100 }}
         onChangeText={(text) => onUpdateDeck('description', text)}
       />
+
+      <View>{state.folder_id && <NormalText>Folder: {state.folder_id}</NormalText>}</View>
+
+      <View>
+        <Dropdown onChange={(value) => onUpdateDeck('folder_id', value)} items={folders} />
+      </View>
       <View style={{ flex: 3, padding: 10 }}>
         <View
           style={{

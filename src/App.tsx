@@ -66,8 +66,7 @@ function LoggedInStack() {
         headerShadowVisible: false,
         headerStyle: { backgroundColor: getColorProperty(theme, 'background') },
         headerTitle: '',
-        headerBackButtonDisplayMode: 'minimal',
-        headerRight: () => <HeaderButton />
+        headerBackButtonDisplayMode: 'minimal'
       }}
     >
       <Stack.Screen name="Home" component={TabStack} />
@@ -87,9 +86,6 @@ function LoggedInStack() {
 function TabStack() {
   const { theme, toggleTheme } = useTheme()
 
-  const HeaderButton = () => {
-    return <Button title="Change theme" onPress={toggleTheme} />
-  }
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

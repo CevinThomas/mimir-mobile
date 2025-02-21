@@ -30,6 +30,7 @@ type InitialState = Deck & {
   id: string
   active: boolean
   cards: Card[]
+  folder_id?: string
 }
 
 const initialState: InitialState = {

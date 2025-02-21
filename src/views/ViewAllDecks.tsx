@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 import { getDecks, getSharedDecks } from '../api/DecksApi'
 import { getDeckSessions } from '../api/DeckSessionApi'
 import { useNavigation } from '@react-navigation/native'
@@ -48,13 +48,9 @@ export default function ViewAllDecks(props: { route: { params: { method: string 
             <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>Ongoing Decks</NormalText>
           </View>
           {decks.map((deck) => {
-            console.log(deck.deck.name)
             return (
-              <View style={{ height: 60 }}>
-                <ClickButton
-                  onPress={() => navigation.navigate('DeckSession', { deck })}
-                  key={deck.id}
-                >
+              <View style={{ height: 60 }} key={deck.deck.id}>
+                <ClickButton onPress={() => navigation.navigate('DeckSession', { deck })}>
                   {deck.deck.name}
                 </ClickButton>
               </View>
@@ -73,8 +69,8 @@ export default function ViewAllDecks(props: { route: { params: { method: string 
         </View>
         {decks.map((deck) => {
           return (
-            <View>
-              <DeckListItem deck={deck} key={deck.id} />
+            <View key={deck.folder.id}>
+              <DeckListItem deck={deck} />
             </View>
           )
         })}
@@ -83,10 +79,3 @@ export default function ViewAllDecks(props: { route: { params: { method: string 
   }
   return <MainBackground>{loopDecks(decks)}</MainBackground>
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row'
-  }
-})
