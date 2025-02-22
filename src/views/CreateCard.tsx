@@ -8,6 +8,7 @@ import CustomTextInput from '../components/Forms/Input'
 import MainBackground from '../components/MainBackground'
 import FilledButton from '../components/Buttons/FilledButton'
 import ClearButton from '../components/Buttons/ClearButton'
+import Header from '../components/Header'
 
 export default function CreateCard(props: {
   route: { params: { card: { name: string; id: string } } }
@@ -60,6 +61,7 @@ export default function CreateCard(props: {
 
   return (
     <MainBackground>
+      <Header />
       <View style={{ flex: 3 }}>
         <View style={{ marginBottom: 30, paddingHorizontal: 10 }}>
           <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>

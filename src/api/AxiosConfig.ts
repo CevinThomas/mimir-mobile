@@ -1,7 +1,6 @@
 import axios from 'axios'
 import * as SecureStore from 'expo-secure-store'
 
-console.log(process.env.EXPO_PUBLIC_API_URL)
 const axiosInstance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
   headers: { 'Content-Type': 'application/json' }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { getColorProperty } from '../../helpers'
@@ -6,10 +6,17 @@ import { Button } from '@rneui/base'
 
 export default function ClearButton({ children, onPress }) {
   const { theme } = useTheme()
-  const backgroundColor = getColorProperty(theme, 'buttonClearBackground')
-  const color = getColorProperty(theme, 'buttonClearText')
-  const borderColor = getColorProperty(theme, 'inputBorder')
-  console.log(color)
+  const [backgroundColor, setBackgroundColor] = useState('')
+  const [color, setColor] = useState('')
+  const [borderColor, setBorderColor] = useState('')
+
+  useEffect(() => {
+    setColor(getColorProperty(theme, 'buttonClearText'))
+    setBorderColor(getColorProperty(theme, 'inputBorder'))
+    setBackgroundColor(getColorProperty(theme, 'buttonClearBackground'))
+    console.log('HELL=O2')
+  }, [])
+
   return (
     <Button
       title={children}

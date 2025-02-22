@@ -11,6 +11,7 @@ import SideActionButton from '../components/Buttons/SideActionButton'
 import ClearButton from '../components/Buttons/ClearButton'
 import Dropdown from '../components/Dropdown'
 import { getFolders } from '../api/FoldersApi'
+import Header from '../components/Header'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -100,6 +101,7 @@ export default function CreateDeck(props: {
 
   return (
     <MainBackground>
+      <Header />
       <CustomTextInput
         value={state.name}
         placeholder={'Title'}

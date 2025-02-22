@@ -51,7 +51,7 @@ export default function AnimatedStyleUpdateExample({ onPress, onDelete, children
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.box]}>
+      <View style={[styles.box]}>
         <GestureHandlerRootView>
           <GestureDetector gesture={gesture}>
             <Button
@@ -63,8 +63,8 @@ export default function AnimatedStyleUpdateExample({ onPress, onDelete, children
             </Button>
           </GestureDetector>
         </GestureHandlerRootView>
-      </Animated.View>
-      <Animated.View style={[styles.deleteBox]}>
+      </View>
+      <Animated.View style={[styles.deleteBox, deleteStyle]}>
         <Button onPress={onDelete} buttonStyle={{ backgroundColor: '#FF5A5F', height: '100%' }}>
           <Ionicons name="trash" size={22} color="white" />
         </Button>

@@ -24,6 +24,7 @@ import CheckboxClickItem from '../components/CheckboxClickItem'
 import DeckBackground from '../svgs/DeckBackground'
 import FilledButton from '../components/Buttons/FilledButton'
 import ClearButton from '../components/Buttons/ClearButton'
+import Header from '../components/Header'
 
 export default function Deck(props: { route: { params: { deck: { name: string; id: string } } } }) {
   const { theme } = useTheme()
@@ -146,11 +147,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <View
-        style={{ position: 'absolute', top: 50, left: 0, right: 0, zIndex: 1, paddingLeft: 20 }}
-      >
-        <NormalText onPress={() => navigation.goBack()}>Back</NormalText>
-      </View>
+      <Header />
       <View style={styles.banner}>
         <DeckBackground />
       </View>
