@@ -20,6 +20,8 @@ import { getColorProperty } from './helpers'
 import DeckIcon from './svgs/DeckIcon'
 import HomeIcon from './svgs/HomeIcon'
 import SettingsIcon from './svgs/SettingsIcon'
+import DeckIconFilled from './svgs/DeckIconFilled'
+import HomeIconFilled from './svgs/HomeIconFilled'
 
 const Stack = createNativeStackNavigator(RootStack)
 const Tab = createBottomTabNavigator(TabStack)
@@ -88,6 +90,14 @@ function TabStack() {
           const focusedColor = getColorProperty(theme, 'primary')
 
           if (route.name === 'Decks') {
+            if (focused) {
+              return (
+                <View style={{ marginTop: 20 }}>
+                  <DeckIconFilled />
+                </View>
+              )
+            }
+
             return (
               <View style={{ marginTop: 20 }}>
                 <DeckIcon fill={focused ? focusedColor : '#FAF9F6'} />
@@ -96,6 +106,13 @@ function TabStack() {
           }
 
           if (route.name === 'Home') {
+            if (focused) {
+              return (
+                <View style={{ marginTop: 20 }}>
+                  <HomeIconFilled />
+                </View>
+              )
+            }
             return (
               <View style={{ marginTop: 20 }}>
                 <HomeIcon fill={focused ? focusedColor : '#FAF9F6'} />

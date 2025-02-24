@@ -4,13 +4,13 @@
     "slug": "mimir-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/splash-test.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash-test.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+        "backgroundColor": "#1A2330"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,14 +19,22 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1A2330"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+            "image": "./assets/splash-test.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#1A2330"
+        }
+      ]
     ]
   }
 }

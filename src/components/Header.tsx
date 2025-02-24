@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native'
 export default function Header() {
   const navigation = useNavigation()
   return (
-    <View style={{ position: 'absolute', top: 50, left: 0, right: 0, zIndex: 1, paddingLeft: 20 }}>
+    <View style={{ position: 'absolute', top: 70, left: 10, right: 0, zIndex: 1 }}>
       <NormalText onPress={() => navigation.goBack()}>Back</NormalText>
     </View>
   )

@@ -11,6 +11,7 @@ import InvisibleButton from '../components/Buttons/InvisibleButton'
 import FilledButton from '../components/Buttons/FilledButton'
 import DeleteButtonAnimated from '../components/DeleteButtonAnimated'
 import { Tab } from '@rneui/themed'
+import ClickButton from '../components/Buttons/ClickButton'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -24,9 +25,8 @@ export default function Decks() {
   const loopDecks = (decks: any[]) => {
     return (
       <ScrollView>
-        {decks.map((deck) => {
-          if (deck.decks.length === 0) return
-          return <DeckListItem key={deck.folder.id} deck={deck} />
+        {decks.slice(0, 5).map((deck) => {
+          return <DeckListItem key={deck.id} deck={deck} />
         })}
       </ScrollView>
     )
@@ -43,20 +43,17 @@ export default function Decks() {
 
   const fetchDecks = async () => {
     const decks = await getDecks()
-    const firstFiveDecks = decks.slice(0, 5)
-    setDecks(firstFiveDecks)
+    setDecks(decks)
   }
 
   const fetchOnGoingDecks = async () => {
     const decks = await getDeckSessions()
-    const firstTwoDecks = decks.slice(0, 2)
-    setOngoingDecks(firstTwoDecks)
+    setOngoingDecks(decks)
   }
 
   const fetchSharedDecks = async () => {
     const decks = await getSharedDecks()
-    const firstFiveDecks = decks.slice(0, 5)
-    setSharedDecks(firstFiveDecks)
+    setSharedDecks(decks)
   }
 
   const fetchAccountDecks = async () => {
@@ -93,7 +90,7 @@ export default function Decks() {
   )
 
   const decksToShow = () => {
-    return decks.some((deck) => {
+    return accountDecks.some((deck) => {
       if (deck.decks.length > 0) {
         return true
       }
@@ -101,7 +98,7 @@ export default function Decks() {
   }
 
   return (
-    <MainBackground>
+    <MainBackground noSpace>
       <View style={[styles.mainContainer]}>
         <View style={styles.settingsContainer}>
           <View style={{ flex: 1 }}>
@@ -145,7 +142,7 @@ export default function Decks() {
                 </View>
 
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {ongoingDecks.map((deck, index) => {
+                  {ongoingDecks.slice(0, 2).map((deck, index) => {
                     return (
                       <View
                         key={deck.deck.id}
@@ -170,7 +167,7 @@ export default function Decks() {
               </View>
             )}
 
-            {decksToShow() && (
+            {decks.length > 0 && (
               <View style={styles.myDecksContainer}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
@@ -202,7 +199,7 @@ export default function Decks() {
               </View>
             )}
 
-            {!decksToShow() && sharedWithMeDecks.length === 0 && ongoingDecks.length === 0 && (
+            {decks.length === 0 && sharedWithMeDecks.length === 0 && ongoingDecks.length === 0 && (
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
               </View>
@@ -216,16 +213,43 @@ export default function Decks() {
           </View>
         ) : (
           <View style={styles.accountSettingContainer}>
-            {accountDecks.length === 0 ? (
+            {!decksToShow() ? (
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
               </View>
             ) : (
               <View style={styles.accountDecks}>
-                <NormalText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>
-                  Account decks
-                </NormalText>
-                {loopDecks(accountDecks)}
+                {accountDecks.map((deck) => {
+                  if (deck.decks.length === 0) return
+                  //TODO: MAKE THIS INTO A COMPONENT SAME INSIDE VIEW ALL DECKS. Call it RenderAccountDecks or
+                  // something, or Render decks with categories
+                  return (
+                    <View>
+                      <View style={{ marginBottom: 10 }}>
+                        <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
+                          {deck.folder.name}
+                        </NormalText>
+                      </View>
+                      {deck.decks.map((deck) => {
+                        return (
+                          <View key={deck.id} style={{ height: 60 }}>
+                            <ClickButton onPress={() => navigation.navigate('Deck', { deck })}>
+                              {deck.name}
+                            </ClickButton>
+                          </View>
+                        )
+                      })}
+                    </View>
+                  )
+                })}
+
+                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                  <InvisibleButton
+                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'accountDecks' })}
+                  >
+                    View all
+                  </InvisibleButton>
+                </View>
               </View>
             )}
           </View>

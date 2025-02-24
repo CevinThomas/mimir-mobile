@@ -66,6 +66,11 @@ export const getDeck = async (deckId: string) => {
   return response.data
 }
 
+export const getNewDecks = async () => {
+  const response = await axiosInstance.get('/decks/new_decks')
+  return response.data
+}
+
 export const getEligibleShareUsers = async (deckId: string) => {
   const response = await axiosInstance.get(`/decks/${deckId}/share_with`)
   return response.data

@@ -196,7 +196,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               <InvisibleButton onPress={handleRemovePress}>Unshare Deck</InvisibleButton>
             )}
 
-            {!promoteRequest && !sharedFrom && (
+            {!promoteRequest && !sharedFrom && !deck.account?.id && (
               <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
             )}
           </View>

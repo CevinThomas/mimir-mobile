@@ -38,14 +38,14 @@ export default function AnimatedStyleUpdateExample({ onPress, onDelete, children
   const rightFlingGesture = Gesture.Fling()
     .direction(Directions.RIGHT)
     .onStart((e) => {
-      deleteWidth.value = 1
+      deleteWidth.value = 0
     })
 
   const gesture = Gesture.Race(flingGesture, rightFlingGesture)
 
   useEffect(() => {
     setTimeout(() => {
-      deleteWidth.value = 1
+      deleteWidth.value = 0
     }, 2000)
   }, [])
 

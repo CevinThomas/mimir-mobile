@@ -17,7 +17,6 @@ export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
 }) {
   const [folders, setFolders] = useState([])
-  const [selectedFolder, setSelectedFolder] = useState(null)
   useEffect(() => {
     if (props.route.params?.deck) {
       dispatch({
@@ -60,7 +59,6 @@ export default function CreateDeck(props: {
 
   const onNavigateToCreateCard = async () => {
     if (!state.id) {
-      console.log('HELLO')
       const response = await createDeck({
         name: state.name,
         description: state.description,
@@ -115,11 +113,12 @@ export default function CreateDeck(props: {
         onChangeText={(text) => onUpdateDeck('description', text)}
       />
 
-      <View>{state.folder_id && <NormalText>Folder: {state.folder_id}</NormalText>}</View>
+      {folders.length > 0 && (
+        <View>
+          <Dropdown onChange={(value) => onUpdateDeck('folder_id', value)} items={folders} />
+        </View>
+      )}
 
-      <View>
-        <Dropdown onChange={(value) => onUpdateDeck('folder_id', value)} items={folders} />
-      </View>
       <View style={{ flex: 3, padding: 10 }}>
         <View
           style={{

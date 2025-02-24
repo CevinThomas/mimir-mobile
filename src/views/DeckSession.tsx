@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import { archiveCard, getCardBatch, getDeckSession, resetDeckSession } from '../api/DeckSessionApi'
-import { CommonActions, useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import Choice from '../components/Choice'
 import OutlineButton from '../components/Buttons/OutlineButton'
 import FilledButton from '../components/Buttons/FilledButton'
+import Header from '../components/Header'
 
 export default function DeckSession(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -49,8 +50,8 @@ export default function DeckSession(props: {
           setAnsweredState(2)
           return
         }
-        setCurrentCardIndex(currentCardIndex + 1)
         setAnsweredState(2)
+        setCurrentCardIndex(currentCardIndex + 1)
       }, 1000)
     } else {
       setAnsweredState(1)
@@ -105,12 +106,6 @@ export default function DeckSession(props: {
     setCurrentCard(cards[currentCardIndex])
   }, [currentCardIndex, setInitLoaded])
 
-  const onEndSessionPress = () => {
-    navigation.dispatch(
-      CommonActions.reset({ index: 1, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
-    )
-  }
-
   const displayCard = () => {
     if (!currentCard) return
     return (
@@ -138,6 +133,7 @@ export default function DeckSession(props: {
 
   return (
     <MainBackground>
+      <Header />
       <ScrollView
         contentContainerStyle={{ flex: 1 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={resetSession} />}
@@ -147,7 +143,6 @@ export default function DeckSession(props: {
             {displayCard()}
             {displayExplanation()}
           </View>
-          <View></View>
 
           <View
             style={{
