@@ -36,7 +36,11 @@ export default function Decks() {
     return (
       <ScrollView>
         {decks.slice(0, 5).map((deck) => {
-          return <DeckListItem key={deck.id} deck={deck} />
+          return (
+            <View style={{ marginBottom: 10 }} key={deck.id}>
+              <DeckListItem deck={deck} />
+            </View>
+          )
         })}
       </ScrollView>
     )
