@@ -71,6 +71,19 @@ export const getNewDecks = async () => {
   return response.data
 }
 
+export const viewedAccountDecks = async () => {
+  return await axiosInstance.patch('/decks/viewed_account_decks')
+}
+
+export const getFeaturedDecks = async () => {
+  const response = await axiosInstance.get('/decks/featured')
+  return response.data
+}
+
+export const removeFeaturedDeck = async (deckId: string) => {
+  return await axiosInstance.delete(`/decks/${deckId}/remove_featured`)
+}
+
 export const getEligibleShareUsers = async (deckId: string) => {
   const response = await axiosInstance.get(`/decks/${deckId}/share_with`)
   return response.data

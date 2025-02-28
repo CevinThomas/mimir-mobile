@@ -23,6 +23,7 @@ const colors = {
     inputBorder: '#444B56',
     darkGray: '#FFFFFF'
   },
+  lightBlue: '#326290',
   primary: '#007BFF',
   secondary: '#6C757D',
   success: '#28A745',

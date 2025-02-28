@@ -3,17 +3,16 @@ import { StyleSheet, TextInputProps, View } from 'react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { getColorProperty } from '../../helpers'
 import { Input } from '@rneui/base'
-import Animated, { useSharedValue, withTiming } from 'react-native-reanimated'
 import NormalText from '../Typography/NormalText'
+import Animated, { useSharedValue, withTiming } from 'react-native-reanimated'
 
 interface CustomTextInputProps extends TextInputProps {
   label: string
 }
 
-export default function CustomTextInput({
+export default function CustomTextArea({
   label,
   style,
-  outline,
   onChangeText,
   ...props
 }: CustomTextInputProps) {
@@ -27,18 +26,8 @@ export default function CustomTextInput({
   const textColor = getColorProperty(theme, 'inputText')
 
   useEffect(() => {
-    if (props.value !== '') {
-      translateY.value = -35
-      translateX.value = -15
-    } else {
-      translateY.value = 0
-      translateX.value = 0
-    }
-  }, [props.value])
-
-  useEffect(() => {
     if (isFocused) {
-      translateY.value = withTiming(-35)
+      translateY.value = withTiming(-61)
       translateX.value = withTiming(-15)
     } else {
       if (inputValue.current === '') {
@@ -57,6 +46,7 @@ export default function CustomTextInput({
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        multiline={true}
         autoCapitalize={'none'}
         autoComplete={label === 'Email' ? 'email' : 'off'}
         style={[
@@ -65,7 +55,7 @@ export default function CustomTextInput({
             backgroundColor,
             color: textColor,
             borderColor: getColorProperty(theme, 'inputBorder'),
-            borderWidth: outline ? 1 : 0
+            borderWidth: 0
           },
           style
         ]}
@@ -82,16 +72,17 @@ export default function CustomTextInput({
 
 const styles = StyleSheet.create({
   container: {
-    height: 65
+    marginBottom: 5
   },
   label: {
+    marginBottom: 8,
     fontWeight: 'normal',
     position: 'absolute',
-    top: -57,
-    left: 25,
-    color: 'white'
+    top: -85,
+    left: 25
   },
   input: {
+    height: 100,
     borderWidth: 1,
     borderRadius: 7,
     paddingHorizontal: 12,

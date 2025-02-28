@@ -16,6 +16,8 @@ import CreateCard from './views/CreateCard'
 import ViewAllDecks from './views/ViewAllDecks'
 import { useTheme } from './context/ThemeContext'
 import { View } from 'react-native'
+import { Button } from '@rneui/themed'
+
 import { getColorProperty } from './helpers'
 import DeckIcon from './svgs/DeckIcon'
 import HomeIcon from './svgs/HomeIcon'
@@ -53,10 +55,17 @@ function RootStack() {
 }
 
 function LoggedInStack() {
+  const { theme, toggleTheme } = useTheme()
+
+  const HeaderButton = () => {
+    return <Button title="Change theme" onPress={toggleTheme} />
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false
+        headerShown: false,
+        headerRight: () => <HeaderButton />
       }}
     >
       <Stack.Screen name="Home" component={TabStack} />
@@ -75,6 +84,9 @@ function LoggedInStack() {
 
 function TabStack() {
   const { theme, toggleTheme } = useTheme()
+  const HeaderButton = () => {
+    return <Button title="Change theme" onPress={toggleTheme} />
+  }
 
   return (
     <Tab.Navigator
@@ -86,6 +98,7 @@ function TabStack() {
         },
         headerShown: false,
         tabBarShowLabel: false,
+        headerRight: () => <HeaderButton />,
         tabBarIcon: ({ focused, color, size }) => {
           const focusedColor = getColorProperty(theme, 'primary')
 

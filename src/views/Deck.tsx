@@ -13,6 +13,7 @@ import {
   favoriteDeck,
   getDeck,
   getEligibleShareUsers,
+  removeFeaturedDeck,
   removeSharedDeck,
   shareDeck
 } from '../api/DecksApi'
@@ -46,6 +47,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
 
   const fetchDeckInfo = async () => {
     const response = await getDeck(props.route.params.deck.id)
+    console.log(response.deck)
     setDeck(response.deck)
     setPromoteRequest(response.promote_request)
     setFavorite(response.favorite)
@@ -55,6 +57,20 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
   const fetchUsersEligibleForShare = async () => {
     const response = await getEligibleShareUsers(props.route.params.deck.id)
     setUsers(response)
+  }
+
+  const onCompleteFeaturedDeckPress = async () => {
+    const response = await removeFeaturedDeck(props.route.params.deck.id)
+    if (response.status === 200 || response.status === 204) {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+        })
+      )
+    } else {
+      alert('Failed to complete featured deck')
+    }
   }
 
   const handleDeletePress = async () => {
@@ -206,6 +222,13 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
           {!deck.account?.id && !sharedFrom && (
             <View style={{ marginBottom: 15 }}>
               <ClearButton onPress={handleEditPress}>Edit Deck</ClearButton>
+            </View>
+          )}
+          {deck?.featured && (
+            <View style={{ marginBottom: 15 }}>
+              <ClearButton onPress={onCompleteFeaturedDeckPress}>
+                Complete featured deck
+              </ClearButton>
             </View>
           )}
           <FilledButton onPress={handleStartPress}>Start deck</FilledButton>

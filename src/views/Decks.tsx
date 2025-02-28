@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'
-import { getAccountDecks, getDecks, getSharedDecks } from '../api/DecksApi'
+import {
+  getAccountDecks,
+  getDecks,
+  getFeaturedDecks,
+  getNewDecks,
+  getSharedDecks,
+  viewedAccountDecks
+} from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useUserContext } from '../context/UserContext'
@@ -11,7 +18,8 @@ import InvisibleButton from '../components/Buttons/InvisibleButton'
 import FilledButton from '../components/Buttons/FilledButton'
 import DeleteButtonAnimated from '../components/DeleteButtonAnimated'
 import { Tab } from '@rneui/themed'
-import ClickButton from '../components/Buttons/ClickButton'
+import DeckWithFolder from '../components/Decks/DeckWithFolder'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -20,6 +28,8 @@ export default function Decks() {
   const [accountDecks, setAccountDecks] = useState([])
   const [ongoingDecks, setOngoingDecks] = useState([])
   const [sharedWithMeDecks, setSharedDecks] = useState([])
+  const [newDecks, setNewDecks] = useState([])
+  const [featuredDecks, setFeaturedDecks] = useState([])
   const [selectedDeckSettings, setSelectedDeckSettings] = useState<'private' | 'account'>('private')
   const [index, setIndex] = useState(0)
   const loopDecks = (decks: any[]) => {
@@ -33,6 +43,9 @@ export default function Decks() {
   }
 
   const setDeckSettings = (settings: 'private' | 'account') => {
+    if (settings === 'account') {
+      viewedAccountDecks()
+    }
     setSelectedDeckSettings(settings)
   }
 
@@ -61,19 +74,24 @@ export default function Decks() {
     setAccountDecks(decks)
   }
 
+  const fetchNewAccountDecks = async () => {
+    const decks = await getNewDecks()
+    setNewDecks(decks)
+  }
+
+  const fetchFeaturedDecks = async () => {
+    const decks = await getFeaturedDecks()
+    setFeaturedDecks(decks)
+  }
+
   const refresh = () => {
     fetchDecks()
     fetchOnGoingDecks()
     fetchSharedDecks()
     fetchAccountDecks()
+    fetchNewAccountDecks()
+    fetchFeaturedDecks()
   }
-
-  useEffect(() => {
-    fetchDecks()
-    fetchOnGoingDecks()
-    fetchSharedDecks()
-    fetchAccountDecks()
-  }, [])
 
   useEffect(() => {
     if (index === 0) {
@@ -118,6 +136,12 @@ export default function Decks() {
               </Tab.Item>
               <Tab.Item
                 titleStyle={{ fontSize: 16, color: 'white' }}
+                iconRight={true}
+                icon={
+                  newDecks.length > 0 ? (
+                    <Ionicons name={'notifications'} size={14} color={'red'} />
+                  ) : null
+                }
                 onPress={() => {
                   setIndex(1)
                 }}
@@ -219,37 +243,41 @@ export default function Decks() {
               </View>
             ) : (
               <View style={styles.accountDecks}>
-                {accountDecks.map((deck) => {
-                  if (deck.decks.length === 0) return
-                  //TODO: MAKE THIS INTO A COMPONENT SAME INSIDE VIEW ALL DECKS. Call it RenderAccountDecks or
-                  // something, or Render decks with categories
-                  return (
-                    <View>
-                      <View style={{ marginBottom: 10 }}>
-                        <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
-                          {deck.folder.name}
-                        </NormalText>
-                      </View>
-                      {deck.decks.map((deck) => {
+                <ScrollView>
+                  {featuredDecks.length > 0 && (
+                    <View style={{ marginBottom: 30 }}>
+                      <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
+                        Featured decks
+                      </NormalText>
+                      {featuredDecks.map((deck) => {
+                        return <DeckListItem key={deck.id} deck={deck} />
+                      })}
+                    </View>
+                  )}
+                  {newDecks.length > 0 && (
+                    <View style={{ marginBottom: 30 }}>
+                      <NormalText style={{ fontSize: 18, marginBottom: 10 }}>New decks!</NormalText>
+                      {newDecks.map((deck) => {
                         return (
-                          <View key={deck.id} style={{ height: 60 }}>
-                            <ClickButton onPress={() => navigation.navigate('Deck', { deck })}>
-                              {deck.name}
-                            </ClickButton>
+                          <View style={{ marginBottom: 10 }} key={deck.id}>
+                            <DeckWithFolder deck={deck} />
                           </View>
                         )
                       })}
                     </View>
-                  )
-                })}
+                  )}
 
-                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                  <InvisibleButton
-                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'accountDecks' })}
-                  >
-                    View all
-                  </InvisibleButton>
-                </View>
+                  {accountDecks.map((deck) => {
+                    if (deck.decks.length === 0) return
+                    //TODO: MAKE THIS INTO A COMPONENT SAME INSIDE VIEW ALL DECKS. Call it RenderAccountDecks or
+                    // something, or Render decks with categories
+                    return (
+                      <View style={{ marginBottom: 10 }} key={deck.folder.id}>
+                        <DeckWithFolder deck={deck} />
+                      </View>
+                    )
+                  })}
+                </ScrollView>
               </View>
             )}
           </View>

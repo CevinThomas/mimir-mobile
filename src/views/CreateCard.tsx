@@ -9,6 +9,13 @@ import MainBackground from '../components/MainBackground'
 import FilledButton from '../components/Buttons/FilledButton'
 import ClearButton from '../components/Buttons/ClearButton'
 import Header from '../components/Header'
+import useSnackBar from '../hooks/useSnackBar'
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated'
 
 export default function CreateCard(props: {
   route: { params: { card: { name: string; id: string } } }
@@ -27,6 +34,7 @@ export default function CreateCard(props: {
   const { state, dispatch } = useCreateDeckContext()
   const navigation = useNavigation()
   const [editingCard, setEditingCard] = useState(false)
+  const [showNewButton, setShowNewButton] = useState(false)
 
   const onSaveCard = async () => {
     if (state.currentCard.id) {
@@ -36,7 +44,18 @@ export default function CreateCard(props: {
       const response = await createCard(state.id, state.currentCard)
       dispatch({ type: 'ADD_CARD', card: response.data })
     }
-    navigation.goBack()
+    setShowNewButton(true)
+    saveCardWith.value = 50
+    show('Card has been saved')
+    setTimeout(() => {
+      hide()
+    }, 1000)
+  }
+
+  const onNewCard = () => {
+    dispatch({ type: 'CLEAR_CURRENT_CARD' })
+    saveCardWith.value = 100
+    setShowNewButton(false)
   }
 
   const onUpdateCard = (key: string, value: string) => {
@@ -59,6 +78,21 @@ export default function CreateCard(props: {
     dispatch({ type: 'UPDATE_CHOICE', index, text })
   }
 
+  const { show, hide, visible, snackBar } = useSnackBar()
+
+  const saveCardWith = useSharedValue(100)
+
+  const config = {
+    duration: 500,
+    easing: Easing.bezier(0.5, 0.01, 0, 1)
+  }
+
+  const saveCardStyle = useAnimatedStyle(() => {
+    return {
+      width: withTiming(`${saveCardWith.value}%`, config)
+    }
+  })
+
   return (
     <MainBackground>
       <Header />
@@ -68,13 +102,13 @@ export default function CreateCard(props: {
         </View>
 
         <CustomTextInput
-          placeholder={'Question *'}
+          label={'Question *'}
           value={state.currentCard.title}
           onChangeText={(text) => onUpdateCard('title', text)}
         />
 
         <CustomTextInput
-          placeholder={'Explanation'}
+          label={'Explanation'}
           value={state.currentCard.explanation}
           onChangeText={(text) => onUpdateCard('explanation', text)}
         />
@@ -87,29 +121,30 @@ export default function CreateCard(props: {
         <View>
           <View>
             <CustomTextInput
+              style={{ borderWidth: 1, borderColor: '#6FC368' }}
               onChangeText={(text) => onChoiceInputPress(0, text)}
-              placeholder={'Choice 1'}
+              label={'Choice 1'}
               value={state.currentCard.choices[0].title}
             />
           </View>
           <View>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(1, text)}
-              placeholder={'Choice 2'}
+              label={'Choice 2'}
               value={state.currentCard.choices[1].title}
             />
           </View>
           <View>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(2, text)}
-              placeholder={'Choice 3'}
+              label={'Choice 3'}
               value={state.currentCard.choices[2].title}
             />
           </View>
           <View>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(3, text)}
-              placeholder={'Choice 4'}
+              label={'Choice 4'}
               value={state.currentCard.choices[3].title}
             />
           </View>
@@ -122,8 +157,19 @@ export default function CreateCard(props: {
             <ClearButton onPress={onRemoveCard}>Remove card</ClearButton>
           </View>
         )}
-        <FilledButton onPress={onSaveCard}>Save card</FilledButton>
+
+        <View style={{ flexDirection: 'row' }}>
+          <Animated.View style={[saveCardStyle]}>
+            <FilledButton onPress={onSaveCard}>Save card</FilledButton>
+          </Animated.View>
+          {showNewButton && (
+            <View style={{ width: '50%' }}>
+              <FilledButton onPress={onNewCard}>New card</FilledButton>
+            </View>
+          )}
+        </View>
       </View>
+      {visible && snackBar()}
     </MainBackground>
   )
 }

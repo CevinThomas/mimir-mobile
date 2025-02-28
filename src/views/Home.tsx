@@ -1,20 +1,9 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
-import { getNewDecks } from '../api/DecksApi'
 
 export default function Home() {
-  const [newDecks, setNewDecks] = useState([])
-
-  useLayoutEffect(() => {
-    const fetchNewDecks = async () => {
-      const response = await getNewDecks()
-      setNewDecks(response)
-    }
-    fetchNewDecks()
-  }, [])
-
   return (
     <MainBackground noSpace>
       <View style={styles.container}>

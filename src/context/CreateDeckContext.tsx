@@ -30,7 +30,7 @@ type InitialState = Deck & {
   id: string
   active: boolean
   cards: Card[]
-  folder_id?: string
+  folder_ids?: string[]
 }
 
 const initialState: InitialState = {
@@ -48,7 +48,8 @@ const initialState: InitialState = {
   description: '',
   id: '',
   active: false,
-  cards: []
+  cards: [],
+  folder_ids: []
 }
 
 const createDeckReducer = (state, action) => {
@@ -65,6 +66,12 @@ const createDeckReducer = (state, action) => {
     case 'UPDATE_DECK_KEY':
       return { ...state, [action.key]: action.value }
 
+    case 'REMOVE_FOLDER_ID':
+      return { ...state, folder_ids: state.folder_ids.filter((id) => id !== action.id) }
+
+    case 'ADD_FOLDER_ID':
+      return { ...state, folder_ids: [...state.folder_ids, action.id] }
+
     case 'CLEAR_CURRENT_CARD':
       return { ...state, currentCard: initialState.currentCard }
 
@@ -78,14 +85,13 @@ const createDeckReducer = (state, action) => {
       return {
         ...state,
         cards: [...state.cards, action.card],
-        currentCard: initialState.currentCard
+        currentCard: action.card
       }
 
     case 'UPDATE_CARD':
       return {
         ...state,
-        cards: state.cards.map((card) => (card.id === action.card.id ? action.card : card)),
-        currentCard: initialState.currentCard
+        cards: state.cards.map((card) => (card.id === action.card.id ? action.card : card))
       }
 
     case 'DELETE_CARD':

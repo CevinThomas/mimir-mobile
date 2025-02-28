@@ -12,6 +12,7 @@ import ClearButton from '../components/Buttons/ClearButton'
 import Dropdown from '../components/Dropdown'
 import { getFolders } from '../api/FoldersApi'
 import Header from '../components/Header'
+import CustomTextArea from '../components/Forms/TextArea'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -63,9 +64,8 @@ export default function CreateDeck(props: {
         name: state.name,
         description: state.description,
         cards: state.cards,
-        folder_id: state.folder_id
+        folder_ids: state.folder_ids
       })
-      console.log('RESPONSE', response)
       dispatch({ type: 'SET_DECK', response })
     }
 
@@ -102,20 +102,23 @@ export default function CreateDeck(props: {
       <Header />
       <CustomTextInput
         value={state.name}
-        placeholder={'Title'}
+        label={'Title'}
         onChangeText={(text) => onUpdateDeck('name', text)}
       />
 
-      <CustomTextInput
+      <CustomTextArea
         value={state.description}
-        placeholder={'Description'}
-        style={{ height: 100 }}
+        label={'Description'}
         onChangeText={(text) => onUpdateDeck('description', text)}
       />
 
       {folders.length > 0 && (
         <View>
-          <Dropdown onChange={(value) => onUpdateDeck('folder_id', value)} items={folders} />
+          <Dropdown
+            unSelect={(value) => dispatch({ type: 'REMOVE_FOLDER_ID', id: value })}
+            onChange={(value) => dispatch({ type: 'ADD_FOLDER_ID', id: value })}
+            items={folders}
+          />
         </View>
       )}
 

@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-import { Dropdown as LibraryDropdown } from 'react-native-element-dropdown'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { MultiSelect as LibraryDropdown } from 'react-native-element-dropdown'
 
-export default function Dropdown({ items, onChange }) {
-  const [value, setValue] = useState(null)
+export default function Dropdown({ items, onChange, unSelect }) {
+  const [selected, setSelected] = useState([])
+
   const [isFocus, setIsFocus] = useState(false)
 
   const renderLabel = () => {
-    if (value || isFocus) {
+    if (isFocus) {
       return <Text style={[styles.label, isFocus && { color: 'blue' }]}></Text>
     }
     return null
@@ -27,15 +28,31 @@ export default function Dropdown({ items, onChange }) {
         maxHeight={300}
         labelField="name"
         valueField="id"
-        placeholder={!isFocus ? 'Select folder' : '...'}
-        searchPlaceholder="Search..."
-        value={value}
+        placeholder={'Select folder'}
+        value={selected}
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
         onChange={(item) => {
-          onChange(item.id)
+          const previousSelected = selected
+          previousSelected.push(item[0])
+          setSelected(previousSelected)
+          onChange(item[0])
           setIsFocus(false)
         }}
+        renderSelectedItem={(item, unSelect) => (
+          <TouchableOpacity
+            onPress={(item) => {
+              if (unSelect) {
+                unSelect(item.id)
+              }
+              setSelected(selected.filter((i) => i.id !== item.id))
+            }}
+          >
+            <View style={styles.selectedStyle}>
+              <Text style={styles.textSelectedStyle}>{item.name}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
       />
     </View>
   )
@@ -81,5 +98,28 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16
+  },
+  selectedStyle: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 14,
+    shadowColor: '#000',
+    marginTop: 8,
+    marginRight: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowOffset: {
+      width: 0,
+      height: 1
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2
+  },
+  textSelectedStyle: {
+    marginRight: 5,
+    fontSize: 16,
+    color: 'white'
   }
 })
