@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View } from 'react-native'
+import { KeyboardAvoidingView, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useCreateDeckContext } from '../context/CreateDeckContext'
 import { createCard, deleteCard, updateCard } from '../api/DecksApi'
@@ -114,7 +114,7 @@ export default function CreateCard(props: {
         />
       </View>
 
-      <View style={{ flex: 6 }}>
+      <KeyboardAvoidingView behavior={'padding'} style={{ flex: 6 }}>
         <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
           <NormalText>Choices</NormalText>
         </View>
@@ -149,7 +149,7 @@ export default function CreateCard(props: {
             />
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
 
       <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
         {editingCard && (
