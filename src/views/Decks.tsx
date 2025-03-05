@@ -10,7 +10,6 @@ import {
 } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { useUserContext } from '../context/UserContext'
 import MainBackground from '../components/MainBackground'
 import DeckListItem from '../components/DeckListItem'
 import NormalText from '../components/Typography/NormalText'
@@ -20,10 +19,11 @@ import DeleteButtonAnimated from '../components/DeleteButtonAnimated'
 import { Tab } from '@rneui/themed'
 import DeckWithFolder from '../components/Decks/DeckWithFolder'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function Decks() {
   const navigation = useNavigation()
-  const { state: userState, dispatch: userDispatch } = useUserContext()
+  const { state } = useStoreContext()
   const [decks, setDecks] = useState([])
   const [accountDecks, setAccountDecks] = useState([])
   const [ongoingDecks, setOngoingDecks] = useState([])
@@ -32,19 +32,16 @@ export default function Decks() {
   const [featuredDecks, setFeaturedDecks] = useState([])
   const [selectedDeckSettings, setSelectedDeckSettings] = useState<'private' | 'account'>('private')
   const [index, setIndex] = useState(0)
-  const loopDecks = (decks: any[]) => {
-    return (
-      <ScrollView>
-        {decks.slice(0, 5).map((deck) => {
-          return (
-            <View style={{ marginBottom: 10 }} key={deck.id}>
-              <DeckListItem deck={deck} />
-            </View>
-          )
-        })}
-      </ScrollView>
-    )
-  }
+
+  const loopDecks = (decks: any[]) => (
+    <ScrollView>
+      {decks.slice(0, 5).map((deck) => (
+        <View style={{ marginBottom: 10 }} key={deck.id}>
+          <DeckListItem deck={deck} />
+        </View>
+      ))}
+    </ScrollView>
+  )
 
   const setDeckSettings = (settings: 'private' | 'account') => {
     if (settings === 'account') {
@@ -98,11 +95,7 @@ export default function Decks() {
   }
 
   useEffect(() => {
-    if (index === 0) {
-      setDeckSettings('private')
-    } else {
-      setDeckSettings('account')
-    }
+    setDeckSettings(index === 0 ? 'private' : 'account')
   }, [index])
 
   useFocusEffect(
@@ -111,17 +104,11 @@ export default function Decks() {
     }, [])
   )
 
-  const decksToShow = () => {
-    return accountDecks.some((deck) => {
-      if (deck.decks.length > 0) {
-        return true
-      }
-    })
-  }
+  const decksToShow = () => accountDecks.some((deck) => deck.decks.length > 0)
 
   return (
     <MainBackground noSpace>
-      <View style={[styles.mainContainer]}>
+      <View style={styles.mainContainer}>
         <View style={styles.settingsContainer}>
           <View style={{ flex: 1 }}>
             <Tab
@@ -130,27 +117,20 @@ export default function Decks() {
               onChange={setIndex}
               dense
             >
-              <Tab.Item
-                titleStyle={{ fontSize: 16, color: 'white' }}
-                onPress={() => {
-                  setIndex(0)
-                }}
-              >
-                Private decks
+              <Tab.Item titleStyle={{ fontSize: 16, color: 'white' }} onPress={() => setIndex(0)}>
+                Private
               </Tab.Item>
               <Tab.Item
                 titleStyle={{ fontSize: 16, color: 'white' }}
-                iconRight={true}
+                iconRight
                 icon={
                   newDecks.length > 0 ? (
-                    <Ionicons name={'notifications'} size={14} color={'red'} />
+                    <Ionicons name="notifications" size={14} color="red" />
                   ) : null
                 }
-                onPress={() => {
-                  setIndex(1)
-                }}
+                onPress={() => setIndex(1)}
               >
-                {userState.account?.name}
+                {state.account?.name}
               </Tab.Item>
             </Tab>
           </View>
@@ -168,29 +148,17 @@ export default function Decks() {
                     view all
                   </InvisibleButton>
                 </View>
-
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {ongoingDecks.slice(0, 2).map((deck, index) => {
-                    return (
-                      <View
-                        key={deck.deck.id}
-                        style={[
-                          {
-                            flex: 1
-                          }
-                        ]}
+                  {ongoingDecks.slice(0, 2).map((deck) => (
+                    <View key={deck.deck.id} style={{ flex: 1 }}>
+                      <DeleteButtonAnimated
+                        onPress={() => navigation.navigate('DeckSession', { deck })}
+                        onDelete={() => deleteSession(deck.id)}
                       >
-                        <DeleteButtonAnimated
-                          onPress={() => navigation.navigate('DeckSession', { deck })}
-                          onDelete={() => {
-                            deleteSession(deck.id)
-                          }}
-                        >
-                          {deck.deck.name}
-                        </DeleteButtonAnimated>
-                      </View>
-                    )
-                  })}
+                        {deck.deck.name}
+                      </DeleteButtonAnimated>
+                    </View>
+                  ))}
                 </View>
               </View>
             )}
@@ -205,7 +173,6 @@ export default function Decks() {
                     view all
                   </InvisibleButton>
                 </View>
-
                 {loopDecks(decks)}
               </View>
             )}
@@ -222,7 +189,6 @@ export default function Decks() {
                     view all
                   </InvisibleButton>
                 </View>
-
                 {loopDecks(sharedWithMeDecks)}
               </View>
             )}
@@ -253,34 +219,29 @@ export default function Decks() {
                       <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
                         Featured decks
                       </NormalText>
-                      {featuredDecks.map((deck) => {
-                        return <DeckListItem key={deck.id} deck={deck} />
-                      })}
+                      {featuredDecks.map((deck) => (
+                        <DeckListItem key={deck.id} deck={deck} />
+                      ))}
                     </View>
                   )}
                   {newDecks.length > 0 && (
                     <View style={{ marginBottom: 30 }}>
                       <NormalText style={{ fontSize: 18, marginBottom: 10 }}>New decks!</NormalText>
-                      {newDecks.map((deck) => {
-                        return (
-                          <View style={{ marginBottom: 10 }} key={deck.id}>
-                            <DeckWithFolder deck={deck} />
-                          </View>
-                        )
-                      })}
+                      {newDecks.map((deck) => (
+                        <View style={{ marginBottom: 10 }} key={deck.id}>
+                          <DeckWithFolder deck={deck} />
+                        </View>
+                      ))}
                     </View>
                   )}
-
-                  {accountDecks.map((deck) => {
-                    if (deck.decks.length === 0) return
-                    //TODO: MAKE THIS INTO A COMPONENT SAME INSIDE VIEW ALL DECKS. Call it RenderAccountDecks or
-                    // something, or Render decks with categories
-                    return (
-                      <View style={{ marginBottom: 10 }} key={deck.folder.id}>
-                        <DeckWithFolder deck={deck} />
-                      </View>
-                    )
-                  })}
+                  {accountDecks.map(
+                    (deck) =>
+                      deck.decks.length > 0 && (
+                        <View style={{ marginBottom: 10 }} key={deck.folder.id}>
+                          <DeckWithFolder deck={deck} />
+                        </View>
+                      )
+                  )}
                 </ScrollView>
               </View>
             )}
@@ -292,9 +253,6 @@ export default function Decks() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
   mainContainer: {
     flex: 1
   },
@@ -320,20 +278,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end'
   },
-
   accountDecks: {
     flex: 8
-  },
-
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold'
-  },
-  scrollView: {
-    flex: 1,
-    padding: 10,
-
-    alignItems: 'center',
-    justifyContent: 'center'
   }
 })

@@ -5,7 +5,7 @@ import Login from './views/Login'
 import SignUp from './views/SignUp'
 import SignUpConfirmation from './views/SignUpConfirmation'
 import Home from './views/Home'
-import { useAuthContext } from './context/AuthContext'
+import { useStoreContext } from './context/StoreContext'
 import Deck from './views/Deck'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Decks from './views/Decks'
@@ -14,9 +14,7 @@ import Profile from './views/Profile'
 import CreateDeck from './views/CreateDeck'
 import CreateCard from './views/CreateCard'
 import ViewAllDecks from './views/ViewAllDecks'
-import { useTheme } from './context/ThemeContext'
 import { View } from 'react-native'
-import { Button } from '@rneui/themed'
 
 import { getColorProperty } from './helpers'
 import DeckIcon from './svgs/DeckIcon'
@@ -25,19 +23,15 @@ import SettingsIcon from './svgs/SettingsIcon'
 import DeckIconFilled from './svgs/DeckIconFilled'
 import HomeIconFilled from './svgs/HomeIconFilled'
 
-const Stack = createNativeStackNavigator(RootStack)
-const Tab = createBottomTabNavigator(TabStack)
+const Stack = createNativeStackNavigator()
+const Tab = createBottomTabNavigator()
 
-function RootStack() {
-  const { theme, toggleTheme } = useTheme()
-
+function WelcomeStack() {
   return (
     <Stack.Navigator
       initialRouteName="Welcome"
       screenOptions={{
-        headerStyle: {
-          backgroundColor: getColorProperty(theme, 'background')
-        },
+        headerShown: false,
         headerShadowVisible: false,
         headerBackButtonDisplayMode: 'minimal'
       }}
@@ -55,17 +49,10 @@ function RootStack() {
 }
 
 function LoggedInStack() {
-  const { theme, toggleTheme } = useTheme()
-
-  const HeaderButton = () => {
-    return <Button title="Change theme" onPress={toggleTheme} />
-  }
-
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
-        headerRight: () => <HeaderButton />
+        headerShown: false
       }}
     >
       <Stack.Screen name="Home" component={TabStack} />
@@ -83,25 +70,17 @@ function LoggedInStack() {
 }
 
 function TabStack() {
-  const { theme, toggleTheme } = useTheme()
-  const HeaderButton = () => {
-    return <Button title="Change theme" onPress={toggleTheme} />
-  }
-
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerTitle: '',
         tabBarStyle: {
-          backgroundColor: getColorProperty(theme, 'background'),
+          backgroundColor: getColorProperty(undefined, 'darkest'),
           borderTopWidth: 0
         },
         headerShown: false,
         tabBarShowLabel: false,
-        headerRight: () => <HeaderButton />,
         tabBarIcon: ({ focused, color, size }) => {
-          const focusedColor = getColorProperty(theme, 'primary')
-
           if (route.name === 'Decks') {
             if (focused) {
               return (
@@ -113,7 +92,7 @@ function TabStack() {
 
             return (
               <View style={{ marginTop: 20 }}>
-                <DeckIcon fill={focused ? focusedColor : '#FAF9F6'} />
+                <DeckIcon fill={focused ? '' : '#FAF9F6'} />
               </View>
             )
           }
@@ -128,7 +107,7 @@ function TabStack() {
             }
             return (
               <View style={{ marginTop: 20 }}>
-                <HomeIcon fill={focused ? focusedColor : '#FAF9F6'} />
+                <HomeIcon fill={focused ? '' : '#FAF9F6'} />
               </View>
             )
           }
@@ -136,7 +115,7 @@ function TabStack() {
           if (route.name === 'Settings') {
             return (
               <View style={{ marginTop: 20 }}>
-                <SettingsIcon fill={focused ? focusedColor : '#FAF9F6'} />
+                <SettingsIcon fill={focused ? '' : '#FAF9F6'} />
               </View>
             )
           }
@@ -153,10 +132,10 @@ function TabStack() {
 }
 
 export default function App() {
-  const { state, dispatch } = useAuthContext()
+  const { state, dispatch } = useStoreContext()
   return (
     <NavigationContainer>
-      {state.isLoggedIn ? <LoggedInStack /> : <RootStack />}
+      {state.isLoggedIn ? <LoggedInStack /> : <WelcomeStack />}
     </NavigationContainer>
   )
 }

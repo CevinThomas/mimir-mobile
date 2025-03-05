@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { BackHandler, View } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
-import { useCreateDeckContext } from '../context/CreateDeckContext'
 import { createDeck, updateDeck } from '../api/DecksApi'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
@@ -13,11 +12,15 @@ import Dropdown from '../components/Dropdown'
 import { getFolders } from '../api/FoldersApi'
 import Header from '../components/Header'
 import CustomTextArea from '../components/Forms/TextArea'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
 }) {
+  const navigation = useNavigation()
+  const { state, dispatch } = useStoreContext()
   const [folders, setFolders] = useState([])
+
   useEffect(() => {
     if (props.route.params?.deck) {
       dispatch({
@@ -34,11 +37,6 @@ export default function CreateDeck(props: {
     fetchFolders()
   }, [])
 
-  const fetchFolders = async () => {
-    const folders = await getFolders()
-    setFolders(folders)
-  }
-
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -51,8 +49,11 @@ export default function CreateDeck(props: {
       }
     }, [])
   )
-  const { state, dispatch } = useCreateDeckContext()
-  const navigation = useNavigation()
+
+  const fetchFolders = async () => {
+    const folders = await getFolders()
+    setFolders(folders)
+  }
 
   const onUpdateDeck = (key: string, value: string) => {
     dispatch({ type: 'UPDATE_DECK_KEY', key, value })

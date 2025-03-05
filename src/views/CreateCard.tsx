@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { KeyboardAvoidingView, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { useCreateDeckContext } from '../context/CreateDeckContext'
 import { createCard, deleteCard, updateCard } from '../api/DecksApi'
 import NormalText from '../components/Typography/NormalText'
 import CustomTextInput from '../components/Forms/Input'
@@ -16,10 +15,16 @@ import Animated, {
   useSharedValue,
   withTiming
 } from 'react-native-reanimated'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function CreateCard(props: {
   route: { params: { card: { name: string; id: string } } }
 }) {
+  const { state, dispatch } = useStoreContext()
+  const navigation = useNavigation()
+  const [editingCard, setEditingCard] = useState(false)
+  const [showNewButton, setShowNewButton] = useState(false)
+
   useFocusEffect(
     React.useCallback(() => {
       if (props.route.params?.card) {
@@ -31,10 +36,6 @@ export default function CreateCard(props: {
       }
     }, [])
   )
-  const { state, dispatch } = useCreateDeckContext()
-  const navigation = useNavigation()
-  const [editingCard, setEditingCard] = useState(false)
-  const [showNewButton, setShowNewButton] = useState(false)
 
   const onSaveCard = async () => {
     if (state.currentCard.id) {
@@ -96,6 +97,7 @@ export default function CreateCard(props: {
   return (
     <MainBackground>
       <Header />
+
       <View style={{ flex: 3 }}>
         <View style={{ marginBottom: 30, paddingHorizontal: 10 }}>
           <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>

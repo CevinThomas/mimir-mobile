@@ -1,54 +1,52 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useState } from 'react'
+import React, { useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
 import { login } from '../api/AuthApi'
-import { useAuthContext } from '../context/AuthContext'
 import * as SecureStore from 'expo-secure-store'
 import { getAccountInfo } from '../api/AccountsApi'
-import { useUserContext } from '../context/UserContext'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import CustomCheckBox from '../components/Forms/Checkbox'
 import FilledButton from '../components/Buttons/FilledButton'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function Login() {
-  const navigation = useNavigation()
-  const { state, dispatch } = useAuthContext()
-  const { state: userState, dispatch: userDispatch } = useUserContext()
+  const { state, dispatch } = useStoreContext()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
+  const email = useRef('')
+  const password = useRef('')
+  const [rememberMe, setRememberMe] = React.useState(false)
 
   const onLoginPress = async () => {
     try {
-      const response = await login(email, password)
+      const response = await login(email.current, password.current)
       if (rememberMe) {
         await SecureStore.setItemAsync('rememberMe', 'true')
-        await SecureStore.setItemAsync('email', email)
-        await SecureStore.setItemAsync('password', password)
+        await SecureStore.setItemAsync('email', email.current)
+        await SecureStore.setItemAsync('password', password.current)
       }
 
       if (response.status.code === 200) {
         const accountResponse = await getAccountInfo()
-        userDispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
+        dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
         dispatch({ type: 'LOG_IN' })
       }
-    } catch (error) {
-      console.error(error)
-    }
+    } catch (error) {}
   }
 
   return (
     <MainBackground>
       <View style={styles.inputContainer}>
-        <CustomTextInput label="Email" onChangeText={setEmail} />
-        <CustomTextInput label="Password" secureTextEntry onChangeText={setPassword} />
+        <CustomTextInput label="Email" onChangeText={(text: string) => (email.current = text)} />
+        <CustomTextInput
+          label="Password"
+          secureTextEntry
+          onChangeText={(text: string) => (password.current = text)}
+        />
         <CustomCheckBox
           label={'Remember me'}
           checked={rememberMe}
-          onPress={() => setRememberMe(!rememberMe)}
+          onPress={() => setRememberMe(!rememberMe.current)}
         />
         <StatusBar style="auto" />
       </View>

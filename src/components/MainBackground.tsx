@@ -1,6 +1,5 @@
 import React from 'react'
 import { StyleSheet } from 'react-native'
-import { useTheme } from '../context/ThemeContext'
 import { getColorProperty } from '../helpers'
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -11,7 +10,6 @@ export default function MainBackground({
   children: React.ReactNode
   noSpace?: boolean
 }) {
-  const { theme } = useTheme()
   const insets = useSafeAreaInsets()
 
   return (
@@ -20,7 +18,7 @@ export default function MainBackground({
         style={[
           styles.container,
           {
-            backgroundColor: getColorProperty(theme, 'background'),
+            backgroundColor: getColorProperty(undefined, 'darkest'),
             paddingTop: noSpace ? 0 : insets.top
           }
         ]}

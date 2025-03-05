@@ -1,23 +1,22 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useRef } from 'react'
 import { AppState, StyleSheet, View } from 'react-native'
-import { useAuthContext } from '../context/AuthContext'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { login, userConfirmed } from '../api/AuthApi'
 import * as SecureStore from 'expo-secure-store'
 import { getAccountInfo } from '../api/AccountsApi'
-import { useUserContext } from '../context/UserContext'
 import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import ClearButton from '../components/Buttons/ClearButton'
 import LottieView from 'lottie-react-native'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function SignUpConfirmation(props: {
   route: { params: { email: string; password: string } }
 }) {
-  const { state, dispatch } = useAuthContext()
-  const { state: userState, dispatch: userDispatch } = useUserContext()
+  const { state, dispatch } = useStoreContext()
+
   const navigation = useNavigation()
   const intervalIdRef = useRef(null)
   const animation = useRef<LottieView>(null)
@@ -64,8 +63,8 @@ export default function SignUpConfirmation(props: {
     await SecureStore.setItemAsync('password', props.route.params.password)
     await login(props.route.params.email, props.route.params.password)
     const account = await getAccountInfo()
-    userDispatch({ type: 'SET_ACCOUNT', payload: account })
 
+    dispatch({ type: 'SET_ACCOUNT', payload: account })
     dispatch({ type: 'LOG_IN' })
   }
 

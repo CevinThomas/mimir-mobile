@@ -1,4 +1,7 @@
 const colors = {
+  darkBlue: '#003B73',
+  white: '#FFFFFF',
+  darkest: '#1A2330',
   darkTheme: {
     background: '#1A2330',
     text: '#FFFFFF',

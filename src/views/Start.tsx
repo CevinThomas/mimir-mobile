@@ -4,18 +4,16 @@ import { StyleSheet, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
 import { login } from '../api/AuthApi'
-import { useAuthContext } from '../context/AuthContext'
 import { getAccountInfo } from '../api/AccountsApi'
-import { useUserContext } from '../context/UserContext'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import FilledButton from '../components/Buttons/FilledButton'
 import ClearButton from '../components/Buttons/ClearButton'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function Start() {
   const navigation = useNavigation()
-  const { state, dispatch } = useAuthContext()
-  const { state: userState, dispatch: userDispatch } = useUserContext()
+  const { state, dispatch } = useStoreContext()
 
   const rememberKey = async () => {
     return await SecureStore.getItemAsync('rememberMe')
@@ -35,7 +33,7 @@ export default function Start() {
         const response = await login(email, password)
         if (response.status.code === 200) {
           const accountResponse = await getAccountInfo()
-          userDispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
+          dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
           dispatch({ type: 'LOG_IN' })
         }
       }
