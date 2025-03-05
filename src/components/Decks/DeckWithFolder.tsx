@@ -5,29 +5,31 @@ import React from 'react'
 import { useNavigation } from '@react-navigation/native'
 import DeckListItem from '../DeckListItem'
 
-export default function DeckWithFolder({ deck }) {
+export default function DeckWithFolder({ deck, hideFolder }) {
   const navigation = useNavigation()
-  console.log(deck)
   return (
     <View>
-      <View
-        style={{
-          marginBottom: !deck.folder.description && 10,
-          flexDirection: 'row',
-          alignItems: 'center'
-        }}
-      >
-        <Ionicons name={'folder'} size={24} color={'white'} />
-        <NormalText
+      {deck.folder && !hideFolder && (
+        <View
           style={{
-            fontWeight: 'bold',
-            fontSize: 18,
-            marginLeft: 10
+            marginBottom: !deck.folder.description && 10,
+            flexDirection: 'row',
+            alignItems: 'center'
           }}
         >
-          {deck.folder.name}
-        </NormalText>
-      </View>
+          <Ionicons name={'folder'} size={24} color={'white'} />
+          <NormalText
+            style={{
+              fontWeight: 'bold',
+              fontSize: 18,
+              marginLeft: 10
+            }}
+          >
+            {deck.folder.name}
+          </NormalText>
+        </View>
+      )}
+
       {deck.folder.description && (
         <View style={{ marginBottom: 10 }}>
           <NormalText style={{ fontSize: 16 }}>{deck.folder.description}</NormalText>

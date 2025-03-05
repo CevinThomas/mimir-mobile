@@ -32,6 +32,7 @@ export default function Decks() {
   const [featuredDecks, setFeaturedDecks] = useState([])
   const [selectedDeckSettings, setSelectedDeckSettings] = useState<'private' | 'account'>('private')
   const [index, setIndex] = useState(0)
+  const [hideFolders, setHideFolders] = useState(false)
 
   const loopDecks = (decks: any[]) => (
     <ScrollView>
@@ -103,6 +104,18 @@ export default function Decks() {
       refresh()
     }, [])
   )
+
+  useEffect(() => {
+    const accountDecksFolders = accountDecks.map((folder) => folder.folder.name)
+    const newAccountDecksFolders = newDecks.map((deck) => deck.folder.name)
+    // This means that all decks are under the "Uncategorized" folder. If there are any decks under another deck,
+    // one of these would have a length of higher than 1
+    if (accountDecksFolders.length <= 1 && newAccountDecksFolders.length <= 1) {
+      setHideFolders(true)
+    } else {
+      setHideFolders(false)
+    }
+  }, [newDecks, accountDecks])
 
   const decksToShow = () => accountDecks.some((deck) => deck.decks.length > 0)
 
@@ -227,21 +240,24 @@ export default function Decks() {
                   {newDecks.length > 0 && (
                     <View style={{ marginBottom: 30 }}>
                       <NormalText style={{ fontSize: 18, marginBottom: 10 }}>New decks!</NormalText>
-                      {newDecks.map((deck) => (
-                        <View style={{ marginBottom: 40 }} key={deck.id}>
-                          <DeckWithFolder deck={deck} />
-                        </View>
-                      ))}
+                      {newDecks.map((deck) => {
+                        return (
+                          <View style={{ marginBottom: 40 }} key={deck.id}>
+                            <DeckWithFolder deck={deck} hideFolder={hideFolders} />
+                          </View>
+                        )
+                      })}
                     </View>
                   )}
-                  {accountDecks.map(
-                    (deck) =>
-                      deck.decks.length > 0 && (
-                        <View style={{ marginBottom: 40 }} key={deck.folder.id}>
-                          <DeckWithFolder deck={deck} />
+                  {accountDecks.map((folder) => {
+                    return (
+                      folder.decks.length > 0 && (
+                        <View style={{ marginBottom: 40 }} key={folder.folder.id}>
+                          <DeckWithFolder deck={folder} hideFolder={hideFolders} />
                         </View>
                       )
-                  )}
+                    )
+                  })}
                 </ScrollView>
               </View>
             )}
