@@ -120,7 +120,16 @@ const storeReducer = (state, action) => {
       }
 
     case 'RESET':
-      return initialState
+      return {
+        ...state,
+        currentCard: initialState.currentCard,
+        name: '',
+        description: '',
+        id: '',
+        active: false,
+        cards: [],
+        folder_ids: []
+      }
 
     case 'UPDATE_CHOICE':
       const choiceToUpdate = state.currentCard.choices[action.index]

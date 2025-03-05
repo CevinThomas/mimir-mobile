@@ -77,7 +77,10 @@ export default function CreateDeck(props: {
     await updateDeck(state.id, { name: state.name, description: state.description })
     dispatch({ type: 'RESET' })
     navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+      })
     )
   }
 

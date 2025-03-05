@@ -36,7 +36,7 @@ export default function Decks() {
   const loopDecks = (decks: any[]) => (
     <ScrollView>
       {decks.slice(0, 5).map((deck) => (
-        <View style={{ marginBottom: 10 }} key={deck.id}>
+        <View key={deck.id}>
           <DeckListItem deck={deck} />
         </View>
       ))}
@@ -215,7 +215,7 @@ export default function Decks() {
               <View style={styles.accountDecks}>
                 <ScrollView>
                   {featuredDecks.length > 0 && (
-                    <View style={{ marginBottom: 30 }}>
+                    <View style={{ marginBottom: 40 }}>
                       <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
                         Featured decks
                       </NormalText>
@@ -228,7 +228,7 @@ export default function Decks() {
                     <View style={{ marginBottom: 30 }}>
                       <NormalText style={{ fontSize: 18, marginBottom: 10 }}>New decks!</NormalText>
                       {newDecks.map((deck) => (
-                        <View style={{ marginBottom: 10 }} key={deck.id}>
+                        <View style={{ marginBottom: 40 }} key={deck.id}>
                           <DeckWithFolder deck={deck} />
                         </View>
                       ))}
@@ -237,7 +237,7 @@ export default function Decks() {
                   {accountDecks.map(
                     (deck) =>
                       deck.decks.length > 0 && (
-                        <View style={{ marginBottom: 10 }} key={deck.folder.id}>
+                        <View style={{ marginBottom: 40 }} key={deck.folder.id}>
                           <DeckWithFolder deck={deck} />
                         </View>
                       )

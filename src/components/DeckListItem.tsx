@@ -9,7 +9,7 @@ export default function DeckListItem({ deck, ...props }) {
   const navigation = useNavigation()
 
   return (
-    <View>
+    <View style={{ marginBottom: 10 }}>
       <View key={deck.id}>
         <ClickButton {...props} onPress={() => navigation.navigate('Deck', { deck })}>
           <View style={{ paddingHorizontal: 10 }}>

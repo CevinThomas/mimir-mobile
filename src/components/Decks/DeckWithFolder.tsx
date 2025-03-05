@@ -13,20 +13,20 @@ export default function DeckWithFolder({ deck }) {
       <View
         style={{
           marginBottom: !deck.folder.description && 10,
-          flexDirection: 'row'
+          flexDirection: 'row',
+          alignItems: 'center'
         }}
       >
+        <Ionicons name={'folder'} size={24} color={'white'} />
         <NormalText
           style={{
             fontWeight: 'bold',
             fontSize: 18,
-            marginRight: 10
+            marginLeft: 10
           }}
         >
           {deck.folder.name}
         </NormalText>
-
-        <Ionicons name={'folder'} size={24} color={'white'} />
       </View>
       {deck.folder.description && (
         <View style={{ marginBottom: 10 }}>

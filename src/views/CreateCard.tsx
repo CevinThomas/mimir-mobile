@@ -98,7 +98,7 @@ export default function CreateCard(props: {
     <MainBackground>
       <Header />
 
-      <View style={{ flex: 3 }}>
+      <View style={{ flex: 2 }}>
         <View style={{ marginBottom: 30, paddingHorizontal: 10 }}>
           <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>
         </View>
@@ -108,25 +108,25 @@ export default function CreateCard(props: {
           value={state.currentCard.title}
           onChangeText={(text) => onUpdateCard('title', text)}
         />
-
-        <CustomTextInput
-          label={'Explanation'}
-          value={state.currentCard.explanation}
-          onChangeText={(text) => onUpdateCard('explanation', text)}
-        />
       </View>
 
       <KeyboardAvoidingView behavior={'padding'} style={{ flex: 6 }}>
         <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
-          <NormalText>Choices</NormalText>
+          <NormalText style={{ fontWeight: 'bold' }}>Choices</NormalText>
         </View>
         <View>
-          <View>
+          <View style={{ marginBottom: 20 }}>
             <CustomTextInput
               style={{ borderWidth: 1, borderColor: '#6FC368' }}
               onChangeText={(text) => onChoiceInputPress(0, text)}
               label={'Choice 1'}
               value={state.currentCard.choices[0].title}
+            />
+
+            <CustomTextInput
+              label={'Explanation'}
+              value={state.currentCard.explanation}
+              onChangeText={(text) => onUpdateCard('explanation', text)}
             />
           </View>
           <View>
