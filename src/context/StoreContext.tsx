@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useReducer } from 'react'
 
+type User = {
+  id: string
+  email: string
+  name: string
+}
+
 type Choice = {
   id?: string
   title: string
@@ -31,6 +37,7 @@ type InitialState = Deck & {
   folder_ids?: string[]
   account: any
   isLoggedIn: boolean
+  user: User
 }
 
 const StoreContext = createContext()
@@ -53,11 +60,21 @@ const initialState: InitialState = {
   id: '',
   active: false,
   cards: [],
-  folder_ids: []
+  folder_ids: [],
+  user: {
+    id: '',
+    email: '',
+    name: ''
+  }
 }
 
 const storeReducer = (state, action) => {
   switch (action.type) {
+    case 'SET_USER':
+      return {
+        ...state,
+        user: action.payload
+      }
     case 'SET_ACCOUNT':
       return {
         ...state,

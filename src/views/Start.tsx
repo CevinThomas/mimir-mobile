@@ -32,6 +32,7 @@ export default function Start() {
         const { email, password } = await emailAndPassword()
         const response = await login(email, password)
         if (response.status.code === 200) {
+          dispatch({ type: 'SET_USER', payload: response.status.data.user })
           const accountResponse = await getAccountInfo()
           dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
           dispatch({ type: 'LOG_IN' })

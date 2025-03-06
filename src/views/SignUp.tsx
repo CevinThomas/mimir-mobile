@@ -6,9 +6,12 @@ import { userSignUp } from '../api/AuthApi'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import MainButton from '../components/Buttons/MainButton'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function SignUp() {
   const navigation = useNavigation()
+
+  const { state, dispatch } = useStoreContext()
 
   const name = useRef('')
   const email = useRef('')
@@ -16,11 +19,14 @@ export default function SignUp() {
 
   const onSignUp = async () => {
     try {
-      await userSignUp(email.current, password.current, name.current)
-      navigation.navigate('SignUpConfirmation', {
-        email: email.current,
-        password: password.current
-      })
+      const response = await userSignUp(email.current, password.current, name.current)
+      if (response.status.code === 200) {
+        dispatch({ type: 'SET_USER', payload: response.status.data.user })
+        navigation.navigate('SignUpConfirmation', {
+          email: email.current,
+          password: password.current
+        })
+      }
     } catch (error) {}
   }
   return (

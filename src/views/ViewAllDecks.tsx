@@ -54,7 +54,7 @@ export default function ViewAllDecks(props: { route: { params: { method: string 
   const loopDecks = (decks: any[]) => {
     if (props.route.params.method === 'ongoingDecks') {
       return (
-        <View style={{ padding: 10 }}>
+        <View>
           <View style={{ marginBottom: 20 }}>
             <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>Ongoing Decks</NormalText>
           </View>

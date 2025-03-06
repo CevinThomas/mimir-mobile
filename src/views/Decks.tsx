@@ -33,6 +33,7 @@ export default function Decks() {
   const [selectedDeckSettings, setSelectedDeckSettings] = useState<'private' | 'account'>('private')
   const [index, setIndex] = useState(0)
   const [hideFolders, setHideFolders] = useState(false)
+  const [newDecksSinceLastTime, setNewDecksSinceLastTime] = useState(false)
 
   const loopDecks = (decks: any[]) => (
     <ScrollView>
@@ -46,6 +47,7 @@ export default function Decks() {
 
   const setDeckSettings = (settings: 'private' | 'account') => {
     if (settings === 'account') {
+      setNewDecksSinceLastTime(false)
       viewedAccountDecks()
     }
     setSelectedDeckSettings(settings)
@@ -77,8 +79,9 @@ export default function Decks() {
   }
 
   const fetchNewAccountDecks = async () => {
-    const decks = await getNewDecks()
-    setNewDecks(decks)
+    const response = await getNewDecks()
+    setNewDecksSinceLastTime(response.newly_added_since_last_time)
+    setNewDecks(response.decks)
   }
 
   const fetchFeaturedDecks = async () => {
@@ -137,7 +140,7 @@ export default function Decks() {
                 titleStyle={{ fontSize: 16, color: 'white' }}
                 iconRight
                 icon={
-                  newDecks.length > 0 ? (
+                  newDecks.length > 0 && newDecksSinceLastTime ? (
                     <Ionicons name="notifications" size={14} color="red" />
                   ) : null
                 }
@@ -151,72 +154,78 @@ export default function Decks() {
 
         {selectedDeckSettings === 'private' ? (
           <View style={styles.privateSettingContainer}>
-            {ongoingDecks.length > 0 && (
-              <View style={styles.onGoingContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
-                  <InvisibleButton
-                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'ongoingDecks' })}
-                  >
-                    view all
-                  </InvisibleButton>
+            <ScrollView>
+              {ongoingDecks.length > 0 && (
+                <View style={styles.onGoingContainer}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
+                    <InvisibleButton
+                      onPress={() =>
+                        navigation.navigate('ViewAllDecks', { method: 'ongoingDecks' })
+                      }
+                    >
+                      view all
+                    </InvisibleButton>
+                  </View>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                    {ongoingDecks.slice(0, 2).map((deck) => (
+                      <View key={deck.deck.id} style={{ flex: 1 }}>
+                        <DeleteButtonAnimated
+                          onPress={() => navigation.navigate('DeckSession', { deck })}
+                          onDelete={() => deleteSession(deck.id)}
+                        >
+                          {deck.deck.name}
+                        </DeleteButtonAnimated>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {ongoingDecks.slice(0, 2).map((deck) => (
-                    <View key={deck.deck.id} style={{ flex: 1 }}>
-                      <DeleteButtonAnimated
-                        onPress={() => navigation.navigate('DeckSession', { deck })}
-                        onDelete={() => deleteSession(deck.id)}
-                      >
-                        {deck.deck.name}
-                      </DeleteButtonAnimated>
-                    </View>
-                  ))}
+              )}
+
+              {decks.length > 0 && (
+                <View style={styles.myDecksContainer}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
+                    <InvisibleButton
+                      onPress={() => navigation.navigate('ViewAllDecks', { method: 'myDecks' })}
+                    >
+                      view all
+                    </InvisibleButton>
+                  </View>
+                  {loopDecks(decks)}
                 </View>
-              </View>
-            )}
+              )}
 
-            {decks.length > 0 && (
-              <View style={styles.myDecksContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
-                  <InvisibleButton
-                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'myDecks' })}
-                  >
-                    view all
-                  </InvisibleButton>
+              {sharedWithMeDecks.length > 0 && (
+                <View style={styles.sharedDecksContainer}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
+                      Shared with me
+                    </NormalText>
+                    <InvisibleButton
+                      onPress={() => navigation.navigate('ViewAllDecks', { method: 'sharedDecks' })}
+                    >
+                      view all
+                    </InvisibleButton>
+                  </View>
+                  {loopDecks(sharedWithMeDecks)}
                 </View>
-                {loopDecks(decks)}
-              </View>
-            )}
+              )}
 
-            {sharedWithMeDecks.length > 0 && (
-              <View style={styles.sharedDecksContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
-                    Shared with me
-                  </NormalText>
-                  <InvisibleButton
-                    onPress={() => navigation.navigate('ViewAllDecks', { method: 'sharedDecks' })}
-                  >
-                    view all
-                  </InvisibleButton>
-                </View>
-                {loopDecks(sharedWithMeDecks)}
-              </View>
-            )}
+              {decks.length === 0 &&
+                sharedWithMeDecks.length === 0 &&
+                ongoingDecks.length === 0 && (
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
+                  </View>
+                )}
 
-            {decks.length === 0 && sharedWithMeDecks.length === 0 && ongoingDecks.length === 0 && (
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
+              <View style={styles.createDeckContainer}>
+                <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
+                  Create new deck
+                </FilledButton>
               </View>
-            )}
-
-            <View style={styles.createDeckContainer}>
-              <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
-                Create new deck
-              </FilledButton>
-            </View>
+            </ScrollView>
           </View>
         ) : (
           <View style={styles.accountSettingContainer}>
@@ -276,17 +285,16 @@ const styles = StyleSheet.create({
     flex: 1
   },
   onGoingContainer: {
-    flex: 2
+    flex: 2,
+    marginBottom: 20
   },
   privateSettingContainer: {
     flex: 8
   },
   myDecksContainer: {
-    flex: 7
+    marginBottom: 10
   },
-  sharedDecksContainer: {
-    flex: 3
-  },
+  sharedDecksContainer: {},
   accountSettingContainer: {
     flex: 8
   },

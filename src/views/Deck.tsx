@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import { createDeckSession } from '../api/DeckSessionApi'
 import MainButton from '../components/Buttons/MainButton'
@@ -26,14 +26,17 @@ import DeckBackground from '../svgs/DeckBackground'
 import FilledButton from '../components/Buttons/FilledButton'
 import ClearButton from '../components/Buttons/ClearButton'
 import Header from '../components/Header'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function Deck(props: { route: { params: { deck: { name: string; id: string } } } }) {
+  const { state } = useStoreContext()
   const { theme } = useTheme()
   const navigation = useNavigation()
   const [displayShare, setDisplayShare] = useState(false)
   const [users, setUsers] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
   const [deck, setDeck] = useState({})
+  const [isOwnerOfDeck, setIsOwnerOfDeck] = useState(false)
 
   const [favorite, setFavorite] = useState(false)
   const [promoteRequest, setPromoteRequest] = useState({})
@@ -47,7 +50,9 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
 
   const fetchDeckInfo = async () => {
     const response = await getDeck(props.route.params.deck.id)
-    console.log(response.deck)
+    if (response.deck.user === state.user.id) {
+      setIsOwnerOfDeck(true)
+    }
     setDeck(response.deck)
     setPromoteRequest(response.promote_request)
     setFavorite(response.favorite)
@@ -204,7 +209,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
             {deck.description && <NormalText>{deck.description}</NormalText>}
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-            {!sharedFrom && !deck.account?.id && (
+            {!sharedFrom && !deck.account?.id && isOwnerOfDeck && (
               <InvisibleButton onPress={handleSharePress}>Share</InvisibleButton>
             )}
 
@@ -212,14 +217,14 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               <InvisibleButton onPress={handleRemovePress}>Unshare Deck</InvisibleButton>
             )}
 
-            {!promoteRequest && !sharedFrom && !deck.account?.id && (
+            {!promoteRequest && !sharedFrom && !deck.account?.id && isOwnerOfDeck && (
               <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
             )}
           </View>
         </View>
 
         <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 10 }}>
-          {!deck.account?.id && !sharedFrom && (
+          {isOwnerOfDeck && (
             <View style={{ marginBottom: 15 }}>
               <ClearButton onPress={handleEditPress}>Edit Deck</ClearButton>
             </View>
@@ -248,16 +253,21 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               <NormalText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 20 }}>
                 Share this deck
               </NormalText>
-              {users.map((user: any) => (
-                <View style={{ flex: 1, width: '100%' }} key={user.id}>
-                  <CheckboxClickItem
-                    onPress={() => handleShareChecked(user.id)}
-                    title={user.email}
-                    key={user.id}
-                    checked={selectedUsers.includes(user.id)}
-                  />
-                </View>
-              ))}
+              <View style={{ flex: 4, width: '100%' }}>
+                <ScrollView style={{ flex: 1 }}>
+                  {users.map((user: any) => (
+                    <View style={{ marginBottom: 10 }} key={user.id}>
+                      <CheckboxClickItem
+                        onPress={() => handleShareChecked(user.id)}
+                        title={user.email}
+                        key={user.id}
+                        checked={selectedUsers.includes(user.id)}
+                      />
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+
               {users.length > 0 ? (
                 <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
                   <MainButton onPress={handleShare}>Share with selected users</MainButton>

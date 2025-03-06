@@ -18,7 +18,6 @@ export default function CheckboxClickItem({ title, checked, onPress, ...props })
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'red',
     borderRadius: 10
   },
 
