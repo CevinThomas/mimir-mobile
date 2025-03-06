@@ -9,7 +9,7 @@ export default function DeckWithFolder({ deck, hideFolder }) {
   const navigation = useNavigation()
   return (
     <View>
-      {deck.folder && !hideFolder && (
+      {deck.folder && !hideFolder && deck.decks.length > 0 && (
         <View
           style={{
             marginBottom: !deck.folder.description && 10,
