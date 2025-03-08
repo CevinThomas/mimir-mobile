@@ -25,6 +25,7 @@ type Deck = {
   active: boolean
   id?: string
   cards: Card[]
+  featured: boolean
 }
 
 type InitialState = Deck & {
@@ -59,6 +60,7 @@ const initialState: InitialState = {
   description: '',
   id: '',
   active: false,
+  featured: false,
   cards: [],
   folder_ids: [],
   user: {
@@ -97,7 +99,8 @@ const storeReducer = (state, action) => {
         description: action.response.description,
         id: action.response.id,
         cards: action.response.cards || [],
-        active: action.response.active || false
+        active: action.response.active || false,
+        featured: action.response.featured || false
       }
     case 'UPDATE_DECK_KEY':
       return { ...state, [action.key]: action.value }
@@ -145,7 +148,8 @@ const storeReducer = (state, action) => {
         id: '',
         active: false,
         cards: [],
-        folder_ids: []
+        folder_ids: [],
+        featured: false
       }
 
     case 'UPDATE_CHOICE':

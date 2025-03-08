@@ -13,6 +13,7 @@ import { getFolders } from '../api/FoldersApi'
 import Header from '../components/Header'
 import CustomTextArea from '../components/Forms/TextArea'
 import { useStoreContext } from '../context/StoreContext'
+import CustomCheckBox from '../components/Forms/Checkbox'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -23,6 +24,7 @@ export default function CreateDeck(props: {
 
   useEffect(() => {
     if (props.route.params?.deck) {
+      console.log(props.route.params.deck)
       dispatch({
         type: 'SET_DECK',
         response: {
@@ -30,6 +32,7 @@ export default function CreateDeck(props: {
           description: props.route.params.deck.description,
           id: props.route.params.deck.id,
           cards: props.route.params.deck.cards,
+          featured: props.route.params.deck.featured,
           active: props.route.params.deck.active
         }
       })
@@ -65,7 +68,8 @@ export default function CreateDeck(props: {
         name: state.name,
         description: state.description,
         cards: state.cards,
-        folder_ids: state.folder_ids
+        folder_ids: state.folder_ids,
+        featured: state.featured
       })
       dispatch({ type: 'SET_DECK', response })
     }
@@ -74,7 +78,11 @@ export default function CreateDeck(props: {
   }
 
   const onSaveDeck = async () => {
-    await updateDeck(state.id, { name: state.name, description: state.description })
+    await updateDeck(state.id, {
+      name: state.name,
+      description: state.description,
+      featured: state.featured
+    })
     dispatch({ type: 'RESET' })
     navigation.dispatch(
       CommonActions.reset({
@@ -93,7 +101,8 @@ export default function CreateDeck(props: {
     await updateDeck(state.id, {
       name: state.name,
       description: state.description,
-      active: true
+      active: !state.active,
+      featured: state.featured
     })
     dispatch({ type: 'RESET' })
     navigation.dispatch(
@@ -114,6 +123,14 @@ export default function CreateDeck(props: {
         value={state.description}
         label={'Description'}
         onChangeText={(text) => onUpdateDeck('description', text)}
+      />
+
+      <CustomCheckBox
+        label={'Featured'}
+        onPress={() => {
+          dispatch({ type: 'UPDATE_DECK_KEY', key: 'featured', value: !state.featured })
+        }}
+        checked={state.featured}
       />
 
       {folders.length > 0 && (
@@ -160,6 +177,22 @@ export default function CreateDeck(props: {
             <FilledButton onPress={onPublishDeck}>Publish deck</FilledButton>
           </View>
           */}
+
+          <View>
+            <ClearButton
+              onPress={async () => {
+                await onPublishDeck()
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+                  })
+                )
+              }}
+            >
+              {state.active ? 'Unpublish deck' : 'Publish deck'}
+            </ClearButton>
+          </View>
 
           <View style={{ flex: 2, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
             <ClearButton onPress={onSaveDeck}>Save deck</ClearButton>

@@ -7,7 +7,6 @@ import { StyleSheet, View } from 'react-native'
 export default function CustomCheckBox({ label, style, ...props }: CheckboxProps) {
   const { theme } = useTheme()
 
-  const backgroundColor = getColorProperty(theme, 'inputBackground')
   const textColor = getColorProperty(theme, 'inputText')
 
   return (
