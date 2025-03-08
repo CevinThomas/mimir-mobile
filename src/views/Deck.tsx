@@ -40,6 +40,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
 
   const [favorite, setFavorite] = useState(false)
   const [promoteRequest, setPromoteRequest] = useState({})
+  const [isFeaturedForUser, setIsFeaturedForUser] = useState(false)
   const [sharedFrom, setSharedFrom] = useState({})
   const bottomSheetRef = useRef<BottomSheet>(null)
 
@@ -50,13 +51,25 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
 
   const fetchDeckInfo = async () => {
     const response = await getDeck(props.route.params.deck.id)
-    if (response.deck.user === state.user.id) {
-      setIsOwnerOfDeck(true)
+
+    if (response.status === 404) {
+      alert('Deck not found')
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+        })
+      )
+    } else {
+      if (response.data.deck.user === state.user.id) {
+        setIsOwnerOfDeck(true)
+      }
+      setDeck(response.data.deck)
+      setPromoteRequest(response.data.promote_request)
+      setFavorite(response.data.favorite)
+      setIsFeaturedForUser(response.data.featured_for_user)
+      setSharedFrom(response.data.shared_from)
     }
-    setDeck(response.deck)
-    setPromoteRequest(response.promote_request)
-    setFavorite(response.favorite)
-    setSharedFrom(response.shared_from)
   }
 
   const fetchUsersEligibleForShare = async () => {
@@ -229,7 +242,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               <ClearButton onPress={handleEditPress}>Edit Deck</ClearButton>
             </View>
           )}
-          {deck?.featured && (
+          {isFeaturedForUser && (
             <View style={{ marginBottom: 15 }}>
               <ClearButton onPress={onCompleteFeaturedDeckPress}>
                 Complete featured deck

@@ -42,8 +42,8 @@ export default function DeckWithFolder({ deck, hideFolder, onViewedPress }) {
           <View key={deck.id}>
             {onViewedPress && (
               <NormalText
-                onPress={() => {
-                  viewedAccountDecks(deck.id)
+                onPress={async () => {
+                  await viewedAccountDecks(deck.id)
                   onViewedPress()
                 }}
               >

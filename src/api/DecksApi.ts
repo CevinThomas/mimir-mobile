@@ -62,8 +62,7 @@ export const deleteChoice = async (deckId: string, cardId: string, choiceId: str
 }
 
 export const getDeck = async (deckId: string) => {
-  const response = await axiosInstance.get(`/decks/${deckId}`)
-  return response.data
+  return await axiosInstance.get(`/decks/${deckId}`)
 }
 
 export const getNewDecks = async () => {

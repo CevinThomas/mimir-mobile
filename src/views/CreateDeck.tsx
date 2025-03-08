@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BackHandler, View } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
-import { createDeck, updateDeck } from '../api/DecksApi'
+import { createDeck, deleteDeck, updateDeck } from '../api/DecksApi'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import NormalText from '../components/Typography/NormalText'
@@ -163,6 +163,22 @@ export default function CreateDeck(props: {
 
           <View style={{ flex: 2, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
             <ClearButton onPress={onSaveDeck}>Save deck</ClearButton>
+          </View>
+          <View>
+            <ClearButton
+              onPress={async () => {
+                await deleteDeck(state.id)
+                dispatch({ type: 'RESET' })
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+                  })
+                )
+              }}
+            >
+              Delete deck
+            </ClearButton>
           </View>
         </View>
       )}

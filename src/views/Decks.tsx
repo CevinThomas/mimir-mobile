@@ -47,8 +47,11 @@ export default function Decks() {
 
   const setDeckSettings = (settings: 'private' | 'account') => {
     if (settings === 'account') {
-      setNewDecksSinceLastTime(false)
       checkedAccountDecks()
+      fetchNewAccountDecks()
+      fetchFeaturedDecks()
+      fetchAccountDecks()
+      setNewDecksSinceLastTime(false)
     }
     setSelectedDeckSettings(settings)
   }
@@ -80,7 +83,6 @@ export default function Decks() {
 
   const fetchNewAccountDecks = async () => {
     const response = await getNewDecks()
-    console.log(response.decks)
     setNewDecksSinceLastTime(response.newly_added_since_last_time)
     setNewDecks(response.decks)
   }
@@ -114,16 +116,20 @@ export default function Decks() {
     const newAccountDecksFolders = newDecks.map((deck) => deck.folder.name)
     // This means that all decks are under the "Uncategorized" folder. If there are any decks under another deck,
     // one of these would have a length of higher than 1
-    if (
-      accountDecksFolders.length <= 1 &&
-      newAccountDecksFolders.length <= 1 &&
-      accountDecksFolders[0] === 'Uncategorized' &&
-      newAccountDecksFolders[0] === 'Uncategorized'
-    ) {
-      setHideFolders(true)
-    } else {
-      setHideFolders(false)
+
+    const categories = accountDecksFolders.concat(newAccountDecksFolders)
+    const uniqueCategories = [...new Set(categories)]
+
+    if (uniqueCategories.length === 1) {
+      if (uniqueCategories[0] === 'Uncategorized') {
+        setHideFolders(true)
+      } else {
+        setHideFolders(false)
+      }
+      return
     }
+
+    setHideFolders(false)
   }, [newDecks, accountDecks])
 
   const accountDecksToShow = () => accountDecks.some((deck) => deck.decks.length > 0)
