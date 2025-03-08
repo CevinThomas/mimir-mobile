@@ -75,6 +75,10 @@ export const viewedAccountDecks = async (deckId: string) => {
   return await axiosInstance.patch(`/decks/${deckId}/viewed_account_decks`)
 }
 
+export const checkedAccountDecks = async () => {
+  return await axiosInstance.patch('/decks/checked')
+}
+
 export const getFeaturedDecks = async () => {
   const response = await axiosInstance.get('/decks/featured')
   return response.data

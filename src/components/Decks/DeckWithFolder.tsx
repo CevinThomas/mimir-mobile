@@ -4,8 +4,9 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native'
 import DeckListItem from '../DeckListItem'
+import { viewedAccountDecks } from '../../api/DecksApi'
 
-export default function DeckWithFolder({ deck, hideFolder }) {
+export default function DeckWithFolder({ deck, hideFolder, onViewedPress }) {
   const navigation = useNavigation()
   return (
     <View>
@@ -39,6 +40,16 @@ export default function DeckWithFolder({ deck, hideFolder }) {
       {deck.decks.map((deck) => {
         return (
           <View key={deck.id}>
+            {onViewedPress && (
+              <NormalText
+                onPress={() => {
+                  viewedAccountDecks(deck.id)
+                  onViewedPress()
+                }}
+              >
+                Viewed
+              </NormalText>
+            )}
             <DeckListItem deck={deck} onPress={() => navigation.navigate('Deck', { deck })} />
           </View>
         )

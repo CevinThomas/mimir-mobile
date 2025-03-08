@@ -15,8 +15,7 @@ import {
   getEligibleShareUsers,
   removeFeaturedDeck,
   removeSharedDeck,
-  shareDeck,
-  viewedAccountDecks
+  shareDeck
 } from '../api/DecksApi'
 import { useTheme } from '../context/ThemeContext'
 import NormalText from '../components/Typography/NormalText'
@@ -199,14 +198,6 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
                 />
               )}
             </View>
-
-            <FilledButton
-              onPress={() => {
-                viewedAccountDecks(props.route.params.deck.id)
-              }}
-            >
-              Viewed deck
-            </FilledButton>
 
             {deck.account?.id && (
               <NormalText style={{ marginBottom: 10 }}>Created by {deck.account.name}</NormalText>

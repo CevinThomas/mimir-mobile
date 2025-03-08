@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import {
+  checkedAccountDecks,
   getAccountDecks,
   getDecks,
   getFeaturedDecks,
   getNewDecks,
-  getSharedDecks,
-  viewedAccountDecks
+  getSharedDecks
 } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -48,7 +48,7 @@ export default function Decks() {
   const setDeckSettings = (settings: 'private' | 'account') => {
     if (settings === 'account') {
       setNewDecksSinceLastTime(false)
-      viewedAccountDecks()
+      checkedAccountDecks()
     }
     setSelectedDeckSettings(settings)
   }
@@ -80,6 +80,7 @@ export default function Decks() {
 
   const fetchNewAccountDecks = async () => {
     const response = await getNewDecks()
+    console.log(response.decks)
     setNewDecksSinceLastTime(response.newly_added_since_last_time)
     setNewDecks(response.decks)
   }
@@ -113,17 +114,25 @@ export default function Decks() {
     const newAccountDecksFolders = newDecks.map((deck) => deck.folder.name)
     // This means that all decks are under the "Uncategorized" folder. If there are any decks under another deck,
     // one of these would have a length of higher than 1
-    if (accountDecksFolders.length <= 1 && newAccountDecksFolders.length <= 1) {
+    if (
+      accountDecksFolders.length <= 1 &&
+      newAccountDecksFolders.length <= 1 &&
+      accountDecksFolders[0] === 'Uncategorized' &&
+      newAccountDecksFolders[0] === 'Uncategorized'
+    ) {
       setHideFolders(true)
     } else {
       setHideFolders(false)
     }
   }, [newDecks, accountDecks])
 
-  const decksToShow = () => accountDecks.some((deck) => deck.decks.length > 0)
+  const accountDecksToShow = () => accountDecks.some((deck) => deck.decks.length > 0)
+  const newDecksToShow = () => newDecks.length > 0
+  const featuredDecksToShow = () => featuredDecks.length > 0
 
   return (
     <MainBackground noSpace>
+      <NormalText>Hej {state.user.name}</NormalText>
       <View style={styles.mainContainer}>
         <View style={styles.settingsContainer}>
           <View style={{ flex: 1 }}>
@@ -229,7 +238,7 @@ export default function Decks() {
           </View>
         ) : (
           <View style={styles.accountSettingContainer}>
-            {!decksToShow() ? (
+            {!accountDecksToShow() && !newDecksToShow() && !featuredDecksToShow() ? (
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
               </View>
@@ -251,8 +260,12 @@ export default function Decks() {
                       <NormalText style={{ fontSize: 18, marginBottom: 10 }}>New decks!</NormalText>
                       {newDecks.map((deck) => {
                         return (
-                          <View style={{ marginBottom: 40 }} key={deck.id}>
-                            <DeckWithFolder deck={deck} hideFolder={hideFolders} />
+                          <View style={{ marginBottom: 40 }} key={deck.folder.id}>
+                            <DeckWithFolder
+                              deck={deck}
+                              hideFolder={hideFolders}
+                              onViewedPress={() => refresh()}
+                            />
                           </View>
                         )
                       })}
