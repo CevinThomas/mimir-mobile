@@ -53,6 +53,12 @@ export default function Decks() {
       fetchAccountDecks()
       setNewDecksSinceLastTime(false)
     }
+
+    if (settings === 'private') {
+      fetchDecks()
+      fetchOnGoingDecks()
+      fetchSharedDecks()
+    }
     setSelectedDeckSettings(settings)
   }
 
@@ -114,8 +120,6 @@ export default function Decks() {
   useEffect(() => {
     const accountDecksFolders = accountDecks.map((folder) => folder.folder.name)
     const newAccountDecksFolders = newDecks.map((deck) => deck.folder.name)
-    // This means that all decks are under the "Uncategorized" folder. If there are any decks under another deck,
-    // one of these would have a length of higher than 1
 
     const categories = accountDecksFolders.concat(newAccountDecksFolders)
     const uniqueCategories = [...new Set(categories)]
