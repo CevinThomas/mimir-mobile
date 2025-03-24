@@ -212,7 +212,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               )}
             </View>
 
-            {deck.account?.id && (
+            {deck.deck_type === 'account_deck' && (
               <NormalText style={{ marginBottom: 10 }}>Created by {deck.account.name}</NormalText>
             )}
             {sharedFrom && <NormalText>Shared from: {sharedFrom.email}</NormalText>}
@@ -222,7 +222,7 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
             {deck.description && <NormalText>{deck.description}</NormalText>}
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-            {!sharedFrom && !deck.account?.id && isOwnerOfDeck && (
+            {!sharedFrom && deck.deck_type === 'private_deck' && isOwnerOfDeck && (
               <InvisibleButton onPress={handleSharePress}>Share</InvisibleButton>
             )}
 
@@ -230,9 +230,12 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               <InvisibleButton onPress={handleRemovePress}>Unshare Deck</InvisibleButton>
             )}
 
-            {!promoteRequest && !sharedFrom && !deck.account?.id && isOwnerOfDeck && (
-              <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
-            )}
+            {!promoteRequest &&
+              !sharedFrom &&
+              deck.deck_type === 'private_deck' &&
+              isOwnerOfDeck && (
+                <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
+              )}
           </View>
         </View>
 

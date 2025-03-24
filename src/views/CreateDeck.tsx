@@ -24,7 +24,6 @@ export default function CreateDeck(props: {
 
   useEffect(() => {
     if (props.route.params?.deck) {
-      console.log(props.route.params.deck)
       dispatch({
         type: 'SET_DECK',
         response: {
@@ -125,13 +124,15 @@ export default function CreateDeck(props: {
         onChangeText={(text) => onUpdateDeck('description', text)}
       />
 
-      <CustomCheckBox
-        label={'Featured'}
-        onPress={() => {
-          dispatch({ type: 'UPDATE_DECK_KEY', key: 'featured', value: !state.featured })
-        }}
-        checked={state.featured}
-      />
+      {state.user.role === 'admin' && (
+        <CustomCheckBox
+          label={'Featured'}
+          onPress={() => {
+            dispatch({ type: 'UPDATE_DECK_KEY', key: 'featured', value: !state.featured })
+          }}
+          checked={state.featured}
+        />
+      )}
 
       {folders.length > 0 && (
         <View>
@@ -178,21 +179,23 @@ export default function CreateDeck(props: {
           </View>
           */}
 
-          <View>
-            <ClearButton
-              onPress={async () => {
-                await onPublishDeck()
-                navigation.dispatch(
-                  CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-                  })
-                )
-              }}
-            >
-              {state.active ? 'Unpublish deck' : 'Publish deck'}
-            </ClearButton>
-          </View>
+          {state.user.role === 'admin' && (
+            <View>
+              <ClearButton
+                onPress={async () => {
+                  await onPublishDeck()
+                  navigation.dispatch(
+                    CommonActions.reset({
+                      index: 0,
+                      routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+                    })
+                  )
+                }}
+              >
+                {state.active ? 'Unpublish deck' : 'Publish deck'}
+              </ClearButton>
+            </View>
+          )}
 
           <View style={{ flex: 2, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
             <ClearButton onPress={onSaveDeck}>Save deck</ClearButton>

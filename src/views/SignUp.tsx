@@ -21,13 +21,15 @@ export default function SignUp() {
     try {
       const response = await userSignUp(email.current, password.current, name.current)
       if (response.status.code === 200) {
-        dispatch({ type: 'SET_USER', payload: response.status.data.user })
+        dispatch({ type: 'SET_USER', payload: response.data })
         navigation.navigate('SignUpConfirmation', {
           email: email.current,
           password: password.current
         })
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+    }
   }
   return (
     <MainBackground>

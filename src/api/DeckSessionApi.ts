@@ -22,6 +22,10 @@ export const getDeckSessions = async () => {
   return response.data
 }
 
+export const copyDeck = async (deckId: string) => {
+  return await axiosInstance.post(`/deck_sessions/${deckId}/copy`)
+}
+
 export const getDeckSession = async (deckSessionId: string) => {
   const response = await axiosInstance.get(`/deck_sessions/${deckSessionId}`)
   return response.data

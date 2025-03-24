@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import { archiveCard, getCardBatch, getDeckSession, resetDeckSession } from '../api/DeckSessionApi'
-import { useNavigation } from '@react-navigation/native'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
@@ -133,7 +133,16 @@ export default function DeckSession(props: {
 
   return (
     <MainBackground>
-      <Header />
+      <Header
+        onBack={() =>
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+            })
+          )
+        }
+      />
       <ScrollView
         contentContainerStyle={{ flex: 1 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={resetSession} />}

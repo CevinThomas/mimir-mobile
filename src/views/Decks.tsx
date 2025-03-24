@@ -20,6 +20,7 @@ import { Tab } from '@rneui/themed'
 import DeckWithFolder from '../components/Decks/DeckWithFolder'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useStoreContext } from '../context/StoreContext'
+import ExpiredDeckModal from '../components/ExpiredDeckModal'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -27,6 +28,7 @@ export default function Decks() {
   const [decks, setDecks] = useState([])
   const [accountDecks, setAccountDecks] = useState([])
   const [ongoingDecks, setOngoingDecks] = useState([])
+  const [expiredDeckSessions, setExpiredDeckSessions] = useState([])
   const [sharedWithMeDecks, setSharedDecks] = useState([])
   const [newDecks, setNewDecks] = useState([])
   const [featuredDecks, setFeaturedDecks] = useState([])
@@ -44,6 +46,18 @@ export default function Decks() {
       ))}
     </ScrollView>
   )
+
+  const shiftExpiredDeckSessions = () => {
+    if (expiredDeckSessions.length >= 2) {
+      const expired = expiredDeckSessions
+      expired.shift()
+      setExpiredDeckSessions(expired)
+
+      return
+    }
+
+    setExpiredDeckSessions([])
+  }
 
   const setDeckSettings = (settings: 'private' | 'account') => {
     if (settings === 'account') {
@@ -73,8 +87,15 @@ export default function Decks() {
   }
 
   const fetchOnGoingDecks = async () => {
-    const decks = await getDeckSessions()
-    setOngoingDecks(decks)
+    try {
+      const decks = await getDeckSessions()
+      if (decks.expired_decks.length > 0) {
+        setExpiredDeckSessions(decks.expired_decks)
+      }
+      setOngoingDecks(decks.ongoing)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const fetchSharedDecks = async () => {
@@ -187,6 +208,13 @@ export default function Decks() {
                     </InvisibleButton>
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                    {expiredDeckSessions.length > 0 && (
+                      <ExpiredDeckModal
+                        refreshCallback={refresh}
+                        deckSessions={expiredDeckSessions}
+                        onAction={shiftExpiredDeckSessions}
+                      />
+                    )}
                     {ongoingDecks.slice(0, 2).map((deck) => (
                       <View key={deck.deck.id} style={{ flex: 1 }}>
                         <DeleteButtonAnimated
@@ -317,7 +345,6 @@ const styles = StyleSheet.create({
   myDecksContainer: {
     marginBottom: 10
   },
-  sharedDecksContainer: {},
   accountSettingContainer: {
     flex: 8
   },

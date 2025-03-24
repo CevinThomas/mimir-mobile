@@ -42,25 +42,6 @@ export const deleteCard = async (deckId: string, cardId: string) => {
   return await axiosInstance.delete(`/decks/${deckId}/cards/${cardId}`)
 }
 
-export const updateChoice = async (
-  deckId: string,
-  cardId: string,
-  choiceId: string,
-  choice: any
-) => {
-  return await axiosInstance.put(`/decks/${deckId}/cards/${cardId}/choices/${choiceId}`, {
-    choice: choice
-  })
-}
-
-export const createChoice = async (deckId: string, cardId: string, choice: any) => {
-  return await axiosInstance.post(`/decks/${deckId}/cards/${cardId}/choices`, { choice: choice })
-}
-
-export const deleteChoice = async (deckId: string, cardId: string, choiceId: string) => {
-  return await axiosInstance.delete(`/decks/${deckId}/cards/${cardId}/choices/${choiceId}`)
-}
-
 export const getDeck = async (deckId: string) => {
   return await axiosInstance.get(`/decks/${deckId}`)
 }

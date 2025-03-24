@@ -4,8 +4,19 @@ import { useNavigation } from '@react-navigation/native'
 import BackIcon from '../svgs/BackIcon'
 import { Button } from '@rneui/base'
 
-export default function Header() {
+type HeaderProps = {
+  onBack?: () => void
+}
+export default function Header({ onBack }) {
   const navigation = useNavigation()
+
+  function handleBackPress() {
+    if (onBack) {
+      onBack()
+    } else {
+      navigation.goBack()
+    }
+  }
   return (
     <View
       style={{
@@ -17,7 +28,7 @@ export default function Header() {
         width: '10%'
       }}
     >
-      <Button onPress={() => navigation.goBack()} buttonStyle={{ backgroundColor: 'transparent' }}>
+      <Button onPress={handleBackPress} buttonStyle={{ backgroundColor: 'transparent' }}>
         <BackIcon />
       </Button>
     </View>
