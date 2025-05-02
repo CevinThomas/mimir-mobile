@@ -4,9 +4,6 @@ import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/
 import { createDeck, deleteDeck, updateDeck } from '../api/DecksApi'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
-import NormalText from '../components/Typography/NormalText'
-import ClickButton from '../components/Buttons/ClickButton'
-import SideActionButton from '../components/Buttons/SideActionButton'
 import ClearButton from '../components/Buttons/ClearButton'
 import Dropdown from '../components/Dropdown'
 import { getFolders } from '../api/FoldersApi'
@@ -14,6 +11,10 @@ import Header from '../components/Header'
 import CustomTextArea from '../components/Forms/TextArea'
 import { useStoreContext } from '../context/StoreContext'
 import CustomCheckBox from '../components/Forms/Checkbox'
+import FilledButton from '../components/Buttons/FilledButton'
+import NormalText from '../components/Typography/NormalText'
+import SideActionButton from '../components/Buttons/SideActionButton'
+import ClickButton from '../components/Buttons/ClickButton'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -61,19 +62,15 @@ export default function CreateDeck(props: {
     dispatch({ type: 'UPDATE_DECK_KEY', key, value })
   }
 
-  const onNavigateToCreateCard = async () => {
-    if (!state.id) {
-      const response = await createDeck({
-        name: state.name,
-        description: state.description,
-        cards: state.cards,
-        folder_ids: state.folder_ids,
-        featured: state.featured
-      })
-      dispatch({ type: 'SET_DECK', response })
-    }
-
-    navigation.navigate('CreateCard')
+  const onCreateDeck = async () => {
+    const response = await createDeck({
+      name: state.name,
+      description: state.description,
+      cards: state.cards,
+      folder_ids: state.folder_ids,
+      featured: false
+    })
+    dispatch({ type: 'SET_DECK', response })
   }
 
   const onSaveDeck = async () => {
@@ -124,7 +121,7 @@ export default function CreateDeck(props: {
         onChangeText={(text) => onUpdateDeck('description', text)}
       />
 
-      {state.user.role === 'admin' && (
+      {state.user.role === 'admin' && state.id && (
         <CustomCheckBox
           label={'Featured'}
           onPress={() => {
@@ -134,7 +131,7 @@ export default function CreateDeck(props: {
         />
       )}
 
-      {folders.length > 0 && (
+      {folders.length > 0 && state.id && (
         <View>
           <Dropdown
             unSelect={(value) => dispatch({ type: 'REMOVE_FOLDER_ID', id: value })}
@@ -144,42 +141,48 @@ export default function CreateDeck(props: {
         </View>
       )}
 
-      <View style={{ flex: 3, padding: 10 }}>
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <View>
-            <NormalText>Cards</NormalText>
-          </View>
-          <View>
-            <SideActionButton onPress={() => onNavigateToCreateCard()}>Add card</SideActionButton>
-          </View>
-        </View>
-        <View style={{ flex: 5 }}>
-          {state.cards?.map((card, index) => (
-            <View style={{ marginBottom: 10 }} key={index}>
-              <ClickButton onPress={() => navigation.navigate('CreateCard', { card: card })}>
-                {card.title}
-              </ClickButton>
+      {state.id && (
+        <View style={{ flex: 3, padding: 10 }}>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <View>
+              <NormalText>Cards</NormalText>
             </View>
-          ))}
+            <View>
+              <SideActionButton onPress={() => navigation.navigate('CreateCard')}>
+                Add card
+              </SideActionButton>
+            </View>
+          </View>
+          <View style={{ flex: 5 }}>
+            {state.cards?.map((card, index) => (
+              <View style={{ marginBottom: 10 }} key={index}>
+                <ClickButton onPress={() => navigation.navigate('CreateCard', { card: card })}>
+                  {card.title}
+                </ClickButton>
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
+      )}
+
+      {!state.id && (
+        <View>
+          <FilledButton fontSize={16} onPress={onCreateDeck}>
+            Create deck
+          </FilledButton>
+        </View>
+      )}
 
       {state.id && (
         <View style={{ flex: 1, flexWrap: 'wrap', flexDirection: 'row', marginBottom: 20 }}>
-          {/*
-          <View style={{ flex: 2, justifyContent: 'flex-end' }}>
-            <FilledButton onPress={onPublishDeck}>Publish deck</FilledButton>
-          </View>
-          */}
-
-          {state.user.role === 'admin' && (
+          {state.user.role === 'admin' && !state.active && (
             <View>
               <ClearButton
                 onPress={async () => {
@@ -192,13 +195,15 @@ export default function CreateDeck(props: {
                   )
                 }}
               >
-                {state.active ? 'Unpublish deck' : 'Publish deck'}
+                Publish deck
               </ClearButton>
             </View>
           )}
 
           <View style={{ flex: 2, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
-            <ClearButton onPress={onSaveDeck}>Save deck</ClearButton>
+            <ClearButton onPress={onSaveDeck}>
+              {state.active ? 'Update deck' : 'Save draft'}
+            </ClearButton>
           </View>
           <View>
             <ClearButton

@@ -9,7 +9,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import {
   createPromoteRequest,
-  deleteDeck,
   favoriteDeck,
   getDeck,
   getEligibleShareUsers,
@@ -28,7 +27,9 @@ import ClearButton from '../components/Buttons/ClearButton'
 import Header from '../components/Header'
 import { useStoreContext } from '../context/StoreContext'
 
-export default function Deck(props: { route: { params: { deck: { name: string; id: string } } } }) {
+export default function Deck(props: {
+  route: { params: { deck: { name: string; id: string }; ongoingDeck: boolean } }
+}) {
   const { state } = useStoreContext()
   const { theme } = useTheme()
   const navigation = useNavigation()
@@ -91,20 +92,6 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
     }
   }
 
-  const handleDeletePress = async () => {
-    const response = await deleteDeck(props.route.params.deck.id)
-    if (response.status === 200 || response.status === 204) {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-        })
-      )
-    } else {
-      alert('Failed to delete deck')
-    }
-  }
-
   const handleRemovePress = async () => {
     const response = await removeSharedDeck(props.route.params.deck.id)
     if (response.status === 200 || response.status === 204) {
@@ -120,8 +107,12 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
   }
 
   const handleStartPress = async () => {
+    if (props.route.params.ongoingDeck) {
+      return navigation.navigate('DeckSession', { id: props.route.params.deck.deckSessionId })
+    }
+
     const response = await createDeckSession(props.route.params.deck.id)
-    navigation.navigate('DeckSession', { deck: response.deck_session })
+    navigation.navigate('DeckSession', { id: response.deck_session.id })
   }
 
   const handleFavoritePress = async () => {
@@ -186,6 +177,11 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
         <DeckBackground />
       </View>
       <View style={[styles.info, { backgroundColor: getColorProperty(theme, 'background') }]}>
+        {deck.notice && (
+          <View style={{ backgroundColor: 'orange', borderRadius: 10, padding: 10 }}>
+            <NormalText>{deck.notice}</NormalText>
+          </View>
+        )}
         <View style={{ flex: 5 }}>
           <View>
             <View
@@ -252,7 +248,9 @@ export default function Deck(props: { route: { params: { deck: { name: string; i
               </ClearButton>
             </View>
           )}
-          <FilledButton onPress={handleStartPress}>Start deck</FilledButton>
+          <FilledButton onPress={handleStartPress}>
+            {props.route.params.ongoingDeck ? 'Continue deck session' : 'Start deck'}
+          </FilledButton>
         </View>
 
         {displayShare && (

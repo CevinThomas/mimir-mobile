@@ -13,7 +13,6 @@ import DeckSession from './views/DeckSession'
 import Profile from './views/Profile'
 import CreateDeck from './views/CreateDeck'
 import CreateCard from './views/CreateCard'
-import ViewAllDecks from './views/ViewAllDecks'
 import { View } from 'react-native'
 
 import { getColorProperty } from './helpers'
@@ -64,7 +63,6 @@ function LoggedInStack() {
       />
       <Stack.Screen name="CreateDeck" component={CreateDeck} />
       <Stack.Screen name="CreateCard" component={CreateCard} options={{ gestureEnabled: false }} />
-      <Stack.Screen name="ViewAllDecks" component={ViewAllDecks} />
     </Stack.Navigator>
   )
 }

@@ -1,25 +1,19 @@
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Button } from '@rneui/themed'
-import { getColorProperty } from '../../helpers'
-import { useTheme } from '../../context/ThemeContext'
 
 export default function ClickButton({ children, onPress, short, background }) {
-  const { theme } = useTheme()
   return (
-    <View style={[theme === 'light' ? styles.shadowStyles : {}]}>
+    <View>
       <Button
         onPress={onPress}
         buttonStyle={[
           styles.button,
           {
-            backgroundColor: background || getColorProperty(theme, 'darkGray')
+            backgroundColor: '#E9E9E9'
           }
         ]}
-        titleStyle={[
-          styles.titleStyle,
-          { color: getColorProperty(theme, 'text'), width: short ? '50%' : '100%' }
-        ]}
+        titleStyle={[styles.titleStyle, { color: '#000', width: short ? '50%' : '100%' }]}
         titleProps={{ numberOfLines: 1, ellipsizeMode: 'tail' }}
       >
         {children}

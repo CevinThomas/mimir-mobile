@@ -28,7 +28,7 @@ export default function DeckSession(props: {
 
   useEffect(() => {
     const sessionInit = async () => {
-      const response = await getDeckSession(props.route.params.deck.id)
+      const response = await getDeckSession(props.route.params.id)
 
       setDeckSessionId(response.deck_session.id)
       setCards(response.cards)

@@ -13,9 +13,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import MainBackground from '../components/MainBackground'
 import DeckListItem from '../components/DeckListItem'
 import NormalText from '../components/Typography/NormalText'
-import InvisibleButton from '../components/Buttons/InvisibleButton'
 import FilledButton from '../components/Buttons/FilledButton'
-import DeleteButtonAnimated from '../components/DeleteButtonAnimated'
 import { Tab } from '@rneui/themed'
 import DeckWithFolder from '../components/Decks/DeckWithFolder'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -36,27 +34,34 @@ export default function Decks() {
   const [index, setIndex] = useState(0)
   const [hideFolders, setHideFolders] = useState(false)
   const [newDecksSinceLastTime, setNewDecksSinceLastTime] = useState(false)
+  const [selectedExpiredDeck, setSelectedExpiredDeck] = useState(null)
 
-  const loopDecks = (decks: any[]) => (
+  const loopDecks = (decks: any[], ongoingDeck: boolean) => (
     <ScrollView>
-      {decks.slice(0, 5).map((deck) => (
-        <View key={deck.id}>
-          <DeckListItem deck={deck} />
-        </View>
-      ))}
+      {decks.map((deck) => {
+        let deckHasExpired = false
+        if (ongoingDeck) {
+          deckHasExpired = expiredDeckSessions.some((expiredDeck) => expiredDeck.id === deck.id)
+        }
+        return (
+          <View key={deck.id}>
+            {deckHasExpired && (
+              <NormalText
+                onPress={() => setSelectedExpiredDeck(deck)}
+                style={{ fontSize: 18, marginBottom: 10 }}
+              >
+                This deck has expired
+              </NormalText>
+            )}
+            <DeckListItem deck={deck} ongoingDeck={ongoingDeck} />
+          </View>
+        )
+      })}
     </ScrollView>
   )
 
-  const shiftExpiredDeckSessions = () => {
-    if (expiredDeckSessions.length >= 2) {
-      const expired = expiredDeckSessions
-      expired.shift()
-      setExpiredDeckSessions(expired)
-
-      return
-    }
-
-    setExpiredDeckSessions([])
+  const hideExpiredDeckModal = () => {
+    setSelectedExpiredDeck(null)
   }
 
   const setDeckSettings = (settings: 'private' | 'account') => {
@@ -197,65 +202,57 @@ export default function Decks() {
             <ScrollView>
               {ongoingDecks.length > 0 && (
                 <View style={styles.onGoingContainer}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
                     <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
-                    <InvisibleButton
-                      onPress={() =>
-                        navigation.navigate('ViewAllDecks', { method: 'ongoingDecks' })
-                      }
-                    >
-                      view all
-                    </InvisibleButton>
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                    {expiredDeckSessions.length > 0 && (
+                    {selectedExpiredDeck && (
                       <ExpiredDeckModal
                         refreshCallback={refresh}
-                        deckSessions={expiredDeckSessions}
-                        onAction={shiftExpiredDeckSessions}
+                        deckSession={selectedExpiredDeck}
+                        onAction={hideExpiredDeckModal}
                       />
                     )}
-                    {ongoingDecks.slice(0, 2).map((deck) => (
-                      <View key={deck.deck.id} style={{ flex: 1 }}>
-                        <DeleteButtonAnimated
-                          onPress={() => navigation.navigate('DeckSession', { deck })}
-                          onDelete={() => deleteSession(deck.id)}
-                        >
-                          {deck.deck.name}
-                        </DeleteButtonAnimated>
-                      </View>
-                    ))}
+                    {loopDecks(ongoingDecks, true)}
                   </View>
                 </View>
               )}
 
               {decks.length > 0 && (
-                <View style={styles.myDecksContainer}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
                     <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
-                    <InvisibleButton
-                      onPress={() => navigation.navigate('ViewAllDecks', { method: 'myDecks' })}
-                    >
-                      view all
-                    </InvisibleButton>
                   </View>
-                  {loopDecks(decks)}
+                  <View style={styles.myDecksContainer}>{loopDecks(decks, false)}</View>
                 </View>
               )}
 
               {sharedWithMeDecks.length > 0 && (
-                <View style={styles.sharedDecksContainer}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
                     <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
                       Shared with me
                     </NormalText>
-                    <InvisibleButton
-                      onPress={() => navigation.navigate('ViewAllDecks', { method: 'sharedDecks' })}
-                    >
-                      view all
-                    </InvisibleButton>
                   </View>
-                  {loopDecks(sharedWithMeDecks)}
+                  {loopDecks(sharedWithMeDecks, false)}
                 </View>
               )}
 
@@ -266,13 +263,13 @@ export default function Decks() {
                     <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
                   </View>
                 )}
-
-              <View style={styles.createDeckContainer}>
-                <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
-                  Create new deck
-                </FilledButton>
-              </View>
             </ScrollView>
+
+            <View style={styles.createDeckContainer}>
+              <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
+                Create new deck
+              </FilledButton>
+            </View>
           </View>
         ) : (
           <View style={styles.accountSettingContainer}>
@@ -349,8 +346,8 @@ const styles = StyleSheet.create({
     flex: 8
   },
   createDeckContainer: {
-    flex: 1,
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
+    marginVertical: 5
   },
   accountDecks: {
     flex: 8

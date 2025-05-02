@@ -27,7 +27,6 @@ export default function Login() {
       }
 
       if (response.status.code === 200) {
-        console.log(response)
         dispatch({ type: 'SET_USER', payload: response.status.data.user })
         const accountResponse = await getAccountInfo()
         dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
