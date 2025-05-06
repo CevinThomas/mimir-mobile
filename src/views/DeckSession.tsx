@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
-import { archiveCard, getCardBatch, getDeckSession, resetDeckSession } from '../api/DeckSessionApi'
+import {
+  answerCardApi,
+  archiveCard,
+  getCardBatch,
+  getDeckSession,
+  resetDeckSession
+} from '../api/DeckSessionApi'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
@@ -40,6 +46,10 @@ export default function DeckSession(props: {
   }, [])
 
   const answerCard = (choice: any) => {
+    try {
+      answerCardApi(deckSessionId, currentCard.id, choice.id)
+    } catch (e) {}
+
     setAnsweredId(choice.id)
     if (choice.correct) {
       setAnsweredState(0)

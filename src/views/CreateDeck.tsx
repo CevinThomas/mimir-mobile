@@ -77,7 +77,8 @@ export default function CreateDeck(props: {
     await updateDeck(state.id, {
       name: state.name,
       description: state.description,
-      featured: state.featured
+      featured: state.featured,
+      folder_ids: state.folder_ids
     })
     dispatch({ type: 'RESET' })
     navigation.dispatch(
@@ -131,7 +132,7 @@ export default function CreateDeck(props: {
         />
       )}
 
-      {folders.length > 0 && state.id && (
+      {folders.length > 0 && (
         <View>
           <Dropdown
             unSelect={(value) => dispatch({ type: 'REMOVE_FOLDER_ID', id: value })}

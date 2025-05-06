@@ -39,3 +39,11 @@ export const deleteDeckSession = async (deckSessionId: string) => {
   const response = await axiosInstance.delete(`/deck_sessions/${deckSessionId}`)
   return response.data
 }
+
+export const answerCardApi = async (sessionId: string, cardId: string, choiceId: string) => {
+  const response = await axiosInstance.post(`/deck_sessions/${sessionId}/answer_question`, {
+    choice_id: choiceId,
+    card_id: cardId
+  })
+  return response.data
+}
