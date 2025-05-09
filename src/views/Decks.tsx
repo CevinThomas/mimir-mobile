@@ -12,7 +12,7 @@ import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import MainBackground from '../components/MainBackground'
-import DeckListItem from '../components/DeckListItem'
+import DeckListItemSwipe from '../components/DeckListItemSwipe'
 import NormalText from '../components/Typography/NormalText'
 import FilledButton from '../components/Buttons/FilledButton'
 import { Tab } from '@rneui/themed'
@@ -55,7 +55,7 @@ export default function Decks() {
                 This deck has expired
               </NormalText>
             )}
-            <DeckListItem 
+            <DeckListItemSwipe 
               deck={deck} 
               ongoingDeck={ongoingDeck} 
               onDelete={ongoingDeck ? deleteSession : undefined} 
@@ -320,7 +320,7 @@ export default function Decks() {
                         Featured decks
                       </NormalText>
                       {featuredDecks.map((deck) => (
-                        <DeckListItem key={deck.id} deck={deck} />
+                        <DeckListItemSwipe key={deck.id} deck={deck} />
                       ))}
                     </View>
                   )}

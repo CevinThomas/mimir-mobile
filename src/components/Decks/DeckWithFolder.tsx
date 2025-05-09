@@ -83,7 +83,12 @@ export default function DeckWithFolder({ deck, hideFolder, onViewedPress }) {
                   Viewed
                 </NormalText>
               )}
-              <DeckListItem deck={deck} onPress={() => navigation.navigate('Deck', { deck })} />
+              <DeckListItem
+                ongoingDeck={false}
+                onDelete={() => {}}
+                deck={deck}
+                onPress={() => navigation.navigate('Deck', { deck })}
+              />
             </View>
           )
         })}
