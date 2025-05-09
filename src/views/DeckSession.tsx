@@ -9,6 +9,7 @@ import {
 } from '../api/DeckSessionApi'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import useDenyBackButton from '../hooks/useDenyBackButton'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import Choice from '../components/Choice'
@@ -29,18 +30,23 @@ export default function DeckSession(props: {
   const [refreshing, setRefreshing] = useState(false)
 
   const navigation = useNavigation()
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   useDenyBackButton()
 
   useEffect(() => {
     const sessionInit = async () => {
-      const response = await getDeckSession(props.route.params.id)
+      try {
+        const response = await getDeckSession(props.route.params.id)
 
-      setDeckSessionId(response.deck_session.id)
-      setCards(response.cards)
+        setDeckSessionId(response.deck_session.id)
+        setCards(response.cards)
 
-      setCurrentCard(response.cards[currentCardIndex])
-      setInitLoaded(true)
+        setCurrentCard(response.cards[currentCardIndex])
+        setInitLoaded(true)
+      } catch (error) {
+        showError(error.message || 'Failed to initialize deck session')
+      }
     }
     sessionInit()
   }, [])
@@ -48,35 +54,45 @@ export default function DeckSession(props: {
   const answerCard = (choice: any) => {
     try {
       answerCardApi(deckSessionId, currentCard.id, choice.id)
-    } catch (e) {}
 
-    setAnsweredId(choice.id)
-    if (choice.correct) {
-      setAnsweredState(0)
-      setTimeout(async () => {
-        if (currentCardIndex === cards.length - 1) {
-          await fetchNextCardBatch()
-          setCurrentCardIndex(0)
-          setAnsweredState(2)
-          return
-        }
-        setAnsweredState(2)
-        setCurrentCardIndex(currentCardIndex + 1)
-      }, 1000)
-    } else {
-      setAnsweredState(1)
+      setAnsweredId(choice.id)
+      if (choice.correct) {
+        setAnsweredState(0)
+        setTimeout(async () => {
+          try {
+            if (currentCardIndex === cards.length - 1) {
+              await fetchNextCardBatch()
+              setCurrentCardIndex(0)
+              setAnsweredState(2)
+              return
+            }
+            setAnsweredState(2)
+            setCurrentCardIndex(currentCardIndex + 1)
+          } catch (error) {
+            showError(error.message || 'Failed to process answer')
+          }
+        }, 1000)
+      } else {
+        setAnsweredState(1)
+      }
+    } catch (error) {
+      showError(error.message || 'Failed to submit answer')
     }
   }
 
   const nextCard = async () => {
-    if (currentCardIndex === cards.length - 1) {
-      await fetchNextCardBatch()
-      setCurrentCardIndex(0)
+    try {
+      if (currentCardIndex === cards.length - 1) {
+        await fetchNextCardBatch()
+        setCurrentCardIndex(0)
+        setAnsweredState(2)
+        return
+      }
       setAnsweredState(2)
-      return
+      setCurrentCardIndex(currentCardIndex + 1)
+    } catch (error) {
+      showError()
     }
-    setAnsweredState(2)
-    setCurrentCardIndex(currentCardIndex + 1)
   }
 
   const displayExplanation = () => {
@@ -90,25 +106,37 @@ export default function DeckSession(props: {
   }
 
   const archiveCardPress = async () => {
-    const response = await archiveCard(deckSessionId, currentCard.id)
-    if (currentCardIndex === cards.length - 1) {
-      await fetchNextCardBatch()
-      return
+    try {
+      const response = await archiveCard(deckSessionId, currentCard.id)
+      if (currentCardIndex === cards.length - 1) {
+        await fetchNextCardBatch()
+        return
+      }
+      setCards(cards.filter((card: any) => card.id !== currentCard.id))
+      setCurrentCard(cards[currentCardIndex + 1])
+    } catch (error) {
+      showError()
     }
-    setCards(cards.filter((card: any) => card.id !== currentCard.id))
-    setCurrentCard(cards[currentCardIndex + 1])
   }
 
   const fetchNextCardBatch = async () => {
-    const response = await getCardBatch(deckSessionId)
-    setCards(response.cards)
-    setCurrentCard(response.cards[0])
-    setCurrentCardIndex(0)
+    try {
+      const response = await getCardBatch(deckSessionId)
+      setCards(response.cards)
+      setCurrentCard(response.cards[0])
+      setCurrentCardIndex(0)
+    } catch (error) {
+      showError()
+    }
   }
 
   const resetSession = async () => {
-    await resetDeckSession(deckSessionId)
-    fetchNextCardBatch()
+    try {
+      await resetDeckSession(deckSessionId)
+      fetchNextCardBatch()
+    } catch (error) {
+      showError()
+    }
   }
 
   useEffect(() => {
@@ -194,6 +222,7 @@ export default function DeckSession(props: {
           </View>
         </View>
       </ScrollView>
+      {errorSnackbar()}
     </MainBackground>
   )
 }

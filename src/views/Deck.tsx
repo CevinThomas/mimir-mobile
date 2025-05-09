@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import { createDeckSession } from '../api/DeckSessionApi'
 import MainButton from '../components/Buttons/MainButton'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 
 import { getColorProperty } from '../helpers'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -44,6 +45,7 @@ export default function Deck(props: {
   const [isFeaturedForUser, setIsFeaturedForUser] = useState(false)
   const [sharedFrom, setSharedFrom] = useState({})
   const bottomSheetRef = useRef<BottomSheet>(null)
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   useEffect(() => {
     fetchDeckInfo()
@@ -51,58 +53,74 @@ export default function Deck(props: {
   }, [])
 
   const fetchDeckInfo = async () => {
-    const response = await getDeck(props.route.params.deck.id)
+    try {
+      const response = await getDeck(props.route.params.deck.id)
 
-    if (response.status === 404) {
-      alert('Deck not found')
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-        })
-      )
-    } else {
-      if (response.data.deck.user === state.user.id) {
-        setIsOwnerOfDeck(true)
+      if (response.status === 404) {
+        showError('Deck not found')
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+          })
+        )
+      } else {
+        if (response.data.deck.user === state.user.id) {
+          setIsOwnerOfDeck(true)
+        }
+        setDeck(response.data.deck)
+        setPromoteRequest(response.data.promote_request)
+        setFavorite(response.data.favorite)
+        setIsFeaturedForUser(response.data.featured_for_user)
+        setSharedFrom(response.data.shared_from)
       }
-      setDeck(response.data.deck)
-      setPromoteRequest(response.data.promote_request)
-      setFavorite(response.data.favorite)
-      setIsFeaturedForUser(response.data.featured_for_user)
-      setSharedFrom(response.data.shared_from)
+    } catch (error) {
+      showError()
     }
   }
 
   const fetchUsersEligibleForShare = async () => {
-    const response = await getEligibleShareUsers(props.route.params.deck.id)
-    setUsers(response)
+    try {
+      const response = await getEligibleShareUsers(props.route.params.deck.id)
+      setUsers(response)
+    } catch (error) {
+      showError()
+    }
   }
 
   const onCompleteFeaturedDeckPress = async () => {
-    const response = await removeFeaturedDeck(props.route.params.deck.id)
-    if (response.status === 200 || response.status === 204) {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-        })
-      )
-    } else {
-      alert('Failed to complete featured deck')
+    try {
+      const response = await removeFeaturedDeck(props.route.params.deck.id)
+      if (response.status === 200 || response.status === 204) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+          })
+        )
+      } else {
+        showError('Failed to complete featured deck')
+      }
+    } catch (error) {
+      showError()
     }
   }
 
   const handleRemovePress = async () => {
-    const response = await removeSharedDeck(props.route.params.deck.id)
-    if (response.status === 200 || response.status === 204) {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-        })
-      )
-    } else {
-      alert('Failed to unshare deck')
+    try {
+      const response = await removeSharedDeck(props.route.params.deck.id)
+      if (response.status === 200 || response.status === 204) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+          })
+        )
+      } else {
+        showError('Failed to unshare deck')
+      }
+    } catch (error) {
+      showError()
     }
   }
 
@@ -111,14 +129,24 @@ export default function Deck(props: {
       return navigation.navigate('DeckSession', { id: props.route.params.deck.deckSessionId })
     }
 
-    const response = await createDeckSession(props.route.params.deck.id)
-    navigation.navigate('DeckSession', { id: response.deck_session.id })
+    try {
+      const response = await createDeckSession(props.route.params.deck.id)
+      navigation.navigate('DeckSession', { id: response.deck_session.id })
+    } catch (error) {
+      showError()
+    }
   }
 
   const handleFavoritePress = async () => {
-    const response = await favoriteDeck(props.route.params.deck.id)
-    if (response.status === 200 || response.status === 204) {
-      fetchDeckInfo()
+    try {
+      const response = await favoriteDeck(props.route.params.deck.id)
+      if (response.status === 200 || response.status === 204) {
+        fetchDeckInfo()
+      } else {
+        showError('Failed to favorite deck')
+      }
+    } catch (error) {
+      showError()
     }
   }
 
@@ -132,16 +160,19 @@ export default function Deck(props: {
   }
 
   const handleShare = async () => {
-    const response = await shareDeck(props.route.params.deck.id, selectedUsers)
-    if (response.status === 200 || response.status === 204) {
-      alert('Deck shared successfully')
-    } else {
-      alert('Failed to share deck')
+    try {
+      const response = await shareDeck(props.route.params.deck.id, selectedUsers)
+      if (response.status === 200 || response.status === 204) {
+        // Success message could be shown here if needed
+        bottomSheetRef.current?.close()
+        setDisplayShare(false)
+        fetchUsersEligibleForShare()
+      } else {
+        showError('Failed to share deck')
+      }
+    } catch (error) {
+      showError()
     }
-
-    bottomSheetRef.current?.close()
-    setDisplayShare(false)
-    fetchUsersEligibleForShare()
   }
 
   const handleClose = () => {
@@ -157,12 +188,16 @@ export default function Deck(props: {
   }
 
   const handlePromoteRequest = async () => {
-    const response = await createPromoteRequest(props.route.params.deck.id)
-    if (response.status === 200 || response.status === 204) {
-      alert('Promote request sent')
-      fetchDeckInfo()
-    } else {
-      alert('Failed to send promote request')
+    try {
+      const response = await createPromoteRequest(props.route.params.deck.id)
+      if (response.status === 200 || response.status === 204) {
+        // Success message could be shown here if needed
+        fetchDeckInfo()
+      } else {
+        showError('Failed to send promote request')
+      }
+    } catch (error) {
+      showError()
     }
   }
 
@@ -293,6 +328,7 @@ export default function Deck(props: {
           </BottomSheet>
         )}
       </View>
+      {errorSnackbar()}
     </GestureHandlerRootView>
   )
 }

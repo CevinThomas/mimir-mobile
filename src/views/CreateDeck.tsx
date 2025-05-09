@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { BackHandler, View } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createDeck, deleteDeck, updateDeck } from '../api/DecksApi'
+import { getFolders } from '../api/FoldersApi'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import ClearButton from '../components/Buttons/ClearButton'
@@ -23,6 +25,7 @@ export default function CreateDeck(props: {
   const navigation = useNavigation()
   const { state, dispatch } = useStoreContext()
   const [folders, setFolders] = useState([])
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   const validationRules = {
     name: {
@@ -71,8 +74,12 @@ export default function CreateDeck(props: {
   )
 
   const fetchFolders = async () => {
-    const folders = await getFolders()
-    setFolders(folders)
+    try {
+      const folders = await getFolders()
+      setFolders(folders)
+    } catch (error) {
+      showError(error.message || 'Failed to fetch folders')
+    }
   }
 
   const onUpdateDeck = (key: string, value: string) => {
@@ -88,14 +95,18 @@ export default function CreateDeck(props: {
       return
     }
 
-    const response = await createDeck({
-      name: state.name,
-      description: state.description,
-      cards: state.cards,
-      folder_ids: state.folder_ids,
-      featured: false
-    })
-    dispatch({ type: 'SET_DECK', response })
+    try {
+      const response = await createDeck({
+        name: state.name,
+        description: state.description,
+        cards: state.cards,
+        folder_ids: state.folder_ids,
+        featured: false
+      })
+      dispatch({ type: 'SET_DECK', response })
+    } catch (error) {
+      showError(error.message || 'Failed to create deck')
+    }
   }
 
   const onSaveDeck = async () => {
@@ -103,19 +114,23 @@ export default function CreateDeck(props: {
       return
     }
 
-    await updateDeck(state.id, {
-      name: state.name,
-      description: state.description,
-      featured: state.featured,
-      folder_ids: state.folder_ids
-    })
-    dispatch({ type: 'RESET' })
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+    try {
+      await updateDeck(state.id, {
+        name: state.name,
+        description: state.description,
+        featured: state.featured,
+        folder_ids: state.folder_ids
       })
-    )
+      dispatch({ type: 'RESET' })
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+        })
+      )
+    } catch (error) {
+      showError(error.message || 'Failed to save deck')
+    }
   }
 
   const onGoBack = () => {
@@ -124,16 +139,20 @@ export default function CreateDeck(props: {
   }
 
   const onPublishDeck = async () => {
-    await updateDeck(state.id, {
-      name: state.name,
-      description: state.description,
-      active: !state.active,
-      featured: state.featured
-    })
-    dispatch({ type: 'RESET' })
-    navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
-    )
+    try {
+      await updateDeck(state.id, {
+        name: state.name,
+        description: state.description,
+        active: !state.active,
+        featured: state.featured
+      })
+      dispatch({ type: 'RESET' })
+      navigation.dispatch(
+        CommonActions.reset({ index: 0, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
+      )
+    } catch (error) {
+      showError(error.message || 'Failed to publish deck')
+    }
   }
 
   return (
@@ -239,14 +258,18 @@ export default function CreateDeck(props: {
           <View>
             <ClearButton
               onPress={async () => {
-                await deleteDeck(state.id)
-                dispatch({ type: 'RESET' })
-                navigation.dispatch(
-                  CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-                  })
-                )
+                try {
+                  await deleteDeck(state.id)
+                  dispatch({ type: 'RESET' })
+                  navigation.dispatch(
+                    CommonActions.reset({
+                      index: 0,
+                      routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+                    })
+                  )
+                } catch (error) {
+                  showError(error.message || 'Failed to delete deck')
+                }
               }}
             >
               Delete deck
@@ -254,6 +277,7 @@ export default function CreateDeck(props: {
           </View>
         </View>
       )}
+      {errorSnackbar()}
     </MainBackground>
   )
 }

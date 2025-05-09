@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native'
 import { login } from '../api/AuthApi'
 import * as SecureStore from 'expo-secure-store'
 import { getAccountInfo } from '../api/AccountsApi'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import CustomCheckBox from '../components/Forms/Checkbox'
@@ -12,6 +13,7 @@ import { useStoreContext } from '../context/StoreContext'
 
 export default function Login() {
   const { state, dispatch } = useStoreContext()
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   const email = useRef('')
   const password = useRef('')
@@ -32,7 +34,9 @@ export default function Login() {
         dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
         dispatch({ type: 'LOG_IN' })
       }
-    } catch (error) {}
+    } catch (error) {
+      showError('Login failed. Please check your credentials.')
+    }
   }
 
   return (
@@ -55,6 +59,7 @@ export default function Login() {
       <View style={styles.signUpContainer}>
         <FilledButton onPress={onLoginPress}>Log in</FilledButton>
       </View>
+      {errorSnackbar()}
     </MainBackground>
   )
 }

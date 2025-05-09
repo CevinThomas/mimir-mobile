@@ -9,6 +9,7 @@ import FilledButton from '../components/Buttons/FilledButton'
 import ClearButton from '../components/Buttons/ClearButton'
 import Header from '../components/Header'
 import useSnackBar from '../hooks/useSnackBar'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -97,19 +98,23 @@ export default function CreateCard(props: {
       return
     }
 
-    if (state.currentCard.id) {
-      const response = await updateCard(state.id, state.currentCard.id, state.currentCard)
-      dispatch({ type: 'UPDATE_CARD', card: response.data })
-    } else {
-      const response = await createCard(state.id, state.currentCard)
-      dispatch({ type: 'ADD_CARD', card: response.data })
+    try {
+      if (state.currentCard.id) {
+        const response = await updateCard(state.id, state.currentCard.id, state.currentCard)
+        dispatch({ type: 'UPDATE_CARD', card: response.data })
+      } else {
+        const response = await createCard(state.id, state.currentCard)
+        dispatch({ type: 'ADD_CARD', card: response.data })
+      }
+      setShowNewButton(true)
+      saveCardWith.value = 50
+      show('Card has been saved')
+      setTimeout(() => {
+        hide()
+      }, 1000)
+    } catch (error) {
+      showError(error.message || 'Failed to save card')
     }
-    setShowNewButton(true)
-    saveCardWith.value = 50
-    show('Card has been saved')
-    setTimeout(() => {
-      hide()
-    }, 1000)
   }
 
   const onNewCard = () => {
@@ -130,12 +135,16 @@ export default function CreateCard(props: {
 
   const onRemoveCard = async () => {
     if (state.currentCard.id) {
-      const response = await deleteCard(state.id, state.currentCard.id)
-      if (response.status === 200 || response.status === 204) {
-        dispatch({ type: 'DELETE_CARD' })
-        navigation.goBack()
-      } else {
-        alert('Failed to delete card')
+      try {
+        const response = await deleteCard(state.id, state.currentCard.id)
+        if (response.status === 200 || response.status === 204) {
+          dispatch({ type: 'DELETE_CARD' })
+          navigation.goBack()
+        } else {
+          showError('Failed to delete card')
+        }
+      } catch (error) {
+        showError(error.message || 'Failed to remove card')
       }
     }
   }
@@ -148,6 +157,7 @@ export default function CreateCard(props: {
   }
 
   const { show, hide, visible, snackBar } = useSnackBar()
+  const { showError, errorSnackbar, visible: errorVisible } = useErrorSnackbar()
 
   const saveCardWith = useSharedValue(100)
 
@@ -246,6 +256,7 @@ export default function CreateCard(props: {
         </View>
       </View>
       {visible && snackBar()}
+      {errorSnackbar()}
     </MainBackground>
   )
 }

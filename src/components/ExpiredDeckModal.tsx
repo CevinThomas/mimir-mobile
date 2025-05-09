@@ -4,6 +4,7 @@ import NormalText from './Typography/NormalText'
 import { Dialog } from '@rneui/base'
 import ClearButton from './Buttons/ClearButton'
 import { copyDeck, deleteDeckSession } from '../api/DeckSessionApi'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 
 type ExpiredDeckModalProps = {
   deckSession: null | {}
@@ -17,18 +18,26 @@ export default function ExpiredDeckModal({
   onAction
 }: ExpiredDeckModalProps) {
   const [dialogVisible, setDialogVisible] = useState(true)
-  console.log(deckSession)
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   async function handleCopyDeck() {
-    await copyDeck(deckSession.id)
-    onAction()
-    refresh()
+    try {
+      await copyDeck(deckSession.id)
+      onAction()
+      refresh()
+    } catch (error) {
+      showError('Failed to copy deck')
+    }
   }
 
   async function handleDeleteSession() {
-    await deleteDeckSession(deckSession.id)
-    onAction()
-    refresh()
+    try {
+      await deleteDeckSession(deckSession.id)
+      onAction()
+      refresh()
+    } catch (error) {
+      showError('Failed to delete session')
+    }
   }
 
   function refresh() {
@@ -50,6 +59,7 @@ export default function ExpiredDeckModal({
         <ClearButton onPress={() => handleCopyDeck()}>Copy deck</ClearButton>
         <ClearButton onPress={() => handleDeleteSession()}>Delete session</ClearButton>
       </View>
+      {errorSnackbar()}
     </Dialog>
   )
 }

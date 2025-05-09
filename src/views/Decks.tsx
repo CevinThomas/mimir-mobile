@@ -9,6 +9,7 @@ import {
   getSharedDecks
 } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import MainBackground from '../components/MainBackground'
 import DeckListItem from '../components/DeckListItem'
@@ -35,6 +36,7 @@ export default function Decks() {
   const [hideFolders, setHideFolders] = useState(false)
   const [newDecksSinceLastTime, setNewDecksSinceLastTime] = useState(false)
   const [selectedExpiredDeck, setSelectedExpiredDeck] = useState(null)
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   const loopDecks = (decks: any[], ongoingDeck: boolean) => (
     <ScrollView>
@@ -64,13 +66,17 @@ export default function Decks() {
     setSelectedExpiredDeck(null)
   }
 
-  const setDeckSettings = (settings: 'private' | 'account') => {
+  const setDeckSettings = async (settings: 'private' | 'account') => {
     if (settings === 'account') {
-      checkedAccountDecks()
-      fetchNewAccountDecks()
-      fetchFeaturedDecks()
-      fetchAccountDecks()
-      setNewDecksSinceLastTime(false)
+      try {
+        await checkedAccountDecks()
+        fetchNewAccountDecks()
+        fetchFeaturedDecks()
+        fetchAccountDecks()
+        setNewDecksSinceLastTime(false)
+      } catch (error) {
+        showError(error.message || 'Failed to check account decks')
+      }
     }
 
     if (settings === 'private') {
@@ -82,13 +88,21 @@ export default function Decks() {
   }
 
   const deleteSession = async (deckSessionId: number) => {
-    await deleteDeckSession(deckSessionId)
-    fetchOnGoingDecks()
+    try {
+      await deleteDeckSession(deckSessionId)
+      fetchOnGoingDecks()
+    } catch (error) {
+      showError(error.message || 'Failed to delete session')
+    }
   }
 
   const fetchDecks = async () => {
-    const decks = await getDecks()
-    setDecks(decks)
+    try {
+      const decks = await getDecks()
+      setDecks(decks)
+    } catch (error) {
+      showError(error.message || 'Failed to fetch decks')
+    }
   }
 
   const fetchOnGoingDecks = async () => {
@@ -99,29 +113,45 @@ export default function Decks() {
       }
       setOngoingDecks(decks.ongoing)
     } catch (error) {
-      console.error(error)
+      showError(error.message || 'Failed to fetch ongoing decks')
     }
   }
 
   const fetchSharedDecks = async () => {
-    const decks = await getSharedDecks()
-    setSharedDecks(decks)
+    try {
+      const decks = await getSharedDecks()
+      setSharedDecks(decks)
+    } catch (error) {
+      showError(error.message || 'Failed to fetch shared decks')
+    }
   }
 
   const fetchAccountDecks = async () => {
-    const decks = await getAccountDecks()
-    setAccountDecks(decks)
+    try {
+      const decks = await getAccountDecks()
+      setAccountDecks(decks)
+    } catch (error) {
+      showError(error.message || 'Failed to fetch account decks')
+    }
   }
 
   const fetchNewAccountDecks = async () => {
-    const response = await getNewDecks()
-    setNewDecksSinceLastTime(response.newly_added_since_last_time)
-    setNewDecks(response.decks)
+    try {
+      const response = await getNewDecks()
+      setNewDecksSinceLastTime(response.newly_added_since_last_time)
+      setNewDecks(response.decks)
+    } catch (error) {
+      showError(error.message || 'Failed to fetch new account decks')
+    }
   }
 
   const fetchFeaturedDecks = async () => {
-    const decks = await getFeaturedDecks()
-    setFeaturedDecks(decks)
+    try {
+      const decks = await getFeaturedDecks()
+      setFeaturedDecks(decks)
+    } catch (error) {
+      showError(error.message || 'Failed to fetch featured decks')
+    }
   }
 
   const refresh = () => {
@@ -321,6 +351,7 @@ export default function Decks() {
           </View>
         )}
       </View>
+      {errorSnackbar()}
     </MainBackground>
   )
 }

@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
 import { login } from '../api/AuthApi'
 import { getAccountInfo } from '../api/AccountsApi'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import FilledButton from '../components/Buttons/FilledButton'
@@ -14,6 +15,7 @@ import { useStoreContext } from '../context/StoreContext'
 export default function Start() {
   const navigation = useNavigation()
   const { state, dispatch } = useStoreContext()
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   const rememberKey = async () => {
     return await SecureStore.getItemAsync('rememberMe')
@@ -27,16 +29,20 @@ export default function Start() {
 
   useEffect(() => {
     const autoLogin = async () => {
-      const rememberMe = await rememberKey()
-      if (rememberMe === 'true') {
-        const { email, password } = await emailAndPassword()
-        const response = await login(email, password)
-        if (response.status.code === 200) {
-          dispatch({ type: 'SET_USER', payload: response.status.data.user })
-          const accountResponse = await getAccountInfo()
-          dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
-          dispatch({ type: 'LOG_IN' })
+      try {
+        const rememberMe = await rememberKey()
+        if (rememberMe === 'true') {
+          const { email, password } = await emailAndPassword()
+          const response = await login(email, password)
+          if (response.status.code === 200) {
+            dispatch({ type: 'SET_USER', payload: response.status.data.user })
+            const accountResponse = await getAccountInfo()
+            dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
+            dispatch({ type: 'LOG_IN' })
+          }
         }
+      } catch (error) {
+        showError('Failed to automatically log in')
       }
     }
 
@@ -62,6 +68,7 @@ export default function Start() {
           </View>
         </View>
       </View>
+      {errorSnackbar()}
     </MainBackground>
   )
 }

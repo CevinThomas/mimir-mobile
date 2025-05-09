@@ -3,6 +3,7 @@ import React, { useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { userSignUp } from '../api/AuthApi'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import MainButton from '../components/Buttons/MainButton'
@@ -12,6 +13,7 @@ export default function SignUp() {
   const navigation = useNavigation()
 
   const { state, dispatch } = useStoreContext()
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   const name = useRef('')
   const email = useRef('')
@@ -28,7 +30,7 @@ export default function SignUp() {
         })
       }
     } catch (error) {
-      console.log(error)
+      showError('Sign up failed. Please try again.')
     }
   }
   return (
@@ -50,6 +52,7 @@ export default function SignUp() {
           </MainButton>
         </View>
       </View>
+      {errorSnackbar()}
     </MainBackground>
   )
 }

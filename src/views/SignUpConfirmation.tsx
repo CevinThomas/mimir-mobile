@@ -5,6 +5,7 @@ import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/
 import { login, userConfirmed } from '../api/AuthApi'
 import * as SecureStore from 'expo-secure-store'
 import { getAccountInfo } from '../api/AccountsApi'
+import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import useDenyBackButton from '../hooks/useDenyBackButton'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
@@ -16,6 +17,7 @@ export default function SignUpConfirmation(props: {
   route: { params: { email: string; password: string } }
 }) {
   const { state, dispatch } = useStoreContext()
+  const { showError, errorSnackbar } = useErrorSnackbar()
 
   const navigation = useNavigation()
   const intervalIdRef = useRef(null)
@@ -27,10 +29,14 @@ export default function SignUpConfirmation(props: {
     React.useCallback(() => {
       const startPolling = () => {
         intervalIdRef.current = setInterval(async () => {
-          const response = await userConfirmed(props.route.params.email)
-          if (response.is_verified === true) {
-            stopPolling()
-            onVerified()
+          try {
+            const response = await userConfirmed(props.route.params.email)
+            if (response.is_verified === true) {
+              stopPolling()
+              onVerified()
+            }
+          } catch (error) {
+            showError()
           }
         }, 2000)
       }
@@ -59,13 +65,17 @@ export default function SignUpConfirmation(props: {
   )
 
   const onVerified = async () => {
-    await SecureStore.setItemAsync('email', props.route.params.email)
-    await SecureStore.setItemAsync('password', props.route.params.password)
-    await login(props.route.params.email, props.route.params.password)
-    const account = await getAccountInfo()
+    try {
+      await SecureStore.setItemAsync('email', props.route.params.email)
+      await SecureStore.setItemAsync('password', props.route.params.password)
+      await login(props.route.params.email, props.route.params.password)
+      const account = await getAccountInfo()
 
-    dispatch({ type: 'SET_ACCOUNT', payload: account })
-    dispatch({ type: 'LOG_IN' })
+      dispatch({ type: 'SET_ACCOUNT', payload: account })
+      dispatch({ type: 'LOG_IN' })
+    } catch (error) {
+      showError('Failed to complete verification. Please try again.')
+    }
   }
 
   const onCancelPress = () => {
@@ -104,6 +114,7 @@ export default function SignUpConfirmation(props: {
       </View>
 
       <StatusBar style="auto" />
+      {errorSnackbar()}
     </MainBackground>
   )
 }
