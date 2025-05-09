@@ -80,7 +80,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
 
 const styles = StyleSheet.create({
   container: {
-    height: 65
+    height: 55
   },
   label: {
     fontWeight: 'normal',

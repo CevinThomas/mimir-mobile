@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { KeyboardAvoidingView, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createCard, deleteCard, updateCard } from '../api/DecksApi'
@@ -16,6 +16,8 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated'
 import { useStoreContext } from '../context/StoreContext'
+import ErrorMessage from '../components/Forms/ErrorMessage'
+import useFormValidation from '../hooks/useFormValidation'
 
 export default function CreateCard(props: {
   route: { params: { card: { name: string; id: string } } }
@@ -24,6 +26,59 @@ export default function CreateCard(props: {
   const navigation = useNavigation()
   const [editingCard, setEditingCard] = useState(false)
   const [showNewButton, setShowNewButton] = useState(false)
+
+  const validationRules = {
+    title: {
+      required: true,
+      errorMessage: 'Question is required'
+    },
+    choice1: {
+      required: true,
+      errorMessage: 'Choice 1 is required'
+    },
+    choice2: {
+      required: true,
+      errorMessage: 'Choice 2 is required'
+    },
+    choice3: {
+      required: true,
+      errorMessage: 'Choice 3 is required'
+    },
+    choice4: {
+      required: true,
+      errorMessage: 'Choice 4 is required'
+    }
+  }
+
+  const { errors, validate, handleChange, setValues } = useFormValidation(
+    {
+      title: state.currentCard.title,
+      explanation: state.currentCard.explanation,
+      choice1: state.currentCard.choices[0]?.title || '',
+      choice2: state.currentCard.choices[1]?.title || '',
+      choice3: state.currentCard.choices[2]?.title || '',
+      choice4: state.currentCard.choices[3]?.title || ''
+    },
+    validationRules
+  )
+
+  useEffect(() => {
+    setValues({
+      title: state.currentCard.title,
+      explanation: state.currentCard.explanation,
+      choice1: state.currentCard.choices[0]?.title || '',
+      choice2: state.currentCard.choices[1]?.title || '',
+      choice3: state.currentCard.choices[2]?.title || '',
+      choice4: state.currentCard.choices[3]?.title || ''
+    })
+  }, [
+    state.currentCard.title,
+    state.currentCard.explanation,
+    state.currentCard.choices[0]?.title,
+    state.currentCard.choices[1]?.title,
+    state.currentCard.choices[2]?.title,
+    state.currentCard.choices[3]?.title
+  ])
 
   useFocusEffect(
     React.useCallback(() => {
@@ -38,6 +93,10 @@ export default function CreateCard(props: {
   )
 
   const onSaveCard = async () => {
+    if (!validate()) {
+      return
+    }
+
     if (state.currentCard.id) {
       const response = await updateCard(state.id, state.currentCard.id, state.currentCard)
       dispatch({ type: 'UPDATE_CARD', card: response.data })
@@ -61,6 +120,12 @@ export default function CreateCard(props: {
 
   const onUpdateCard = (key: string, value: string) => {
     dispatch({ type: 'UPDATE_CURRENT_CARD', key, value })
+
+    if (key === 'title') {
+      handleChange('title', value)
+    } else if (key === 'explanation') {
+      handleChange('explanation', value)
+    }
   }
 
   const onRemoveCard = async () => {
@@ -77,6 +142,9 @@ export default function CreateCard(props: {
 
   const onChoiceInputPress = (index, text) => {
     dispatch({ type: 'UPDATE_CHOICE', index, text })
+
+    const fieldName = `choice${index + 1}`
+    handleChange(fieldName, text)
   }
 
   const { show, hide, visible, snackBar } = useSnackBar()
@@ -108,6 +176,7 @@ export default function CreateCard(props: {
           value={state.currentCard.title}
           onChangeText={(text) => onUpdateCard('title', text)}
         />
+        <ErrorMessage message={errors.title} visible={!!errors.title} />
       </View>
 
       <KeyboardAvoidingView behavior={'padding'} style={{ flex: 6 }}>
@@ -119,36 +188,41 @@ export default function CreateCard(props: {
             <CustomTextInput
               style={{ borderWidth: 1, borderColor: '#6FC368' }}
               onChangeText={(text) => onChoiceInputPress(0, text)}
-              label={'Choice 1'}
+              label={'Choice 1 *'}
               value={state.currentCard.choices[0].title}
             />
+            <ErrorMessage message={errors.choice1} visible={!!errors.choice1} />
 
             <CustomTextInput
-              label={'Explanation'}
+              label={'Explanation *'}
               value={state.currentCard.explanation}
               onChangeText={(text) => onUpdateCard('explanation', text)}
             />
+            <ErrorMessage message={errors.explanation} visible={!!errors.explanation} />
           </View>
           <View>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(1, text)}
-              label={'Choice 2'}
+              label={'Choice 2 *'}
               value={state.currentCard.choices[1].title}
             />
+            <ErrorMessage message={errors.choice2} visible={!!errors.choice2} />
           </View>
           <View>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(2, text)}
-              label={'Choice 3'}
+              label={'Choice 3 *'}
               value={state.currentCard.choices[2].title}
             />
+            <ErrorMessage message={errors.choice3} visible={!!errors.choice3} />
           </View>
           <View>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(3, text)}
-              label={'Choice 4'}
+              label={'Choice 4 *'}
               value={state.currentCard.choices[3].title}
             />
+            <ErrorMessage message={errors.choice4} visible={!!errors.choice4} />
           </View>
         </View>
       </KeyboardAvoidingView>

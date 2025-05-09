@@ -6,7 +6,6 @@ import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import ClearButton from '../components/Buttons/ClearButton'
 import Dropdown from '../components/Dropdown'
-import { getFolders } from '../api/FoldersApi'
 import Header from '../components/Header'
 import CustomTextArea from '../components/Forms/TextArea'
 import { useStoreContext } from '../context/StoreContext'
@@ -15,6 +14,8 @@ import FilledButton from '../components/Buttons/FilledButton'
 import NormalText from '../components/Typography/NormalText'
 import SideActionButton from '../components/Buttons/SideActionButton'
 import ClickButton from '../components/Buttons/ClickButton'
+import ErrorMessage from '../components/Forms/ErrorMessage'
+import useFormValidation from '../hooks/useFormValidation'
 
 export default function CreateDeck(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -22,6 +23,22 @@ export default function CreateDeck(props: {
   const navigation = useNavigation()
   const { state, dispatch } = useStoreContext()
   const [folders, setFolders] = useState([])
+
+  const validationRules = {
+    name: {
+      required: true,
+      errorMessage: 'Title is required'
+    }
+  }
+
+  const { errors, validate, handleChange, setValues } = useFormValidation(
+    { name: state.name },
+    validationRules
+  )
+
+  useEffect(() => {
+    setValues({ name: state.name })
+  }, [state.name])
 
   useEffect(() => {
     if (props.route.params?.deck) {
@@ -60,9 +77,17 @@ export default function CreateDeck(props: {
 
   const onUpdateDeck = (key: string, value: string) => {
     dispatch({ type: 'UPDATE_DECK_KEY', key, value })
+
+    if (key === 'name') {
+      handleChange('name', value)
+    }
   }
 
   const onCreateDeck = async () => {
+    if (!validate(['name'])) {
+      return
+    }
+
     const response = await createDeck({
       name: state.name,
       description: state.description,
@@ -74,6 +99,10 @@ export default function CreateDeck(props: {
   }
 
   const onSaveDeck = async () => {
+    if (!validate(['name'])) {
+      return
+    }
+
     await updateDeck(state.id, {
       name: state.name,
       description: state.description,
@@ -112,9 +141,10 @@ export default function CreateDeck(props: {
       <Header />
       <CustomTextInput
         value={state.name}
-        label={'Title'}
+        label={'Title *'}
         onChangeText={(text) => onUpdateDeck('name', text)}
       />
+      <ErrorMessage message={errors.name} visible={!!errors.name} />
 
       <CustomTextArea
         value={state.description}
