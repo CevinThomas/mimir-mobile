@@ -61,7 +61,7 @@ export default function Deck(props: {
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{ name: 'Decks' }]
+            routes: [{ name: 'Home', params: { screen: 'Decks' } }]
           })
         )
       } else {
@@ -95,7 +95,7 @@ export default function Deck(props: {
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{ name: 'Decks' }]
+            routes: [{ name: 'Home', params: { screen: 'Decks' } }]
           })
         )
       } else {
@@ -113,7 +113,7 @@ export default function Deck(props: {
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{ name: 'Decks' }]
+            routes: [{ name: 'Home', params: { screen: 'Decks' } }]
           })
         )
       } else {

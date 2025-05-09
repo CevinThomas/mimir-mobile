@@ -55,7 +55,11 @@ export default function Decks() {
                 This deck has expired
               </NormalText>
             )}
-            <DeckListItem deck={deck} ongoingDeck={ongoingDeck} />
+            <DeckListItem 
+              deck={deck} 
+              ongoingDeck={ongoingDeck} 
+              onDelete={ongoingDeck ? deleteSession : undefined} 
+            />
           </View>
         )
       })}

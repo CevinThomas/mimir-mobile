@@ -125,7 +125,7 @@ export default function CreateDeck(props: {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{ name: 'Decks' }]
+          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
         })
       )
     } catch (error) {
@@ -148,7 +148,7 @@ export default function CreateDeck(props: {
       })
       dispatch({ type: 'RESET' })
       navigation.dispatch(
-        CommonActions.reset({ index: 0, routes: [{ name: 'Decks' }] })
+        CommonActions.reset({ index: 0, routes: [{ name: 'Home', params: { screen: 'Decks' } }] })
       )
     } catch (error) {
       showError(error.message || 'Failed to publish deck')
@@ -240,7 +240,7 @@ export default function CreateDeck(props: {
                   navigation.dispatch(
                     CommonActions.reset({
                       index: 0,
-                      routes: [{ name: 'Decks' }]
+                      routes: [{ name: 'Home', params: { screen: 'Decks' } }]
                     })
                   )
                 }}
@@ -264,7 +264,7 @@ export default function CreateDeck(props: {
                   navigation.dispatch(
                     CommonActions.reset({
                       index: 0,
-                      routes: [{ name: 'Decks' }]
+                      routes: [{ name: 'Home', params: { screen: 'Decks' } }]
                     })
                   )
                 } catch (error) {
