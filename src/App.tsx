@@ -4,7 +4,6 @@ import Start from './views/Start'
 import Login from './views/Login'
 import SignUp from './views/SignUp'
 import SignUpConfirmation from './views/SignUpConfirmation'
-import Home from './views/Home'
 import { useStoreContext } from './context/StoreContext'
 import Deck from './views/Deck'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -17,10 +16,8 @@ import { View } from 'react-native'
 
 import { getColorProperty } from './helpers'
 import DeckIcon from './svgs/DeckIcon'
-import HomeIcon from './svgs/HomeIcon'
 import SettingsIcon from './svgs/SettingsIcon'
 import DeckIconFilled from './svgs/DeckIconFilled'
-import HomeIconFilled from './svgs/HomeIconFilled'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -95,21 +92,6 @@ function TabStack() {
             )
           }
 
-          if (route.name === 'Home') {
-            if (focused) {
-              return (
-                <View style={{ marginTop: 20 }}>
-                  <HomeIconFilled />
-                </View>
-              )
-            }
-            return (
-              <View style={{ marginTop: 20 }}>
-                <HomeIcon fill={focused ? '' : '#FAF9F6'} />
-              </View>
-            )
-          }
-
           if (route.name === 'Settings') {
             return (
               <View style={{ marginTop: 20 }}>
@@ -122,7 +104,6 @@ function TabStack() {
         }
       })}
     >
-      <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Decks" component={Decks} />
       <Tab.Screen name="Settings" component={Profile} />
     </Tab.Navigator>
