@@ -326,7 +326,6 @@ export default function Decks() {
                   )}
                   {newDecks.length > 0 && (
                     <View style={{ marginBottom: 30 }}>
-                      <NormalText style={{ fontSize: 18, marginBottom: 10 }}>New decks!</NormalText>
                       {newDecks.map((deck) => {
                         return (
                           <View style={{ marginBottom: 40 }} key={deck.folder.id}>
@@ -334,6 +333,7 @@ export default function Decks() {
                               deck={deck}
                               hideFolder={hideFolders}
                               onViewedPress={() => refresh()}
+                              isNew={true}
                             />
                           </View>
                         )

@@ -7,7 +7,7 @@ import DeckListItem from '../DeckListItem'
 import { viewedAccountDecks } from '../../api/DecksApi'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
-export default function DeckWithFolder({ deck, hideFolder, onViewedPress }) {
+export default function DeckWithFolder({ deck, hideFolder, onViewedPress, isNew = false }) {
   const navigation = useNavigation()
 
   const [expanded, setExpanded] = useState(true)
@@ -87,6 +87,7 @@ export default function DeckWithFolder({ deck, hideFolder, onViewedPress }) {
                 ongoingDeck={false}
                 onDelete={() => {}}
                 deck={deck}
+                isNew={isNew}
                 onPress={() => navigation.navigate('Deck', { deck })}
               />
             </View>
