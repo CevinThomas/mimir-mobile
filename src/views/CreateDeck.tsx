@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { BackHandler, ScrollView, View } from 'react-native'
+import { Alert, BackHandler, ScrollView, View } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createDeck, deleteDeck, updateDeck } from '../api/DecksApi'
 import { getFolders } from '../api/FoldersApi'
@@ -92,7 +92,7 @@ export default function CreateDeck(props: {
 
   const onCreateDeck = async () => {
     if (!validate(['name'])) {
-      return
+      return Promise.reject('Validation failed')
     }
 
     try {
@@ -104,14 +104,16 @@ export default function CreateDeck(props: {
         featured: false
       })
       dispatch({ type: 'SET_DECK', response })
+      return Promise.resolve()
     } catch (error) {
       showError(error.message || 'Failed to create deck')
+      return Promise.reject(error)
     }
   }
 
   const onSaveDeck = async () => {
     if (!validate(['name'])) {
-      return
+      return Promise.reject('Validation failed')
     }
 
     try {
@@ -128,14 +130,49 @@ export default function CreateDeck(props: {
           routes: [{ name: 'Home', params: { screen: 'Decks' } }]
         })
       )
+      return Promise.resolve()
     } catch (error) {
       showError(error.message || 'Failed to save deck')
+      return Promise.reject(error)
     }
   }
 
   const onGoBack = () => {
-    dispatch({ type: 'RESET' })
-    navigation.dispatch(CommonActions.goBack())
+    Alert.alert(
+      'Save Changes',
+      'Do you want to save your changes?',
+      [
+        {
+          text: 'No',
+          onPress: () => {
+            dispatch({ type: 'RESET' })
+            navigation.dispatch(CommonActions.goBack())
+          },
+          style: 'cancel'
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            if (state.id) {
+              onSaveDeck()
+                .catch(error => {
+                  console.error('Failed to save deck:', error)
+                  // Navigation is handled in onSaveDeck on success
+                })
+            } else {
+              onCreateDeck()
+                .then(() => {
+                  navigation.dispatch(CommonActions.goBack())
+                })
+                .catch(error => {
+                  console.error('Failed to create deck:', error)
+                })
+            }
+          }
+        }
+      ],
+      { cancelable: false }
+    )
   }
 
   const onPublishDeck = async () => {
@@ -157,7 +194,7 @@ export default function CreateDeck(props: {
 
   return (
     <MainBackground>
-      <Header />
+      <Header onBack={onGoBack} />
       <View style={{ flex: 3 }}>
         <CustomTextInput
           value={state.name}
