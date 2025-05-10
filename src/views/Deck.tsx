@@ -28,6 +28,7 @@ import FilledButton from '../components/Buttons/FilledButton'
 import ClearButton from '../components/Buttons/ClearButton'
 import Header from '../components/Header'
 import { useStoreContext } from '../context/StoreContext'
+import TextSkeleton from '../components/Skeletons/TextSkeleton'
 
 export default function Deck(props: {
   route: {
@@ -52,6 +53,7 @@ export default function Deck(props: {
   const [promoteRequest, setPromoteRequest] = useState({})
   const [isFeaturedForUser, setIsFeaturedForUser] = useState(false)
   const [sharedFrom, setSharedFrom] = useState({})
+  const [loading, setLoading] = useState(true)
   const bottomSheetRef = useRef<BottomSheet>(null)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
@@ -62,6 +64,7 @@ export default function Deck(props: {
   }, [])
 
   const fetchDeckInfo = async () => {
+    setLoading(true)
     try {
       const response = await getDeck(props.route.params.deck.id)
 
@@ -85,6 +88,8 @@ export default function Deck(props: {
       }
     } catch (error) {
       showError()
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -237,9 +242,13 @@ export default function Deck(props: {
                 marginTop: 20
               }}
             >
-              <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>
-                {props.route.params.deck.name}
-              </NormalText>
+              {loading ? (
+                <TextSkeleton width="70%" height={24} style={{ fontWeight: 'bold' }} />
+              ) : (
+                <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>
+                  {props.route.params.deck.name}
+                </NormalText>
+              )}
               {favorite ? (
                 <Ionicons onPress={handleFavoritePress} name="star" size={24} color="white" />
               ) : (
@@ -252,63 +261,94 @@ export default function Deck(props: {
               )}
             </View>
 
-            {deck.deck_type === 'account_deck' && (
-              <NormalText style={{ marginBottom: 10 }}>Created by {deck.account.name}</NormalText>
+            {loading ? (
+              <>
+                <TextSkeleton width="50%" marginBottom={10} />
+                <TextSkeleton width="60%" marginBottom={10} />
+                <TextSkeleton width="40%" marginBottom={10} />
+                <TextSkeleton width="90%" height={20} marginBottom={10} />
+              </>
+            ) : (
+              <>
+                {deck.deck_type === 'account_deck' && (
+                  <NormalText style={{ marginBottom: 10 }}>Created by {deck.account.name}</NormalText>
+                )}
+                {sharedFrom && <NormalText>Shared from: {sharedFrom.email}</NormalText>}
+                {promoteRequest && !deck.account?.id && (
+                  <NormalText>Promote status {promoteRequest.status}</NormalText>
+                )}
+                {deck.description && <NormalText>{deck.description}</NormalText>}
+              </>
             )}
-            {sharedFrom && <NormalText>Shared from: {sharedFrom.email}</NormalText>}
-            {promoteRequest && !deck.account?.id && (
-              <NormalText>Promote status {promoteRequest.status}</NormalText>
-            )}
-            {deck.description && <NormalText>{deck.description}</NormalText>}
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-            {!sharedFrom && deck.deck_type === 'private_deck' && isOwnerOfDeck && (
-              <InvisibleButton onPress={handleSharePress}>Share</InvisibleButton>
-            )}
+            {loading ? (
+              <>
+                <TextSkeleton width="30%" height={20} />
+                <TextSkeleton width="30%" height={20} />
+              </>
+            ) : (
+              <>
+                {!sharedFrom && deck.deck_type === 'private_deck' && isOwnerOfDeck && (
+                  <InvisibleButton onPress={handleSharePress}>Share</InvisibleButton>
+                )}
 
-            {sharedFrom && (
-              <InvisibleButton onPress={handleRemovePress}>Unshare Deck</InvisibleButton>
-            )}
+                {sharedFrom && (
+                  <InvisibleButton onPress={handleRemovePress}>Unshare Deck</InvisibleButton>
+                )}
 
-            {!promoteRequest &&
-              !sharedFrom &&
-              deck.deck_type === 'private_deck' &&
-              isOwnerOfDeck && (
-                <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
-              )}
+                {!promoteRequest &&
+                  !sharedFrom &&
+                  deck.deck_type === 'private_deck' &&
+                  isOwnerOfDeck && (
+                    <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
+                  )}
 
-            {props.route.params.isNew && (
-              <InvisibleButton
-                onPress={async () => {
-                  await viewedAccountDecks(props.route.params.deck.id)
-                  if (props.route.params.onViewedPress) {
-                    props.route.params.onViewedPress()
-                  }
-                  navigation.goBack()
-                }}
-              >
-                Viewed
-              </InvisibleButton>
+                {props.route.params.isNew && (
+                  <InvisibleButton
+                    onPress={async () => {
+                      await viewedAccountDecks(props.route.params.deck.id)
+                      if (props.route.params.onViewedPress) {
+                        props.route.params.onViewedPress()
+                      }
+                      navigation.goBack()
+                    }}
+                  >
+                    Viewed
+                  </InvisibleButton>
+                )}
+              </>
             )}
           </View>
         </View>
 
         <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 10 }}>
-          {isOwnerOfDeck && (
-            <View style={{ marginBottom: 15 }}>
-              <ClearButton onPress={handleEditPress}>Edit Deck</ClearButton>
-            </View>
+          {loading ? (
+            <>
+              <View style={{ marginBottom: 15 }}>
+                <TextSkeleton width="100%" height={40} />
+              </View>
+              <TextSkeleton width="100%" height={50} />
+            </>
+          ) : (
+            <>
+              {isOwnerOfDeck && (
+                <View style={{ marginBottom: 15 }}>
+                  <ClearButton onPress={handleEditPress}>Edit Deck</ClearButton>
+                </View>
+              )}
+              {isFeaturedForUser && (
+                <View style={{ marginBottom: 15 }}>
+                  <ClearButton onPress={onCompleteFeaturedDeckPress}>
+                    Complete featured deck
+                  </ClearButton>
+                </View>
+              )}
+              <FilledButton onPress={handleStartPress}>
+                {props.route.params.ongoingDeck ? 'Continue deck session' : 'Start deck'}
+              </FilledButton>
+            </>
           )}
-          {isFeaturedForUser && (
-            <View style={{ marginBottom: 15 }}>
-              <ClearButton onPress={onCompleteFeaturedDeckPress}>
-                Complete featured deck
-              </ClearButton>
-            </View>
-          )}
-          <FilledButton onPress={handleStartPress}>
-            {props.route.params.ongoingDeck ? 'Continue deck session' : 'Start deck'}
-          </FilledButton>
         </View>
 
         {displayShare && (
