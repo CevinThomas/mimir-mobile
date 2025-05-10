@@ -1,85 +1,132 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, TextInputProps, View } from 'react-native'
+import React, { memo, useEffect, useRef, useState } from 'react'
+import { StyleSheet, TextInputProps, View, TouchableWithoutFeedback } from 'react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { getColorProperty } from '../../helpers'
 import { Input } from '@rneui/base'
 import NormalText from '../Typography/NormalText'
-import Animated, { useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  interpolate
+} from 'react-native-reanimated'
 
 interface CustomTextInputProps extends TextInputProps {
   label: string
 }
 
-export default function CustomTextArea({
-  label,
-  style,
-  onChangeText,
-  ...props
-}: CustomTextInputProps) {
-  const { theme } = useTheme()
-  const inputValue = useRef('')
-  const [isFocused, setIsFocused] = useState(false)
-  const translateX = useSharedValue(0)
-  const translateY = useSharedValue(0)
+const CustomTextArea: React.FC<CustomTextInputProps> = memo(
+  ({ label, style, outline, onChangeText, ...props }) => {
+    const { theme } = useTheme()
+    const inputValue = useRef(props.value || '')
+    const inputRef = useRef(null)
+    const [isFocused, setIsFocused] = useState(false)
+    const animationProgress = useSharedValue(props.value ? 1 : 0)
 
-  const backgroundColor = getColorProperty(theme, 'inputBackground')
-  const textColor = getColorProperty(theme, 'inputText')
+    const backgroundColor = getColorProperty(theme, 'inputBackground')
+    const textColor = getColorProperty(theme, 'inputText')
+    // Use accent color for the label when focused, or text color as fallback
+    const labelColor = getColorProperty(
+      theme,
+      'accent',
+      getColorProperty(theme, 'inputLabel', textColor)
+    )
 
-  useEffect(() => {
-    if (isFocused) {
-      translateY.value = withTiming(-61)
-      translateX.value = withTiming(-15)
-    } else {
-      if (inputValue.current === '') {
-        translateY.value = withTiming(0)
-        translateX.value = withTiming(0)
+    // Update animation when value changes externally
+    useEffect(() => {
+      if (props.value === undefined) return
+
+      if (props.value !== '') {
+        animationProgress.value = withTiming(1, { duration: 150 })
+      } else if (!isFocused) {
+        animationProgress.value = withTiming(0, { duration: 150 })
       }
-    }
-  }, [isFocused])
+    }, [props.value])
 
-  return (
-    <View style={styles.container}>
-      <Input
-        onChangeText={(text) => {
-          inputValue.current = text
-          onChangeText(text)
-        }}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        multiline={true}
-        autoCapitalize={'none'}
-        autoComplete={label === 'Email' ? 'email' : 'off'}
-        style={[
-          styles.input,
+    // Update animation on focus/blur
+    useEffect(() => {
+      if (isFocused || inputValue.current !== '') {
+        animationProgress.value = withTiming(1, { duration: 150 })
+      } else {
+        animationProgress.value = withTiming(0, { duration: 150 })
+      }
+    }, [isFocused])
+
+    // Animated styles for the floating label
+    const labelAnimatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [
           {
-            backgroundColor,
-            color: textColor,
-            borderColor: getColorProperty(theme, 'inputBorder'),
-            borderWidth: 0
+            translateY: interpolate(animationProgress.value, [0, 1], [0, -24])
           },
-          style
-        ]}
-        inputContainerStyle={{ borderBottomWidth: 0 }}
-        labelStyle={[styles.label, { color: textColor }]}
-        {...props}
-      />
-      <Animated.View style={{ transform: [{ translateY }, { translateX }] }}>
-        <NormalText style={[styles.label]}>{label}</NormalText>
-      </Animated.View>
-    </View>
-  )
-}
+          {
+            translateX: interpolate(animationProgress.value, [0, 1], [0, -10])
+          },
+          {
+            scale: interpolate(animationProgress.value, [0, 1], [1, 0.85])
+          }
+        ],
+        color: isFocused ? labelColor : textColor,
+        zIndex: 1
+      }
+    })
+
+    return (
+      <View style={styles.container}>
+        <Input
+          ref={inputRef}
+          onChangeText={(text) => {
+            inputValue.current = text
+            if (onChangeText) {
+              onChangeText(text)
+            }
+          }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          multiline={true}
+          autoCapitalize={'none'}
+          autoComplete={label === 'Email' ? 'email' : 'off'}
+          style={[
+            styles.input,
+            {
+              backgroundColor,
+              color: textColor,
+              borderColor: isFocused ? '#005DB4' : getColorProperty(theme, 'inputBorder'),
+              borderWidth: isFocused || outline ? 1 : 0
+            },
+            style
+          ]}
+          inputContainerStyle={{ borderBottomWidth: 0 }}
+          label={null} // Remove default label
+          {...props}
+        />
+        <TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
+          <Animated.View style={[styles.labelContainer, labelAnimatedStyle]}>
+            <NormalText style={styles.labelText}>{label}</NormalText>
+          </Animated.View>
+        </TouchableWithoutFeedback>
+      </View>
+    )
+  }
+)
 
 const styles = StyleSheet.create({
   container: {
+    height: 100,
+    position: 'relative',
     marginBottom: 5
   },
-  label: {
-    marginBottom: 8,
-    fontWeight: 'normal',
+  labelContainer: {
     position: 'absolute',
-    top: -85,
-    left: 25
+    top: 15,
+    left: 25,
+    paddingHorizontal: 10,
+    backgroundColor: 'transparent',
+    zIndex: 2
+  },
+  labelText: {
+    fontWeight: 'normal',
+    color: 'white'
   },
   input: {
     height: 100,
@@ -89,3 +136,5 @@ const styles = StyleSheet.create({
     paddingVertical: 12
   }
 })
+
+export default CustomTextArea

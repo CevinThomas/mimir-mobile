@@ -1,9 +1,14 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
-import { StyleSheet, TextInputProps, View } from 'react-native'
+import { StyleSheet, TextInputProps, View, TouchableWithoutFeedback } from 'react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { getColorProperty } from '../../helpers'
 import { Input } from '@rneui/base'
-import Animated, { useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  interpolate
+} from 'react-native-reanimated'
 import NormalText from '../Typography/NormalText'
 
 interface CustomTextInputProps extends TextInputProps {
@@ -13,44 +18,68 @@ interface CustomTextInputProps extends TextInputProps {
 const CustomTextInput: React.FC<CustomTextInputProps> = memo(
   ({ label, style, outline, onChangeText, ...props }) => {
     const { theme } = useTheme()
-    const inputValue = useRef('')
+    const inputValue = useRef(props.value || '')
+    const inputRef = useRef(null)
     const [isFocused, setIsFocused] = useState(false)
-    const translateX = useSharedValue(0)
-    const translateY = useSharedValue(0)
+    const animationProgress = useSharedValue(props.value ? 1 : 0)
 
     const backgroundColor = getColorProperty(theme, 'inputBackground')
     const textColor = getColorProperty(theme, 'inputText')
+    // Use accent color for the label when focused, or text color as fallback
+    const labelColor = getColorProperty(
+      theme,
+      'accent',
+      getColorProperty(theme, 'inputLabel', textColor)
+    )
 
+    // Update animation when value changes externally
     useEffect(() => {
       if (props.value === undefined) return
 
       if (props.value !== '') {
-        translateY.value = -35
-        translateX.value = -15
-      } else {
-        translateY.value = 0
-        translateX.value = 0
+        animationProgress.value = withTiming(1, { duration: 150 })
+      } else if (!isFocused) {
+        animationProgress.value = withTiming(0, { duration: 150 })
       }
     }, [props.value])
 
+    // Update animation on focus/blur
     useEffect(() => {
-      if (isFocused) {
-        translateY.value = withTiming(-35)
-        translateX.value = withTiming(-15)
+      if (isFocused || inputValue.current !== '') {
+        animationProgress.value = withTiming(1, { duration: 150 })
       } else {
-        if (inputValue.current === '') {
-          translateY.value = withTiming(0)
-          translateX.value = withTiming(0)
-        }
+        animationProgress.value = withTiming(0, { duration: 150 })
       }
     }, [isFocused])
+
+    // Animated styles for the floating label
+    const labelAnimatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [
+          {
+            translateY: interpolate(animationProgress.value, [0, 1], [0, -24])
+          },
+          {
+            translateX: interpolate(animationProgress.value, [0, 1], [0, -10])
+          },
+          {
+            scale: interpolate(animationProgress.value, [0, 1], [1, 0.85])
+          }
+        ],
+        color: isFocused ? labelColor : textColor,
+        zIndex: 1
+      }
+    })
 
     return (
       <View style={styles.container}>
         <Input
+          ref={inputRef}
           onChangeText={(text) => {
             inputValue.current = text
-            onChangeText(text)
+            if (onChangeText) {
+              onChangeText(text)
+            }
           }}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -61,18 +90,20 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
             {
               backgroundColor,
               color: textColor,
-              borderColor: getColorProperty(theme, 'inputBorder'),
-              borderWidth: outline ? 1 : 0
+              borderColor: isFocused ? '#005DB4' : getColorProperty(theme, 'inputBorder'),
+              borderWidth: isFocused || outline ? 1 : 0
             },
             style
           ]}
           inputContainerStyle={{ borderBottomWidth: 0 }}
-          labelStyle={[styles.label, { color: textColor }]}
+          label={null} // Remove default label
           {...props}
         />
-        <Animated.View style={{ transform: [{ translateY }, { translateX }] }}>
-          <NormalText style={[styles.label]}>{label}</NormalText>
-        </Animated.View>
+        <TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
+          <Animated.View style={[styles.labelContainer, labelAnimatedStyle]}>
+            <NormalText style={styles.labelText}>{label}</NormalText>
+          </Animated.View>
+        </TouchableWithoutFeedback>
       </View>
     )
   }
@@ -80,13 +111,19 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
 
 const styles = StyleSheet.create({
   container: {
-    height: 55
+    height: 55,
+    position: 'relative'
   },
-  label: {
-    fontWeight: 'normal',
+  labelContainer: {
     position: 'absolute',
-    top: -57,
+    top: 15,
     left: 25,
+    paddingHorizontal: 10,
+    backgroundColor: 'transparent',
+    zIndex: 2
+  },
+  labelText: {
+    fontWeight: 'normal',
     color: 'white'
   },
   input: {

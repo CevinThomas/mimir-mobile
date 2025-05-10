@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { KeyboardAvoidingView, View } from 'react-native'
+import { KeyboardAvoidingView, StyleSheet, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createCard, deleteCard, updateCard } from '../api/DecksApi'
 import NormalText from '../components/Typography/NormalText'
@@ -54,7 +54,6 @@ export default function CreateCard(props: {
   const { errors, validate, handleChange, setValues } = useFormValidation(
     {
       title: state.currentCard.title,
-      explanation: state.currentCard.explanation,
       choice1: state.currentCard.choices[0]?.title || '',
       choice2: state.currentCard.choices[1]?.title || '',
       choice3: state.currentCard.choices[2]?.title || '',
@@ -177,24 +176,32 @@ export default function CreateCard(props: {
       <Header />
 
       <View style={{ flex: 2 }}>
-        <View style={{ marginBottom: 30, paddingHorizontal: 10 }}>
+        <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
           <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>
         </View>
 
+        <View style={styles.choiceContainer}>
+          <CustomTextInput
+            label={'Question *'}
+            value={state.currentCard.title}
+            onChangeText={(text) => onUpdateCard('title', text)}
+          />
+          <ErrorMessage message={errors.title} visible={!!errors.title} />
+        </View>
+
         <CustomTextInput
-          label={'Question *'}
-          value={state.currentCard.title}
-          onChangeText={(text) => onUpdateCard('title', text)}
+          label={'Explanation'}
+          value={state.currentCard.explanation}
+          onChangeText={(text) => onUpdateCard('explanation', text)}
         />
-        <ErrorMessage message={errors.title} visible={!!errors.title} />
       </View>
 
-      <KeyboardAvoidingView behavior={'padding'} style={{ flex: 6 }}>
+      <KeyboardAvoidingView behavior={'padding'} style={{ flex: 5 }}>
         <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
           <NormalText style={{ fontWeight: 'bold' }}>Choices</NormalText>
         </View>
         <View>
-          <View style={{ marginBottom: 20 }}>
+          <View style={styles.choiceContainer}>
             <CustomTextInput
               style={{ borderWidth: 1, borderColor: '#6FC368' }}
               onChangeText={(text) => onChoiceInputPress(0, text)}
@@ -202,15 +209,8 @@ export default function CreateCard(props: {
               value={state.currentCard.choices[0].title}
             />
             <ErrorMessage message={errors.choice1} visible={!!errors.choice1} />
-
-            <CustomTextInput
-              label={'Explanation *'}
-              value={state.currentCard.explanation}
-              onChangeText={(text) => onUpdateCard('explanation', text)}
-            />
-            <ErrorMessage message={errors.explanation} visible={!!errors.explanation} />
           </View>
-          <View>
+          <View style={styles.choiceContainer}>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(1, text)}
               label={'Choice 2 *'}
@@ -218,7 +218,7 @@ export default function CreateCard(props: {
             />
             <ErrorMessage message={errors.choice2} visible={!!errors.choice2} />
           </View>
-          <View>
+          <View style={styles.choiceContainer}>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(2, text)}
               label={'Choice 3 *'}
@@ -226,7 +226,7 @@ export default function CreateCard(props: {
             />
             <ErrorMessage message={errors.choice3} visible={!!errors.choice3} />
           </View>
-          <View>
+          <View style={styles.choiceContainer}>
             <CustomTextInput
               onChangeText={(text) => onChoiceInputPress(3, text)}
               label={'Choice 4 *'}
@@ -260,3 +260,9 @@ export default function CreateCard(props: {
     </MainBackground>
   )
 }
+
+const styles = StyleSheet.create({
+  choiceContainer: {
+    marginBottom: 10
+  }
+})
