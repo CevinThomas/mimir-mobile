@@ -15,7 +15,8 @@ import {
   getEligibleShareUsers,
   removeFeaturedDeck,
   removeSharedDeck,
-  shareDeck
+  shareDeck,
+  viewedAccountDecks
 } from '../api/DecksApi'
 import { useTheme } from '../context/ThemeContext'
 import NormalText from '../components/Typography/NormalText'
@@ -29,7 +30,14 @@ import Header from '../components/Header'
 import { useStoreContext } from '../context/StoreContext'
 
 export default function Deck(props: {
-  route: { params: { deck: { name: string; id: string }; ongoingDeck: boolean } }
+  route: {
+    params: {
+      deck: { name: string; id: string }
+      ongoingDeck: boolean
+      isNew?: boolean
+      onViewedPress?: () => void
+    }
+  }
 }) {
   const { state } = useStoreContext()
   const { theme } = useTheme()
@@ -48,6 +56,7 @@ export default function Deck(props: {
   const { showError, errorSnackbar } = useErrorSnackbar()
 
   useEffect(() => {
+    console.log(props.route.params.isNew)
     fetchDeckInfo()
     fetchUsersEligibleForShare()
   }, [])
@@ -267,6 +276,20 @@ export default function Deck(props: {
               isOwnerOfDeck && (
                 <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
               )}
+
+            {props.route.params.isNew && (
+              <InvisibleButton
+                onPress={async () => {
+                  await viewedAccountDecks(props.route.params.deck.id)
+                  if (props.route.params.onViewedPress) {
+                    props.route.params.onViewedPress()
+                  }
+                  navigation.goBack()
+                }}
+              >
+                Viewed
+              </InvisibleButton>
+            )}
           </View>
         </View>
 

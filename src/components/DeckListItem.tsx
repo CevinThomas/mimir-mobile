@@ -29,7 +29,7 @@ export default function DeckListItem({ deck, ongoingDeck, onDelete, isNew = fals
     <View style={{ marginBottom: 10 }}>
       <ClickButton
         {...props}
-        onPress={() => navigation.navigate('Deck', { deck: deckData, ongoingDeck })}
+        onPress={() => navigation.navigate('Deck', { deck: deckData, ongoingDeck, isNew, onViewedPress: props.onViewedPress })}
       >
         <View style={{ paddingHorizontal: 10, position: 'relative' }}>
           {isNew && (

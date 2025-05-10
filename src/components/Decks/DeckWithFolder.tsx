@@ -4,7 +4,6 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import React, { useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import DeckListItem from '../DeckListItem'
-import { viewedAccountDecks } from '../../api/DecksApi'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 export default function DeckWithFolder({ deck, hideFolder, onViewedPress, isNew = false }) {
@@ -73,22 +72,12 @@ export default function DeckWithFolder({ deck, hideFolder, onViewedPress, isNew 
         {deck.decks.map((deck) => {
           return (
             <View key={deck.id}>
-              {onViewedPress && (
-                <NormalText
-                  onPress={async () => {
-                    await viewedAccountDecks(deck.id)
-                    onViewedPress()
-                  }}
-                >
-                  Viewed
-                </NormalText>
-              )}
               <DeckListItem
                 ongoingDeck={false}
                 onDelete={() => {}}
                 deck={deck}
                 isNew={isNew}
-                onPress={() => navigation.navigate('Deck', { deck })}
+                onViewedPress={onViewedPress}
               />
             </View>
           )
