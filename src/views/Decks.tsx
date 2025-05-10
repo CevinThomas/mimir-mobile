@@ -320,7 +320,7 @@ export default function Decks() {
                         Featured decks
                       </NormalText>
                       {featuredDecks.map((deck) => (
-                        <DeckListItemSwipe key={deck.id} deck={deck} />
+                        <DeckListItemSwipe key={deck.id} deck={deck} isFeatured={true} />
                       ))}
                     </View>
                   )}
