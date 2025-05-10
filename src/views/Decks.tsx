@@ -8,6 +8,8 @@ import {
   getNewDecks,
   getSharedDecks
 } from '../api/DecksApi'
+import DeckListItemSkeleton from '../components/Skeletons/DeckListItemSkeleton'
+import DeckWithFolderSkeleton from '../components/Skeletons/DeckWithFolderSkeleton'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -36,6 +38,14 @@ export default function Decks() {
   const [hideFolders, setHideFolders] = useState(false)
   const [newDecksSinceLastTime, setNewDecksSinceLastTime] = useState(false)
   const [selectedExpiredDeck, setSelectedExpiredDeck] = useState(null)
+
+  // Loading states
+  const [loadingDecks, setLoadingDecks] = useState(false)
+  const [loadingOngoingDecks, setLoadingOngoingDecks] = useState(false)
+  const [loadingSharedDecks, setLoadingSharedDecks] = useState(false)
+  const [loadingAccountDecks, setLoadingAccountDecks] = useState(false)
+  const [loadingNewDecks, setLoadingNewDecks] = useState(false)
+  const [loadingFeaturedDecks, setLoadingFeaturedDecks] = useState(false)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
   const loopDecks = (decks: any[], ongoingDeck: boolean) => (
@@ -55,10 +65,10 @@ export default function Decks() {
                 This deck has expired
               </NormalText>
             )}
-            <DeckListItemSwipe 
-              deck={deck} 
-              ongoingDeck={ongoingDeck} 
-              onDelete={ongoingDeck ? deleteSession : undefined} 
+            <DeckListItemSwipe
+              deck={deck}
+              ongoingDeck={ongoingDeck}
+              onDelete={ongoingDeck ? deleteSession : undefined}
             />
           </View>
         )
@@ -71,7 +81,15 @@ export default function Decks() {
   }
 
   const setDeckSettings = async (settings: 'private' | 'account') => {
+    // Set the selected deck settings immediately to show the correct tab
+    setSelectedDeckSettings(settings)
+
     if (settings === 'account') {
+      // Set loading states to true before fetching data
+      setLoadingNewDecks(true)
+      setLoadingFeaturedDecks(true)
+      setLoadingAccountDecks(true)
+
       try {
         await checkedAccountDecks()
         fetchNewAccountDecks()
@@ -80,15 +98,23 @@ export default function Decks() {
         setNewDecksSinceLastTime(false)
       } catch (error) {
         showError(error.message || 'Failed to check account decks')
+        // Reset loading states in case of error
+        setLoadingNewDecks(false)
+        setLoadingFeaturedDecks(false)
+        setLoadingAccountDecks(false)
       }
     }
 
     if (settings === 'private') {
+      // Set loading states to true before fetching data
+      setLoadingDecks(true)
+      setLoadingOngoingDecks(true)
+      setLoadingSharedDecks(true)
+
       fetchDecks()
       fetchOnGoingDecks()
       fetchSharedDecks()
     }
-    setSelectedDeckSettings(settings)
   }
 
   const deleteSession = async (deckSessionId: number) => {
@@ -101,15 +127,19 @@ export default function Decks() {
   }
 
   const fetchDecks = async () => {
+    setLoadingDecks(true)
     try {
       const decks = await getDecks()
       setDecks(decks)
     } catch (error) {
       showError(error.message || 'Failed to fetch decks')
+    } finally {
+      setLoadingDecks(false)
     }
   }
 
   const fetchOnGoingDecks = async () => {
+    setLoadingOngoingDecks(true)
     try {
       const decks = await getDeckSessions()
       if (decks.expired_decks.length > 0) {
@@ -118,43 +148,57 @@ export default function Decks() {
       setOngoingDecks(decks.ongoing)
     } catch (error) {
       showError(error.message || 'Failed to fetch ongoing decks')
+    } finally {
+      setLoadingOngoingDecks(false)
     }
   }
 
   const fetchSharedDecks = async () => {
+    setLoadingSharedDecks(true)
     try {
       const decks = await getSharedDecks()
       setSharedDecks(decks)
     } catch (error) {
       showError(error.message || 'Failed to fetch shared decks')
+    } finally {
+      setLoadingSharedDecks(false)
     }
   }
 
   const fetchAccountDecks = async () => {
+    setLoadingAccountDecks(true)
     try {
       const decks = await getAccountDecks()
       setAccountDecks(decks)
     } catch (error) {
       showError(error.message || 'Failed to fetch account decks')
+    } finally {
+      setLoadingAccountDecks(false)
     }
   }
 
   const fetchNewAccountDecks = async () => {
+    setLoadingNewDecks(true)
     try {
       const response = await getNewDecks()
       setNewDecksSinceLastTime(response.newly_added_since_last_time)
       setNewDecks(response.decks)
     } catch (error) {
       showError(error.message || 'Failed to fetch new account decks')
+    } finally {
+      setLoadingNewDecks(false)
     }
   }
 
   const fetchFeaturedDecks = async () => {
+    setLoadingFeaturedDecks(true)
     try {
       const decks = await getFeaturedDecks()
       setFeaturedDecks(decks)
     } catch (error) {
       showError(error.message || 'Failed to fetch featured decks')
+    } finally {
+      setLoadingFeaturedDecks(false)
     }
   }
 
@@ -202,7 +246,6 @@ export default function Decks() {
 
   return (
     <MainBackground noSpace>
-      <NormalText>Hej {state.user.name}</NormalText>
       <View style={styles.mainContainer}>
         <View style={styles.settingsContainer}>
           <View style={{ flex: 1 }}>
@@ -234,7 +277,8 @@ export default function Decks() {
         {selectedDeckSettings === 'private' ? (
           <View style={styles.privateSettingContainer}>
             <ScrollView>
-              {ongoingDecks.length > 0 && (
+              {/* Ongoing Decks Section */}
+              {loadingOngoingDecks ? (
                 <View style={styles.onGoingContainer}>
                   <View
                     style={{
@@ -246,19 +290,39 @@ export default function Decks() {
                     <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                    {selectedExpiredDeck && (
-                      <ExpiredDeckModal
-                        refreshCallback={refresh}
-                        deckSession={selectedExpiredDeck}
-                        onAction={hideExpiredDeckModal}
-                      />
-                    )}
-                    {loopDecks(ongoingDecks, true)}
+                    {Array.from({ length: 2 }).map((_, index) => (
+                      <DeckListItemSkeleton key={index} />
+                    ))}
                   </View>
                 </View>
+              ) : (
+                ongoingDecks.length > 0 && (
+                  <View style={styles.onGoingContainer}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
+                    </View>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                      {selectedExpiredDeck && (
+                        <ExpiredDeckModal
+                          refreshCallback={refresh}
+                          deckSession={selectedExpiredDeck}
+                          onAction={hideExpiredDeckModal}
+                        />
+                      )}
+                      {loopDecks(ongoingDecks, true)}
+                    </View>
+                  </View>
+                )
               )}
 
-              {decks.length > 0 && (
+              {/* My Decks Section */}
+              {loadingDecks ? (
                 <View>
                   <View
                     style={{
@@ -269,11 +333,31 @@ export default function Decks() {
                   >
                     <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
                   </View>
-                  <View style={styles.myDecksContainer}>{loopDecks(decks, false)}</View>
+                  <View style={styles.myDecksContainer}>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <DeckListItemSkeleton key={index} />
+                    ))}
+                  </View>
                 </View>
+              ) : (
+                decks.length > 0 && (
+                  <View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
+                    </View>
+                    <View style={styles.myDecksContainer}>{loopDecks(decks, false)}</View>
+                  </View>
+                )
               )}
 
-              {sharedWithMeDecks.length > 0 && (
+              {/* Shared With Me Section */}
+              {loadingSharedDecks ? (
                 <View>
                   <View
                     style={{
@@ -286,11 +370,34 @@ export default function Decks() {
                       Shared with me
                     </NormalText>
                   </View>
-                  {loopDecks(sharedWithMeDecks, false)}
+                  {Array.from({ length: 2 }).map((_, index) => (
+                    <DeckListItemSkeleton key={index} />
+                  ))}
                 </View>
+              ) : (
+                sharedWithMeDecks.length > 0 && (
+                  <View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
+                        Shared with me
+                      </NormalText>
+                    </View>
+                    {loopDecks(sharedWithMeDecks, false)}
+                  </View>
+                )
               )}
 
-              {decks.length === 0 &&
+              {/* No Decks Available Message */}
+              {!loadingDecks && 
+                !loadingOngoingDecks && 
+                !loadingSharedDecks && 
+                decks.length === 0 &&
                 sharedWithMeDecks.length === 0 &&
                 ongoingDecks.length === 0 && (
                   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -307,48 +414,79 @@ export default function Decks() {
           </View>
         ) : (
           <View style={styles.accountSettingContainer}>
-            {!accountDecksToShow() && !newDecksToShow() && !featuredDecksToShow() ? (
+            {!loadingFeaturedDecks && 
+             !loadingNewDecks && 
+             !loadingAccountDecks && 
+             !accountDecksToShow() && 
+             !newDecksToShow() && 
+             !featuredDecksToShow() ? (
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
               </View>
             ) : (
               <View style={styles.accountDecks}>
                 <ScrollView>
-                  {featuredDecks.length > 0 && (
+                  {/* Featured Decks Section */}
+                  {loadingFeaturedDecks ? (
                     <View style={{ marginBottom: 40 }}>
                       <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
                         Featured decks
                       </NormalText>
-                      {featuredDecks.map((deck) => (
-                        <DeckListItemSwipe key={deck.id} deck={deck} isFeatured={true} />
+                      {Array.from({ length: 2 }).map((_, index) => (
+                        <DeckListItemSkeleton key={index} />
                       ))}
                     </View>
+                  ) : (
+                    featuredDecks.length > 0 && (
+                      <View style={{ marginBottom: 40 }}>
+                        <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
+                          Featured decks
+                        </NormalText>
+                        {featuredDecks.map((deck) => (
+                          <DeckListItemSwipe key={deck.id} deck={deck} isFeatured={true} />
+                        ))}
+                      </View>
+                    )
                   )}
-                  {newDecks.length > 0 && (
+
+                  {/* New Decks Section */}
+                  {loadingNewDecks ? (
                     <View style={{ marginBottom: 30 }}>
-                      {newDecks.map((deck) => {
-                        return (
-                          <View style={{ marginBottom: 40 }} key={deck.folder.id}>
-                            <DeckWithFolder
-                              deck={deck}
-                              hideFolder={hideFolders}
-                              onViewedPress={() => refresh()}
-                              isNew={true}
-                            />
+                      <DeckWithFolderSkeleton numberOfDecks={2} hideFolder={hideFolders} />
+                    </View>
+                  ) : (
+                    newDecks.length > 0 && (
+                      <View style={{ marginBottom: 30 }}>
+                        {newDecks.map((deck) => {
+                          return (
+                            <View style={{ marginBottom: 40 }} key={deck.folder.id}>
+                              <DeckWithFolder
+                                deck={deck}
+                                hideFolder={hideFolders}
+                                onViewedPress={() => refresh()}
+                                isNew={true}
+                              />
+                            </View>
+                          )
+                        })}
+                      </View>
+                    )
+                  )}
+
+                  {/* Account Decks Section */}
+                  {loadingAccountDecks ? (
+                    <DeckWithFolderSkeleton numberOfDecks={3} hideFolder={hideFolders} />
+                  ) : (
+                    accountDecks.map((folder) => {
+                      return (
+                        folder.decks.length > 0 && (
+                          <View style={{ marginBottom: 40 }} key={folder.folder.id}>
+                            <DeckWithFolder deck={folder} hideFolder={hideFolders} />
                           </View>
                         )
-                      })}
-                    </View>
-                  )}
-                  {accountDecks.map((folder) => {
-                    return (
-                      folder.decks.length > 0 && (
-                        <View style={{ marginBottom: 40 }} key={folder.folder.id}>
-                          <DeckWithFolder deck={folder} hideFolder={hideFolders} />
-                        </View>
                       )
-                    )
-                  })}
+                    })
+                  )}
                 </ScrollView>
               </View>
             )}
