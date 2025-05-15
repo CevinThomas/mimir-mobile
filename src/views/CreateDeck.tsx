@@ -154,17 +154,16 @@ export default function CreateDeck(props: {
           text: 'Yes',
           onPress: () => {
             if (state.id) {
-              onSaveDeck()
-                .catch(error => {
-                  console.error('Failed to save deck:', error)
-                  // Navigation is handled in onSaveDeck on success
-                })
+              onSaveDeck().catch((error) => {
+                console.error('Failed to save deck:', error)
+                // Navigation is handled in onSaveDeck on success
+              })
             } else {
               onCreateDeck()
                 .then(() => {
                   navigation.dispatch(CommonActions.goBack())
                 })
-                .catch(error => {
+                .catch((error) => {
                   console.error('Failed to create deck:', error)
                 })
             }
@@ -196,19 +195,19 @@ export default function CreateDeck(props: {
     <MainBackground>
       <Header onBack={onGoBack} />
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 20}
         enabled
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
-          <View style={{ flex: 3 }}>
+          <View style={{ flex: 3, paddingTop: 10 }}>
             <CustomTextInput
               value={state.name}
               label={'Title *'}
@@ -268,7 +267,9 @@ export default function CreateDeck(props: {
                 <View style={{ flex: 5 }}>
                   {state.cards?.map((card, index) => (
                     <View style={{ marginBottom: 10 }} key={index}>
-                      <ClickButton onPress={() => navigation.navigate('CreateCard', { card: card })}>
+                      <ClickButton
+                        onPress={() => navigation.navigate('CreateCard', { card: card })}
+                      >
                         {card.title}
                       </ClickButton>
                     </View>
