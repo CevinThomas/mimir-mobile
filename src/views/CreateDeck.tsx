@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, BackHandler, ScrollView, View } from 'react-native'
+import { Alert, BackHandler, ScrollView, View, KeyboardAvoidingView, Platform } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createDeck, deleteDeck, updateDeck } from '../api/DecksApi'
 import { getFolders } from '../api/FoldersApi'
@@ -195,131 +195,147 @@ export default function CreateDeck(props: {
   return (
     <MainBackground>
       <Header onBack={onGoBack} />
-      <View style={{ flex: 3 }}>
-        <CustomTextInput
-          value={state.name}
-          label={'Title *'}
-          onChangeText={(text) => onUpdateDeck('name', text)}
-        />
-        <ErrorMessage message={errors.name} visible={!!errors.name} />
 
-        <CustomTextArea
-          value={state.description}
-          label={'Description'}
-          onChangeText={(text) => onUpdateDeck('description', text)}
-        />
-
-        {state.user.role === 'admin' && state.id && (
-          <CustomCheckBox
-            label={'Featured'}
-            onPress={() => {
-              dispatch({ type: 'UPDATE_DECK_KEY', key: 'featured', value: !state.featured })
-            }}
-            checked={state.featured}
-          />
-        )}
-
-        {folders.length > 0 && (
-          <View>
-            <Dropdown
-              unSelect={(value) => dispatch({ type: 'REMOVE_FOLDER_ID', id: value })}
-              onChange={(value) => dispatch({ type: 'ADD_FOLDER_ID', id: value })}
-              items={folders}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 20}
+        enabled
+      >
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={{ flex: 3 }}>
+            <CustomTextInput
+              value={state.name}
+              label={'Title *'}
+              onChangeText={(text) => onUpdateDeck('name', text)}
             />
-          </View>
-        )}
-      </View>
+            <ErrorMessage message={errors.name} visible={!!errors.name} />
 
-      {state.id && (
-        <View style={{ flex: 10, padding: 10 }}>
-          <View style={{ flex: 1 }}>
-            <View
-              style={{
-                marginBottom: 20,
-                marginTop: 20,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              <View>
-                <NormalText>Cards</NormalText>
-              </View>
-              <View>
-                <SideActionButton onPress={() => navigation.navigate('CreateCard')}>
-                  Add card
-                </SideActionButton>
-              </View>
-            </View>
+            <CustomTextArea
+              value={state.description}
+              label={'Description'}
+              onChangeText={(text) => onUpdateDeck('description', text)}
+            />
 
-            <ScrollView style={{ flex: 5 }}>
-              {state.cards?.map((card, index) => (
-                <View style={{ marginBottom: 10 }} key={index}>
-                  <ClickButton onPress={() => navigation.navigate('CreateCard', { card: card })}>
-                    {card.title}
-                  </ClickButton>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      )}
-
-      {!state.id && (
-        <View>
-          <FilledButton fontSize={16} onPress={onCreateDeck}>
-            Create deck
-          </FilledButton>
-        </View>
-      )}
-
-      {state.id && (
-        <View style={{ flex: 1, flexWrap: 'wrap', flexDirection: 'row', marginBottom: 20 }}>
-          {state.user.role === 'admin' && !state.active && (
-            <View>
-              <ClearButton
-                onPress={async () => {
-                  await onPublishDeck()
-                  navigation.dispatch(
-                    CommonActions.reset({
-                      index: 0,
-                      routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-                    })
-                  )
+            {state.user.role === 'admin' && state.id && (
+              <CustomCheckBox
+                label={'Featured'}
+                onPress={() => {
+                  dispatch({ type: 'UPDATE_DECK_KEY', key: 'featured', value: !state.featured })
                 }}
-              >
-                Publish deck
-              </ClearButton>
+                checked={state.featured}
+              />
+            )}
+
+            {folders.length > 0 && (
+              <View>
+                <Dropdown
+                  unSelect={(value) => dispatch({ type: 'REMOVE_FOLDER_ID', id: value })}
+                  onChange={(value) => dispatch({ type: 'ADD_FOLDER_ID', id: value })}
+                  items={folders}
+                />
+              </View>
+            )}
+          </View>
+
+          {state.id && (
+            <View style={{ flex: 10, padding: 10 }}>
+              <View style={{ flex: 1 }}>
+                <View
+                  style={{
+                    marginBottom: 20,
+                    marginTop: 20,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <View>
+                    <NormalText>Cards</NormalText>
+                  </View>
+                  <View>
+                    <SideActionButton onPress={() => navigation.navigate('CreateCard')}>
+                      Add card
+                    </SideActionButton>
+                  </View>
+                </View>
+
+                <View style={{ flex: 5 }}>
+                  {state.cards?.map((card, index) => (
+                    <View style={{ marginBottom: 10 }} key={index}>
+                      <ClickButton onPress={() => navigation.navigate('CreateCard', { card: card })}>
+                        {card.title}
+                      </ClickButton>
+                    </View>
+                  ))}
+                </View>
+              </View>
             </View>
           )}
 
-          <View style={{ flex: 2, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
-            <ClearButton onPress={onSaveDeck}>
-              {state.active ? 'Update deck' : 'Save draft'}
-            </ClearButton>
-          </View>
-          <View>
-            <ClearButton
-              onPress={async () => {
-                try {
-                  await deleteDeck(state.id)
-                  dispatch({ type: 'RESET' })
-                  navigation.dispatch(
-                    CommonActions.reset({
-                      index: 0,
-                      routes: [{ name: 'Home', params: { screen: 'Decks' } }]
-                    })
-                  )
-                } catch (error) {
-                  showError(error.message || 'Failed to delete deck')
-                }
-              }}
-            >
-              Delete deck
-            </ClearButton>
-          </View>
-        </View>
-      )}
+          {!state.id && (
+            <View>
+              <FilledButton fontSize={16} onPress={onCreateDeck}>
+                Create deck
+              </FilledButton>
+            </View>
+          )}
+
+          {state.id && (
+            <View style={{ flex: 1, flexWrap: 'wrap', flexDirection: 'row', marginBottom: 20 }}>
+              {state.user.role === 'admin' && !state.active && (
+                <View>
+                  <ClearButton
+                    onPress={async () => {
+                      await onPublishDeck()
+                      navigation.dispatch(
+                        CommonActions.reset({
+                          index: 0,
+                          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+                        })
+                      )
+                    }}
+                  >
+                    Publish deck
+                  </ClearButton>
+                </View>
+              )}
+
+              <View style={{ flex: 2, justifyContent: 'flex-end', paddingHorizontal: 5 }}>
+                <ClearButton onPress={onSaveDeck}>
+                  {state.active ? 'Update deck' : 'Save draft'}
+                </ClearButton>
+              </View>
+              <View>
+                <ClearButton
+                  onPress={async () => {
+                    try {
+                      await deleteDeck(state.id)
+                      dispatch({ type: 'RESET' })
+                      navigation.dispatch(
+                        CommonActions.reset({
+                          index: 0,
+                          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+                        })
+                      )
+                    } catch (error) {
+                      showError(error.message || 'Failed to delete deck')
+                    }
+                  }}
+                >
+                  Delete deck
+                </ClearButton>
+              </View>
+            </View>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+
       {errorSnackbar()}
     </MainBackground>
   )

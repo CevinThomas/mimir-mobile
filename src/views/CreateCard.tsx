@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { KeyboardAvoidingView, StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, StyleSheet, View, ScrollView, Platform } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createCard, deleteCard, updateCard } from '../api/DecksApi'
 import NormalText from '../components/Typography/NormalText'
@@ -175,86 +175,101 @@ export default function CreateCard(props: {
     <MainBackground>
       <Header />
 
-      <View style={{ flex: 2 }}>
-        <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
-          <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>
-        </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 50}
+        enabled
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={{ flex: 2 }}>
+            <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
+              <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>
+            </View>
 
-        <View style={styles.choiceContainer}>
-          <CustomTextInput
-            label={'Question *'}
-            value={state.currentCard.title}
-            onChangeText={(text) => onUpdateCard('title', text)}
-          />
-          <ErrorMessage message={errors.title} visible={!!errors.title} />
-        </View>
+            <View style={styles.choiceContainer}>
+              <CustomTextInput
+                label={'Question *'}
+                value={state.currentCard.title}
+                onChangeText={(text) => onUpdateCard('title', text)}
+              />
+              <ErrorMessage message={errors.title} visible={!!errors.title} />
+            </View>
 
-        <CustomTextInput
-          label={'Explanation'}
-          value={state.currentCard.explanation}
-          onChangeText={(text) => onUpdateCard('explanation', text)}
-        />
-      </View>
+            <CustomTextInput
+              label={'Explanation'}
+              value={state.currentCard.explanation}
+              onChangeText={(text) => onUpdateCard('explanation', text)}
+            />
+          </View>
 
-      <KeyboardAvoidingView behavior={'padding'} style={{ flex: 5 }}>
-        <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
-          <NormalText style={{ fontWeight: 'bold' }}>Choices</NormalText>
-        </View>
-        <View>
-          <View style={styles.choiceContainer}>
-            <CustomTextInput
-              style={{ borderWidth: 1, borderColor: '#6FC368' }}
-              onChangeText={(text) => onChoiceInputPress(0, text)}
-              label={'Choice 1 *'}
-              value={state.currentCard.choices[0].title}
-            />
-            <ErrorMessage message={errors.choice1} visible={!!errors.choice1} />
+          <View style={{ flex: 5 }}>
+            <View style={{ marginBottom: 20, paddingHorizontal: 10 }}>
+              <NormalText style={{ fontWeight: 'bold' }}>Choices</NormalText>
+            </View>
+            <View>
+              <View style={styles.choiceContainer}>
+                <CustomTextInput
+                  style={{ borderWidth: 1, borderColor: '#6FC368' }}
+                  onChangeText={(text) => onChoiceInputPress(0, text)}
+                  label={'Choice 1 *'}
+                  value={state.currentCard.choices[0].title}
+                />
+                <ErrorMessage message={errors.choice1} visible={!!errors.choice1} />
+              </View>
+              <View style={styles.choiceContainer}>
+                <CustomTextInput
+                  onChangeText={(text) => onChoiceInputPress(1, text)}
+                  label={'Choice 2 *'}
+                  value={state.currentCard.choices[1].title}
+                />
+                <ErrorMessage message={errors.choice2} visible={!!errors.choice2} />
+              </View>
+              <View style={styles.choiceContainer}>
+                <CustomTextInput
+                  onChangeText={(text) => onChoiceInputPress(2, text)}
+                  label={'Choice 3 *'}
+                  value={state.currentCard.choices[2].title}
+                />
+                <ErrorMessage message={errors.choice3} visible={!!errors.choice3} />
+              </View>
+              <View style={styles.choiceContainer}>
+                <CustomTextInput
+                  onChangeText={(text) => onChoiceInputPress(3, text)}
+                  label={'Choice 4 *'}
+                  value={state.currentCard.choices[3].title}
+                />
+                <ErrorMessage message={errors.choice4} visible={!!errors.choice4} />
+              </View>
+            </View>
           </View>
-          <View style={styles.choiceContainer}>
-            <CustomTextInput
-              onChangeText={(text) => onChoiceInputPress(1, text)}
-              label={'Choice 2 *'}
-              value={state.currentCard.choices[1].title}
-            />
-            <ErrorMessage message={errors.choice2} visible={!!errors.choice2} />
+
+          <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
+            {editingCard && (
+              <View style={{ marginBottom: 10 }}>
+                <ClearButton onPress={onRemoveCard}>Remove card</ClearButton>
+              </View>
+            )}
+
+            <View style={{ flexDirection: 'row' }}>
+              <Animated.View style={[saveCardStyle]}>
+                <FilledButton onPress={onSaveCard}>Save card</FilledButton>
+              </Animated.View>
+              {showNewButton && (
+                <View style={{ width: '50%' }}>
+                  <FilledButton onPress={onNewCard}>New card</FilledButton>
+                </View>
+              )}
+            </View>
           </View>
-          <View style={styles.choiceContainer}>
-            <CustomTextInput
-              onChangeText={(text) => onChoiceInputPress(2, text)}
-              label={'Choice 3 *'}
-              value={state.currentCard.choices[2].title}
-            />
-            <ErrorMessage message={errors.choice3} visible={!!errors.choice3} />
-          </View>
-          <View style={styles.choiceContainer}>
-            <CustomTextInput
-              onChangeText={(text) => onChoiceInputPress(3, text)}
-              label={'Choice 4 *'}
-              value={state.currentCard.choices[3].title}
-            />
-            <ErrorMessage message={errors.choice4} visible={!!errors.choice4} />
-          </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
 
-      <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
-        {editingCard && (
-          <View style={{ marginBottom: 10 }}>
-            <ClearButton onPress={onRemoveCard}>Remove card</ClearButton>
-          </View>
-        )}
-
-        <View style={{ flexDirection: 'row' }}>
-          <Animated.View style={[saveCardStyle]}>
-            <FilledButton onPress={onSaveCard}>Save card</FilledButton>
-          </Animated.View>
-          {showNewButton && (
-            <View style={{ width: '50%' }}>
-              <FilledButton onPress={onNewCard}>New card</FilledButton>
-            </View>
-          )}
-        </View>
-      </View>
       {visible && snackBar()}
       {errorSnackbar()}
     </MainBackground>
