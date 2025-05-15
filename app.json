@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.anonymous.mimir-mobile"
     },
     "android": {
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1A2330"

@@ -15,6 +15,7 @@ import CreateCard from './views/CreateCard'
 import { View } from 'react-native'
 
 import { getColorProperty } from './helpers'
+import { useTheme } from './context/ThemeContext'
 import DeckIcon from './svgs/DeckIcon'
 import SettingsIcon from './svgs/SettingsIcon'
 import DeckIconFilled from './svgs/DeckIconFilled'
@@ -112,9 +113,12 @@ function TabStack() {
 
 export default function App() {
   const { state, dispatch } = useStoreContext()
+  const { theme } = useTheme()
   return (
-    <NavigationContainer>
-      {state.isLoggedIn ? <LoggedInStack /> : <WelcomeStack />}
-    </NavigationContainer>
+    <View style={{ flex: 1, backgroundColor: getColorProperty(theme, 'background') }}>
+      <NavigationContainer>
+        {state.isLoggedIn ? <LoggedInStack /> : <WelcomeStack />}
+      </NavigationContainer>
+    </View>
   )
 }
