@@ -7,8 +7,6 @@ import DeckListItem from '../DeckListItem'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 export default function DeckWithFolder({ deck, hideFolder, onViewedPress, isNew = false }) {
-  const navigation = useNavigation()
-
   const [expanded, setExpanded] = useState(true)
   const animatedHeight = useSharedValue(1) // Initial height scale (1 = 100%)
 

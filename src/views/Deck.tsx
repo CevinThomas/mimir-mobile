@@ -56,9 +56,14 @@ export default function Deck(props: {
   const { showError, errorSnackbar } = useErrorSnackbar()
 
   useEffect(() => {
-    console.log(props.route.params.isNew)
     fetchDeckInfo()
     fetchUsersEligibleForShare()
+  }, [])
+
+  useEffect(() => {
+    if (props.route.params.isNew) {
+      viewedAccountDecks(props.route.params.deck.id)
+    }
   }, [])
 
   const fetchDeckInfo = async () => {
@@ -276,20 +281,6 @@ export default function Deck(props: {
               isOwnerOfDeck && (
                 <InvisibleButton onPress={handlePromoteRequest}>Request promote</InvisibleButton>
               )}
-
-            {props.route.params.isNew && (
-              <InvisibleButton
-                onPress={async () => {
-                  await viewedAccountDecks(props.route.params.deck.id)
-                  if (props.route.params.onViewedPress) {
-                    props.route.params.onViewedPress()
-                  }
-                  navigation.goBack()
-                }}
-              >
-                Viewed
-              </InvisibleButton>
-            )}
           </View>
         </View>
 
@@ -342,7 +333,7 @@ export default function Deck(props: {
 
               {users.length > 0 ? (
                 <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
-                  <MainButton onPress={handleShare}>Share with selected users</MainButton>
+                  <FilledButton onPress={handleShare}>Share with selected users</FilledButton>
                 </View>
               ) : (
                 <Text>You have no one to share with :(</Text>

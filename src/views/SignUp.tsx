@@ -8,6 +8,7 @@ import MainBackground from '../components/MainBackground'
 import CustomTextInput from '../components/Forms/Input'
 import MainButton from '../components/Buttons/MainButton'
 import { useStoreContext } from '../context/StoreContext'
+import FilledButton from '../components/Buttons/FilledButton'
 
 export default function SignUp() {
   const navigation = useNavigation()
@@ -47,9 +48,7 @@ export default function SignUp() {
         </View>
         <View style={styles.buttonContainer}>
           <StatusBar style="auto" />
-          <MainButton type={'filled'} onPress={onSignUp}>
-            Create account
-          </MainButton>
+          <FilledButton onPress={onSignUp}>Create account</FilledButton>
         </View>
       </View>
       {errorSnackbar()}

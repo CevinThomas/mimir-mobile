@@ -7,7 +7,14 @@ import CardsIcon from '../svgs/CardsIcon'
 import ProgressBar from 'react-native-progress/Bar'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-export default function DeckListItem({ deck, ongoingDeck, onDelete, isNew = false, isFeatured = false, ...props }) {
+export default function DeckListItem({
+  deck,
+  ongoingDeck,
+  onDelete,
+  isNew = false,
+  isFeatured = false,
+  ...props
+}) {
   const navigation = useNavigation()
   const [deckData, setDeckData] = useState(ongoingDeck ? deck.deck : deck)
   const [progress, setProgress] = useState(0)
@@ -29,41 +36,54 @@ export default function DeckListItem({ deck, ongoingDeck, onDelete, isNew = fals
     <View style={{ marginBottom: 10 }}>
       <ClickButton
         {...props}
-        onPress={() => navigation.navigate('Deck', { deck: deckData, ongoingDeck, isNew, onViewedPress: props.onViewedPress })}
+        onPress={() =>
+          navigation.navigate('Deck', {
+            deck: deckData,
+            ongoingDeck,
+            isNew,
+            onViewedPress: props.onViewedPress
+          })
+        }
       >
         <View style={{ paddingHorizontal: 10, position: 'relative' }}>
           {isNew && (
-            <View style={{ 
-              position: 'absolute', 
-              top: 5, 
-              left: 5, 
-              backgroundColor: '#68C281', 
-              borderRadius: 4,
-              paddingHorizontal: 6,
-              paddingVertical: 2,
-              flexDirection: 'row',
-              alignItems: 'center',
-              zIndex: 1
-            }}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 5,
+                left: 5,
+                backgroundColor: '#68C281',
+                borderRadius: 4,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                flexDirection: 'row',
+                alignItems: 'center',
+                zIndex: 1
+              }}
+            >
               <Ionicons name="star" size={14} color="white" />
               <NormalText style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>NEW</NormalText>
             </View>
           )}
           {isFeatured && (
-            <View style={{ 
-              position: 'absolute', 
-              top: 5, 
-              left: isNew ? 65 : 5, 
-              backgroundColor: '#4A90E2', 
-              borderRadius: 4,
-              paddingHorizontal: 6,
-              paddingVertical: 2,
-              flexDirection: 'row',
-              alignItems: 'center',
-              zIndex: 1
-            }}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 5,
+                left: isNew ? 65 : 5,
+                backgroundColor: '#4A90E2',
+                borderRadius: 4,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                flexDirection: 'row',
+                alignItems: 'center',
+                zIndex: 1
+              }}
+            >
               <Ionicons name="ribbon" size={14} color="white" />
-              <NormalText style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>FEATURED</NormalText>
+              <NormalText style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>
+                FEATURED
+              </NormalText>
             </View>
           )}
           <View
@@ -101,9 +121,7 @@ export default function DeckListItem({ deck, ongoingDeck, onDelete, isNew = fals
               </View>
               <View style={{ flexDirection: 'row' }}>
                 <CardsIcon />
-                <NormalText
-                  style={{ fontSize: 18, marginLeft: 10, color: 'rgba(0,0,0,0.4)' }}
-                >
+                <NormalText style={{ fontSize: 18, marginLeft: 10, color: 'rgba(0,0,0,0.4)' }}>
                   {deckData.number_of_cards}
                 </NormalText>
               </View>

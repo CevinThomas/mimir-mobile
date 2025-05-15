@@ -55,10 +55,10 @@ export default function Decks() {
                 This deck has expired
               </NormalText>
             )}
-            <DeckListItemSwipe 
-              deck={deck} 
-              ongoingDeck={ongoingDeck} 
-              onDelete={ongoingDeck ? deleteSession : undefined} 
+            <DeckListItemSwipe
+              deck={deck}
+              ongoingDeck={ongoingDeck}
+              onDelete={ongoingDeck ? deleteSession : undefined}
             />
           </View>
         )
@@ -202,7 +202,6 @@ export default function Decks() {
 
   return (
     <MainBackground noSpace>
-      <NormalText>Hej {state.user.name}</NormalText>
       <View style={styles.mainContainer}>
         <View style={styles.settingsContainer}>
           <View style={{ flex: 1 }}>
@@ -225,7 +224,7 @@ export default function Decks() {
                 }
                 onPress={() => setIndex(1)}
               >
-                {state.account?.name}
+                Account
               </Tab.Item>
             </Tab>
           </View>

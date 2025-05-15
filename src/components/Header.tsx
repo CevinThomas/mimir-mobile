@@ -1,5 +1,5 @@
 import React from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import BackIcon from '../svgs/BackIcon'
 import { Button } from '@rneui/base'
@@ -21,7 +21,7 @@ export default function Header({ onBack }) {
     <View
       style={{
         position: 'absolute',
-        top: 70,
+        top: Platform.OS === 'android' ? 30 : 70,
         left: 5,
         right: 0,
         zIndex: 1,
