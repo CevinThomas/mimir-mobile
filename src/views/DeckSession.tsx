@@ -139,6 +139,7 @@ export default function DeckSession(props: {
     }
   }
 
+
   useEffect(() => {
     if (!initLoaded) return
     setCurrentCard(cards[currentCardIndex])

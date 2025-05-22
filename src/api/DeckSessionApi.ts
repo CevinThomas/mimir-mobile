@@ -47,3 +47,8 @@ export const answerCardApi = async (sessionId: string, cardId: string, choiceId:
   })
   return response.data
 }
+
+export const completeDeckSession = async (deckSessionId: string) => {
+  const response = await axiosInstance.post(`/deck_sessions/${deckSessionId}/complete`)
+  return response.data
+}

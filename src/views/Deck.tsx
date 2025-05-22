@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { CommonActions, useNavigation } from '@react-navigation/native'
-import { createDeckSession } from '../api/DeckSessionApi'
-import MainButton from '../components/Buttons/MainButton'
+import { completeDeckSession, createDeckSession } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
 
 import { getColorProperty } from '../helpers'
@@ -34,6 +33,7 @@ export default function Deck(props: {
     params: {
       deck: { name: string; id: string }
       ongoingDeck: boolean
+      completed?: boolean
       isNew?: boolean
       onViewedPress?: () => void
     }
@@ -52,10 +52,12 @@ export default function Deck(props: {
   const [promoteRequest, setPromoteRequest] = useState({})
   const [isFeaturedForUser, setIsFeaturedForUser] = useState(false)
   const [sharedFrom, setSharedFrom] = useState({})
+  const [isCompleted, setIsCompleted] = useState(false)
   const bottomSheetRef = useRef<BottomSheet>(null)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
   useEffect(() => {
+    setIsCompleted(props.route.params.completed || false)
     fetchDeckInfo()
     fetchUsersEligibleForShare()
   }, [])
@@ -148,6 +150,20 @@ export default function Deck(props: {
       navigation.navigate('DeckSession', { id: response.deck_session.id })
     } catch (error) {
       showError()
+    }
+  }
+
+  const handleCompleteDeckSession = async () => {
+    try {
+      await completeDeckSession(props.route.params.deck.deckSessionId)
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+        })
+      )
+    } catch (error) {
+      showError(error.message || 'Failed to complete deck session')
     }
   }
 
@@ -245,16 +261,17 @@ export default function Deck(props: {
               <NormalText style={{ fontWeight: 'bold', fontSize: 24 }}>
                 {props.route.params.deck.name}
               </NormalText>
-              {favorite ? (
-                <Ionicons onPress={handleFavoritePress} name="star" size={24} color="white" />
-              ) : (
-                <Ionicons
-                  onPress={handleFavoritePress}
-                  name={'star-outline'}
-                  size={24}
-                  color={'white'}
-                />
-              )}
+              {!isCompleted &&
+                (favorite ? (
+                  <Ionicons onPress={handleFavoritePress} name="star" size={24} color="white" />
+                ) : (
+                  <Ionicons
+                    onPress={handleFavoritePress}
+                    name={'star-outline'}
+                    size={24}
+                    color={'white'}
+                  />
+                ))}
             </View>
 
             {deck.deck_type === 'account_deck' && (
@@ -267,15 +284,16 @@ export default function Deck(props: {
             {deck.description && <NormalText>{deck.description}</NormalText>}
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-            {!sharedFrom && deck.deck_type === 'private_deck' && isOwnerOfDeck && (
+            {!isCompleted && !sharedFrom && deck.deck_type === 'private_deck' && isOwnerOfDeck && (
               <InvisibleButton onPress={handleSharePress}>Share</InvisibleButton>
             )}
 
-            {sharedFrom && (
+            {!isCompleted && sharedFrom && (
               <InvisibleButton onPress={handleRemovePress}>Unshare Deck</InvisibleButton>
             )}
 
-            {!promoteRequest &&
+            {!isCompleted &&
+              !promoteRequest &&
               !sharedFrom &&
               deck.deck_type === 'private_deck' &&
               isOwnerOfDeck && (
@@ -285,21 +303,26 @@ export default function Deck(props: {
         </View>
 
         <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 10 }}>
-          {isOwnerOfDeck && (
+          {isOwnerOfDeck && !isCompleted && (
             <View style={{ marginBottom: 15 }}>
               <ClearButton onPress={handleEditPress}>Edit Deck</ClearButton>
             </View>
           )}
-          {isFeaturedForUser && (
+          {isFeaturedForUser && !isCompleted && (
             <View style={{ marginBottom: 15 }}>
               <ClearButton onPress={onCompleteFeaturedDeckPress}>
                 Complete featured deck
               </ClearButton>
             </View>
           )}
-          <FilledButton onPress={handleStartPress}>
-            {props.route.params.ongoingDeck ? 'Continue deck session' : 'Start deck'}
-          </FilledButton>
+          {props.route.params.ongoingDeck && !isCompleted && (
+            <ClearButton onPress={handleCompleteDeckSession}>Complete deck session</ClearButton>
+          )}
+          {!isCompleted && (
+            <FilledButton onPress={handleStartPress}>
+              {props.route.params.ongoingDeck ? 'Continue deck session' : 'Start deck'}
+            </FilledButton>
+          )}
         </View>
 
         {displayShare && (

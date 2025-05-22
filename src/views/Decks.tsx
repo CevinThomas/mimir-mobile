@@ -27,6 +27,7 @@ export default function Decks() {
   const [decks, setDecks] = useState([])
   const [accountDecks, setAccountDecks] = useState([])
   const [ongoingDecks, setOngoingDecks] = useState([])
+  const [completedDecks, setCompletedDecks] = useState([])
   const [expiredDeckSessions, setExpiredDeckSessions] = useState([])
   const [sharedWithMeDecks, setSharedDecks] = useState([])
   const [newDecks, setNewDecks] = useState([])
@@ -38,7 +39,7 @@ export default function Decks() {
   const [selectedExpiredDeck, setSelectedExpiredDeck] = useState(null)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
-  const loopDecks = (decks: any[], ongoingDeck: boolean) => (
+  const loopDecks = (decks: any[], ongoingDeck: boolean, completed: boolean = false) => (
     <ScrollView>
       {decks.map((deck) => {
         let deckHasExpired = false
@@ -58,6 +59,7 @@ export default function Decks() {
             <DeckListItemSwipe
               deck={deck}
               ongoingDeck={ongoingDeck}
+              completed={completed}
               onDelete={ongoingDeck ? deleteSession : undefined}
             />
           </View>
@@ -115,7 +117,12 @@ export default function Decks() {
       if (decks.expired_decks.length > 0) {
         setExpiredDeckSessions(decks.expired_decks)
       }
+      console.log(decks.ongoing)
       setOngoingDecks(decks.ongoing)
+      if (decks.completed) {
+        console.log(decks.completed)
+        setCompletedDecks(decks.completed)
+      }
     } catch (error) {
       showError(error.message || 'Failed to fetch ongoing decks')
     }
@@ -289,9 +296,27 @@ export default function Decks() {
                 </View>
               )}
 
+              {completedDecks.length > 0 && (
+                <View style={styles.onGoingContainer}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Completed</NormalText>
+                  </View>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                    {loopDecks(completedDecks, false, true)}
+                  </View>
+                </View>
+              )}
+
               {decks.length === 0 &&
                 sharedWithMeDecks.length === 0 &&
-                ongoingDecks.length === 0 && (
+                ongoingDecks.length === 0 &&
+                completedDecks.length === 0 && (
                   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
                   </View>

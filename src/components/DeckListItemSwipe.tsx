@@ -9,13 +9,23 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { Ionicons } from '@expo/vector-icons'
 
-export default function DeckListItemSwipe({ deck, ongoingDeck, onDelete, isNew = false, isFeatured = false, ...props }) {
+export default function DeckListItemSwipe({
+  deck,
+  ongoingDeck,
+  completed,
+  onDelete,
+  isNew = false,
+  isFeatured = false,
+  ...props
+}) {
   const navigation = useNavigation()
   const [componentWidth, setComponentWidth] = useState(0)
   // Calculate 30% of the component width, with a fallback to 50
   const MAX_SWIPE_WIDTH = componentWidth * 0.3 || 50
 
-  const [deckData, setDeckData] = React.useState(ongoingDeck ? deck.deck : deck)
+  const [deckData, setDeckData] = React.useState(
+    completed ? deck.deck : ongoingDeck ? deck.deck : deck
+  )
   const [progress, setProgress] = React.useState(0)
 
   // Animated values for swipe
@@ -201,41 +211,49 @@ export default function DeckListItemSwipe({ deck, ongoingDeck, onDelete, isNew =
             <Animated.View style={[{ backgroundColor: 'white' }, animatedStyle]}>
               <ClickButton
                 {...props}
-                onPress={() => navigation.navigate('Deck', { deck: deckData, ongoingDeck })}
+                onPress={() => navigation.navigate('Deck', { deck: deckData, ongoingDeck, completed })}
               >
                 <View style={{ paddingHorizontal: 10, position: 'relative' }}>
                   {isNew && (
-                    <View style={{ 
-                      position: 'absolute', 
-                      top: 5, 
-                      left: 5, 
-                      backgroundColor: '#68C281', 
-                      borderRadius: 4,
-                      paddingHorizontal: 6,
-                      paddingVertical: 2,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      zIndex: 1
-                    }}>
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: 5,
+                        left: 5,
+                        backgroundColor: '#68C281',
+                        borderRadius: 4,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        zIndex: 1
+                      }}
+                    >
                       <Ionicons name="star" size={14} color="white" />
-                      <NormalText style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>NEW</NormalText>
+                      <NormalText style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>
+                        NEW
+                      </NormalText>
                     </View>
                   )}
                   {isFeatured && (
-                    <View style={{ 
-                      position: 'absolute', 
-                      top: 5, 
-                      left: isNew ? 65 : 5, 
-                      backgroundColor: '#4A90E2', 
-                      borderRadius: 4,
-                      paddingHorizontal: 6,
-                      paddingVertical: 2,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      zIndex: 1
-                    }}>
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: 5,
+                        left: isNew ? 65 : 5,
+                        backgroundColor: '#4A90E2',
+                        borderRadius: 4,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        zIndex: 1
+                      }}
+                    >
                       <Ionicons name="ribbon" size={14} color="white" />
-                      <NormalText style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>FEATURED</NormalText>
+                      <NormalText style={{ color: 'white', fontSize: 12, marginLeft: 4 }}>
+                        FEATURED
+                      </NormalText>
                     </View>
                   )}
                   <View
