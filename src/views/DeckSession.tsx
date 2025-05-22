@@ -95,7 +95,7 @@ export default function DeckSession(props: {
   const nextCard = async () => {
     try {
       // Store the current value of skipCardChecked before resetting it
-      const shouldArchiveCard = answeredState === CORRECT && skipCardChecked;
+      const shouldArchiveCard = answeredState === CORRECT && skipCardChecked
 
       // If correct answer is selected and checkbox is checked, archive the card
       if (shouldArchiveCard) {
@@ -129,7 +129,11 @@ export default function DeckSession(props: {
   }
 
   const displayExplanation = () => {
-    if ((answeredState === CORRECT || answeredState === WRONG) && currentCard && currentCard.explanation) {
+    if (
+      (answeredState === CORRECT || answeredState === WRONG) &&
+      currentCard &&
+      currentCard.explanation
+    ) {
       return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <NormalText>{currentCard.explanation}</NormalText>
@@ -302,7 +306,8 @@ export default function DeckSession(props: {
           <View
             style={{
               flex: 1,
-              flexDirection: 'column'
+              flexDirection: 'column',
+              justifyContent: 'flex-end'
             }}
           >
             {answeredState === CORRECT && (
