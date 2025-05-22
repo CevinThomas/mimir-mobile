@@ -208,12 +208,14 @@ export default function CreateDeck(props: {
           showsVerticalScrollIndicator={false}
         >
           <View style={{ flex: 3, paddingTop: 10 }}>
-            <CustomTextInput
-              value={state.name}
-              label={'Title *'}
-              onChangeText={(text) => onUpdateDeck('name', text)}
-            />
-            <ErrorMessage message={errors.name} visible={!!errors.name} />
+            <View style={{ marginBottom: 20 }}>
+              <CustomTextInput
+                value={state.name}
+                label={'Title *'}
+                onChangeText={(text) => onUpdateDeck('name', text)}
+              />
+              <ErrorMessage message={errors.name} visible={!!errors.name} />
+            </View>
 
             <CustomTextArea
               value={state.description}

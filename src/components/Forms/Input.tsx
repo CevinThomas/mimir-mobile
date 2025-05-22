@@ -37,7 +37,8 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
       if (props.value === undefined) return
 
       if (props.value !== '') {
-        animationProgress.value = withTiming(1, { duration: 150 })
+        // Ensure label is at the top when there's a value
+        animationProgress.value = 1
       } else if (!isFocused) {
         animationProgress.value = withTiming(0, { duration: 150 })
       }
@@ -45,6 +46,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
 
     // Update animation on focus/blur
     useEffect(() => {
+      if (!isFocused && props.value !== '') return
       if (isFocused || inputValue.current !== '') {
         animationProgress.value = withTiming(1, { duration: 150 })
       } else {
@@ -111,7 +113,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
 
 const styles = StyleSheet.create({
   container: {
-    height: 55,
+    height: 50,
     position: 'relative'
   },
   labelContainer: {
@@ -127,6 +129,7 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   input: {
+    height: 50,
     borderWidth: 1,
     borderRadius: 7,
     paddingHorizontal: 12,

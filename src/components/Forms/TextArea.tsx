@@ -45,6 +45,7 @@ const CustomTextArea: React.FC<CustomTextInputProps> = memo(
 
     // Update animation on focus/blur
     useEffect(() => {
+      if (!isFocused && props.value !== '') return
       if (isFocused || inputValue.current !== '') {
         animationProgress.value = withTiming(1, { duration: 150 })
       } else {

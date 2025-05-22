@@ -19,6 +19,7 @@ import Animated, {
 import { useStoreContext } from '../context/StoreContext'
 import ErrorMessage from '../components/Forms/ErrorMessage'
 import useFormValidation from '../hooks/useFormValidation'
+import CustomTextArea from '../components/Forms/TextArea'
 
 export default function CreateCard(props: {
   route: { params: { card: { name: string; id: string } } }
@@ -192,7 +193,7 @@ export default function CreateCard(props: {
               <NormalText style={{ fontWeight: 'bold' }}>Create Card</NormalText>
             </View>
 
-            <View style={styles.choiceContainer}>
+            <View style={{ marginBottom: 10 }}>
               <CustomTextInput
                 label={'Question *'}
                 value={state.currentCard.title}
@@ -201,7 +202,7 @@ export default function CreateCard(props: {
               <ErrorMessage message={errors.title} visible={!!errors.title} />
             </View>
 
-            <CustomTextInput
+            <CustomTextArea
               label={'Explanation'}
               value={state.currentCard.explanation}
               onChangeText={(text) => onUpdateCard('explanation', text)}
@@ -278,6 +279,6 @@ export default function CreateCard(props: {
 
 const styles = StyleSheet.create({
   choiceContainer: {
-    marginBottom: 10
+    marginBottom: 20
   }
 })
