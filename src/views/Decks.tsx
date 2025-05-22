@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'
-import {
-  getDecks,
-  getSharedDecks
-} from '../api/DecksApi'
+import { getDecks, getSharedDecks } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -13,6 +10,7 @@ import NormalText from '../components/Typography/NormalText'
 import FilledButton from '../components/Buttons/FilledButton'
 import { useStoreContext } from '../context/StoreContext'
 import ExpiredDeckModal from '../components/ExpiredDeckModal'
+import DeckListItemSkeleton from '../components/Skeletons/DeckListItemSkeleton'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -23,6 +21,9 @@ export default function Decks() {
   const [expiredDeckSessions, setExpiredDeckSessions] = useState([])
   const [sharedWithMeDecks, setSharedDecks] = useState([])
   const [selectedExpiredDeck, setSelectedExpiredDeck] = useState(null)
+  const [isLoadingDecks, setIsLoadingDecks] = useState(true)
+  const [isLoadingOngoingDecks, setIsLoadingOngoingDecks] = useState(true)
+  const [isLoadingSharedDecks, setIsLoadingSharedDecks] = useState(true)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
   const loopDecks = (decks: any[], ongoingDeck: boolean, completed: boolean = false) => (
@@ -58,7 +59,6 @@ export default function Decks() {
     setSelectedExpiredDeck(null)
   }
 
-
   const deleteSession = async (deckSessionId: number) => {
     try {
       await deleteDeckSession(deckSessionId)
@@ -69,45 +69,61 @@ export default function Decks() {
   }
 
   const fetchDecks = async () => {
+    setIsLoadingDecks(true)
+    const startTime = Date.now()
     try {
       const decks = await getDecks()
       setDecks(decks)
     } catch (error) {
       showError(error.message || 'Failed to fetch decks')
+    } finally {
+      setIsLoadingDecks(false)
     }
   }
 
   const fetchOnGoingDecks = async () => {
+    setIsLoadingOngoingDecks(true)
+    const startTime = Date.now()
     try {
       const decks = await getDeckSessions()
       if (decks.expired_decks.length > 0) {
         setExpiredDeckSessions(decks.expired_decks)
       }
-      console.log(decks.ongoing)
       setOngoingDecks(decks.ongoing)
       if (decks.completed) {
-        console.log(decks.completed)
         setCompletedDecks(decks.completed)
       }
     } catch (error) {
       showError(error.message || 'Failed to fetch ongoing decks')
+    } finally {
+      setIsLoadingOngoingDecks(false)
     }
   }
 
   const fetchSharedDecks = async () => {
+    setIsLoadingSharedDecks(true)
+    const startTime = Date.now()
     try {
       const decks = await getSharedDecks()
       setSharedDecks(decks)
     } catch (error) {
       showError(error.message || 'Failed to fetch shared decks')
+    } finally {
+      setIsLoadingSharedDecks(false)
     }
   }
-
 
   const refresh = () => {
     fetchDecks()
     fetchOnGoingDecks()
     fetchSharedDecks()
+  }
+
+  // Helper function to render skeleton loaders
+  const renderSkeletons = (count) => {
+    return Array(count)
+      .fill(0)
+      .map((_, index) => <DeckListItemSkeleton key={`skeleton-${index}`} />)
   }
 
   useFocusEffect(
@@ -121,7 +137,8 @@ export default function Decks() {
       <View style={styles.mainContainer}>
         <View style={styles.privateSettingContainer}>
           <ScrollView>
-            {ongoingDecks.length > 0 && (
+            {/* Ongoing Decks Section */}
+            {isLoadingOngoingDecks && ongoingDecks.length !== 0 ? (
               <View style={styles.onGoingContainer}>
                 <View
                   style={{
@@ -140,12 +157,37 @@ export default function Decks() {
                       onAction={hideExpiredDeckModal}
                     />
                   )}
-                  {loopDecks(ongoingDecks, true)}
+                  {renderSkeletons(ongoingDecks.length)}
                 </View>
               </View>
+            ) : (
+              ongoingDecks.length > 0 && (
+                <View style={styles.onGoingContainer}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
+                  </View>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                    {selectedExpiredDeck && (
+                      <ExpiredDeckModal
+                        refreshCallback={refresh}
+                        deckSession={selectedExpiredDeck}
+                        onAction={hideExpiredDeckModal}
+                      />
+                    )}
+                    {loopDecks(ongoingDecks, true)}
+                  </View>
+                </View>
+              )
             )}
 
-            {decks.length > 0 && (
+            {/* My Decks Section */}
+            {isLoadingDecks && decks.length !== 0 ? (
               <View>
                 <View
                   style={{
@@ -156,11 +198,27 @@ export default function Decks() {
                 >
                   <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
                 </View>
-                <View style={styles.myDecksContainer}>{loopDecks(decks, false)}</View>
+                <View style={styles.myDecksContainer}>{renderSkeletons(decks.length)}</View>
               </View>
+            ) : (
+              decks.length > 0 && (
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
+                  </View>
+                  <View style={styles.myDecksContainer}>{loopDecks(decks, false)}</View>
+                </View>
+              )
             )}
 
-            {sharedWithMeDecks.length > 0 && (
+            {/* Shared Decks Section */}
+            {isLoadingSharedDecks && sharedWithMeDecks.length !== 0 ? (
               <View>
                 <View
                   style={{
@@ -173,11 +231,29 @@ export default function Decks() {
                     Shared with me
                   </NormalText>
                 </View>
-                {loopDecks(sharedWithMeDecks, false)}
+                {renderSkeletons(sharedWithMeDecks.length)}
               </View>
+            ) : (
+              sharedWithMeDecks.length > 0 && (
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
+                      Shared with me
+                    </NormalText>
+                  </View>
+                  {loopDecks(sharedWithMeDecks, false)}
+                </View>
+              )
             )}
 
-            {completedDecks.length > 0 && (
+            {/* Completed Decks Section */}
+            {isLoadingOngoingDecks && completedDecks.length !== 0 ? (
               <View style={styles.onGoingContainer}>
                 <View
                   style={{
@@ -189,12 +265,33 @@ export default function Decks() {
                   <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Completed</NormalText>
                 </View>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {loopDecks(completedDecks, false, true)}
+                  {renderSkeletons(completedDecks.length)}
                 </View>
               </View>
+            ) : (
+              completedDecks.length > 0 && (
+                <View style={styles.onGoingContainer}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Completed</NormalText>
+                  </View>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                    {loopDecks(completedDecks, false, true)}
+                  </View>
+                </View>
+              )
             )}
 
-            {decks.length === 0 &&
+            {/* No Decks Available Message */}
+            {!isLoadingDecks &&
+              !isLoadingSharedDecks &&
+              !isLoadingOngoingDecks &&
+              decks.length === 0 &&
               sharedWithMeDecks.length === 0 &&
               ongoingDecks.length === 0 &&
               completedDecks.length === 0 && (
