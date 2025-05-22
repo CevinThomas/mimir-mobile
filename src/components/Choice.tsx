@@ -3,16 +3,17 @@ import { StyleSheet, View } from 'react-native'
 import { useTheme } from '../context/ThemeContext'
 import { getColorProperty } from '../helpers'
 import ChoiceButton from './Buttons/ChoiceButton'
+import { CORRECT, WRONG } from '../constants/answerStates'
 
 export default function Choice({ choice, answeredChoice, answeredState, answerCard }) {
   const { theme } = useTheme()
   const [backgroundColor, setBackgroundColor] = useState()
 
   useEffect(() => {
-    if (answeredState === 0 && answeredChoice) {
+    if (answeredState === CORRECT && answeredChoice) {
       return setBackgroundColor('#6FC368')
     }
-    if (answeredState === 1 && answeredChoice) {
+    if (answeredState === WRONG && answeredChoice) {
       return setBackgroundColor('#CF6679')
     }
     setBackgroundColor(getColorProperty(theme, 'inputBackground'))
@@ -20,7 +21,7 @@ export default function Choice({ choice, answeredChoice, answeredState, answerCa
   return (
     <View style={styles.container}>
       <ChoiceButton
-        disabled={(answeredState === 1 || answeredState === 0) && !answeredChoice}
+        disabled={(answeredState === WRONG || answeredState === CORRECT) && !answeredChoice}
         backgroundColor={backgroundColor}
         onPress={() => answerCard(choice)}
       >

@@ -18,6 +18,8 @@ import OutlineButton from '../components/Buttons/OutlineButton'
 import FilledButton from '../components/Buttons/FilledButton'
 import Svg, { Path } from 'react-native-svg'
 import { Button } from '@rneui/base'
+import CheckboxClickItem from '../components/CheckboxClickItem'
+import { CORRECT, WRONG, UNANSWERED } from '../constants/answerStates'
 
 export default function DeckSession(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -26,11 +28,12 @@ export default function DeckSession(props: {
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [currentCard, setCurrentCard] = useState()
   const [initLoaded, setInitLoaded] = useState(false)
-  const [answeredState, setAnsweredState] = useState(2)
+  const [answeredState, setAnsweredState] = useState(UNANSWERED)
   const [answeredChoiceId, setAnsweredId] = useState()
   const [deckSessionId, setDeckSessionId] = useState<number>()
   const [refreshing, setRefreshing] = useState(false)
   const [percentage, setPercentage] = useState('0%')
+  const [skipCardChecked, setSkipCardChecked] = useState(false)
 
   const navigation = useNavigation()
   const { showError, errorSnackbar } = useErrorSnackbar()
@@ -74,27 +77,11 @@ export default function DeckSession(props: {
 
       setAnsweredId(choice.id)
       if (choice.correct) {
-        setAnsweredState(0)
-        setTimeout(async () => {
-          try {
-            if (currentCardIndex === cards.length - 1) {
-              await fetchNextCardBatch()
-              setCurrentCardIndex(0)
-              setAnsweredState(2)
-              // Fetch updated percentage after moving to next card batch
-              await fetchPercentage(deckSessionId)
-              return
-            }
-            setAnsweredState(2)
-            setCurrentCardIndex(currentCardIndex + 1)
-            // Fetch updated percentage after moving to next card
-            await fetchPercentage(deckSessionId)
-          } catch (error) {
-            showError(error.message || 'Failed to process answer')
-          }
-        }, 1000)
+        setAnsweredState(CORRECT)
+        // Fetch updated percentage after answering correctly
+        fetchPercentage(deckSessionId)
       } else {
-        setAnsweredState(1)
+        setAnsweredState(WRONG)
         // Fetch updated percentage after answering incorrectly
         fetchPercentage(deckSessionId)
       }
@@ -105,15 +92,32 @@ export default function DeckSession(props: {
 
   const nextCard = async () => {
     try {
+      // Store the current value of skipCardChecked before resetting it
+      const shouldArchiveCard = answeredState === CORRECT && skipCardChecked;
+
+      // If correct answer is selected and checkbox is checked, archive the card
+      if (shouldArchiveCard) {
+        await archiveCard(deckSessionId, currentCard.id)
+      }
+
+      // Reset the checkbox state
+      setSkipCardChecked(false)
+
       if (currentCardIndex === cards.length - 1) {
         await fetchNextCardBatch()
         setCurrentCardIndex(0)
-        setAnsweredState(2)
+        setAnsweredState(UNANSWERED)
         // Fetch updated percentage after moving to next card batch
         await fetchPercentage(deckSessionId)
         return
       }
-      setAnsweredState(2)
+
+      // If we archived the card and it wasn't the last one, we need to update the cards array
+      if (shouldArchiveCard) {
+        setCards(cards.filter((card: any) => card.id !== currentCard.id))
+      }
+
+      setAnsweredState(UNANSWERED)
       setCurrentCardIndex(currentCardIndex + 1)
       // Fetch updated percentage after moving to next card
       await fetchPercentage(deckSessionId)
@@ -123,7 +127,7 @@ export default function DeckSession(props: {
   }
 
   const displayExplanation = () => {
-    if (answeredState === 1) {
+    if ((answeredState === CORRECT || answeredState === WRONG) && currentCard && currentCard.explanation) {
       return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <NormalText>{currentCard.explanation}</NormalText>
@@ -187,7 +191,10 @@ export default function DeckSession(props: {
           <NormalText fontSize={32}>{currentCard.title}</NormalText>
         </View>
         <View>
-          {currentCard.choices.map((choice: any) => {
+          {(answeredState === UNANSWERED 
+            ? currentCard.choices 
+            : currentCard.choices.filter((choice: any) => choice.id === answeredChoiceId)
+          ).map((choice: any) => {
             const answeredChoice = answeredChoiceId === choice.id
             return (
               <Choice
@@ -279,27 +286,25 @@ export default function DeckSession(props: {
           <View
             style={{
               flex: 1,
-              flexWrap: 'wrap',
-              flexDirection: 'row'
+              flexDirection: 'column'
             }}
           >
-            <View style={{ flex: 2, justifyContent: 'flex-end' }}>
-              <OutlineButton
-                disabled={cards.length === 1 || answeredState === 1 || answeredState === 0}
-                onPress={archiveCardPress}
-              >
-                Skip this card next time
-              </OutlineButton>
-            </View>
-            {answeredState === 1 && (
+            {answeredState === CORRECT && (
+              <View style={{ justifyContent: 'flex-end', marginBottom: 10 }}>
+                <CheckboxClickItem
+                  title="Skip this card next time"
+                  onPress={() => setSkipCardChecked(!skipCardChecked)}
+                  checked={skipCardChecked}
+                />
+              </View>
+            )}
+            {(answeredState === CORRECT || answeredState === WRONG) && (
               <View
                 style={{
-                  flex: 1,
-                  justifyContent: 'flex-end',
-                  paddingHorizontal: 5
+                  justifyContent: 'flex-end'
                 }}
               >
-                <FilledButton fontSize={14} onPress={nextCard}>
+                <FilledButton fontSize={14} onPress={nextCard} style={{ width: '100%' }}>
                   Next
                 </FilledButton>
               </View>
