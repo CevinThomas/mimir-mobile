@@ -17,7 +17,7 @@ export default function DeckWithFolder({ deck, hideFolder, onViewedPress, isNew 
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      height: animatedHeight.value * (deck.decks.length * 140), // Map shared value to height percentage
+      height: animatedHeight.value * (deck.decks.length * 150), // Map shared value to height percentage
       overflow: 'hidden'
     }
   })
