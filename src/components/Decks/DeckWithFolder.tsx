@@ -25,7 +25,7 @@ export default function DeckWithFolder({ deck, hideFolder, onViewedPress, isNew 
   return (
     <View>
       {deck.folder && !hideFolder && deck.decks.length > 0 && (
-        <View>
+        <TouchableOpacity onPress={toggleExpand}>
           <View
             style={{
               marginBottom: !deck.folder.description && 10,
@@ -48,16 +48,14 @@ export default function DeckWithFolder({ deck, hideFolder, onViewedPress, isNew 
             </View>
 
             <View style={{ width: '50%', alignItems: 'flex-end' }}>
-              <TouchableOpacity onPress={toggleExpand}>
                 <Ionicons
                   name={expanded ? 'chevron-up' : 'chevron-down'}
                   size={20}
                   color={'white'}
                 />
-              </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
       )}
 
       {deck.folder.description && (
