@@ -6,11 +6,7 @@ const ThemeContext = createContext()
 
 export const ThemeProvider = ({ children }) => {
   const systemTheme = useColorScheme()
-  const [theme, setTheme] = useState(systemTheme)
-
-  useEffect(() => {
-    setTheme(systemTheme)
-  }, [systemTheme])
+  const [theme, setTheme] = useState('dark')
 
   useEffect(() => {
     const getTheme = async () => {
