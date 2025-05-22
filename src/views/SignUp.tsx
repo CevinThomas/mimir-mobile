@@ -19,6 +19,8 @@ export default function SignUp() {
   const name = useRef('')
   const email = useRef('')
   const password = useRef('')
+  const emailInputRef = useRef(null)
+  const passwordInputRef = useRef(null)
 
   const onSignUp = async () => {
     try {
@@ -38,12 +40,39 @@ export default function SignUp() {
     <MainBackground>
       <View style={styles.container}>
         <View style={styles.form}>
-          <CustomTextInput label="Namn" onChangeText={(text: string) => (name.current = text)} />
-          <CustomTextInput label="Email" onChangeText={(text: string) => (email.current = text)} />
+          <View style={{ marginBottom: 10 }}>
+            <CustomTextInput
+              label="Namn"
+              onChangeText={(text: string) => (name.current = text)}
+              autoCapitalize={'words'}
+              returnKeyType="next"
+              onSubmitEditing={() => emailInputRef.current?.focus()}
+              blurOnSubmit={false}
+            />
+          </View>
+
+          <View style={{ marginBottom: 10 }}>
+            <CustomTextInput
+              ref={emailInputRef}
+              label="Email"
+              onChangeText={(text: string) => (email.current = text)}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
+              blurOnSubmit={false}
+              textContentType={'emailAddress'}
+              inputMode={'email'}
+              keyboardType={'email-address'}
+            />
+          </View>
+
           <CustomTextInput
+            ref={passwordInputRef}
             label={'Password'}
             secureTextEntry={true}
             onChangeText={(text) => (password.current = text)}
+            returnKeyType="go"
+            returnKeyLabel="signup"
+            onSubmitEditing={onSignUp}
           />
         </View>
         <View style={styles.buttonContainer}>

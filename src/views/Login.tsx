@@ -43,13 +43,19 @@ export default function Login() {
   return (
     <MainBackground>
       <View style={styles.inputContainer}>
-        <CustomTextInput 
-          label="Email" 
-          onChangeText={(text: string) => (email.current = text)}
-          returnKeyType="next"
-          onSubmitEditing={() => passwordInputRef.current?.focus()}
-          blurOnSubmit={false}
-        />
+        <View style={{ marginBottom: 10 }}>
+          <CustomTextInput
+            label="Email"
+            onChangeText={(text: string) => (email.current = text)}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordInputRef.current?.focus()}
+            blurOnSubmit={false}
+            textContentType={'emailAddress'}
+            inputMode={'email'}
+            keyboardType={'email-address'}
+          />
+        </View>
+
         <CustomTextInput
           ref={passwordInputRef}
           label="Password"
