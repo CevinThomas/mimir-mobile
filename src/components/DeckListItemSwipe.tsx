@@ -43,7 +43,8 @@ export default function DeckListItemSwipe({
       setProgress(Math.round((correctCards / totalCards) * 100))
       const deckToUpdate = {
         ...deck.deck,
-        deckSessionId: deck.id
+        deckSessionId: deck.id,
+        number_of_cards: totalCards // Update the number_of_cards to subtract excluded cards
       }
       setDeckData(deckToUpdate)
     }
