@@ -52,3 +52,8 @@ export const completeDeckSession = async (deckSessionId: string) => {
   const response = await axiosInstance.post(`/deck_sessions/${deckSessionId}/complete`)
   return response.data
 }
+
+export const getDeckSessionPercentage = async (deckSessionId: string) => {
+  const response = await axiosInstance.get(`/deck_sessions/${deckSessionId}/percentage`)
+  return response.data
+}
