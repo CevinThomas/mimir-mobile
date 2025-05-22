@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View, RefreshControl } from 'react-native'
 import { getDecks, getSharedDecks } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
@@ -24,6 +24,7 @@ export default function Decks() {
   const [isLoadingDecks, setIsLoadingDecks] = useState(true)
   const [isLoadingOngoingDecks, setIsLoadingOngoingDecks] = useState(true)
   const [isLoadingSharedDecks, setIsLoadingSharedDecks] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
   const loopDecks = (decks: any[], ongoingDeck: boolean, completed: boolean = false) => (
@@ -119,6 +120,14 @@ export default function Decks() {
     fetchSharedDecks()
   }
 
+  const onRefresh = () => {
+    setRefreshing(true)
+    Promise.all([fetchDecks(), fetchOnGoingDecks(), fetchSharedDecks()])
+      .finally(() => {
+        setRefreshing(false)
+      })
+  }
+
   // Helper function to render skeleton loaders
   const renderSkeletons = (count) => {
     return Array(count)
@@ -126,17 +135,21 @@ export default function Decks() {
       .map((_, index) => <DeckListItemSkeleton key={`skeleton-${index}`} />)
   }
 
-  useFocusEffect(
-    React.useCallback(() => {
-      refresh()
-    }, [])
-  )
+  useEffect(() => {
+    refresh()
+  }, [])
 
   return (
     <MainBackground noSpace>
       <View style={styles.mainContainer}>
         <View style={styles.privateSettingContainer}>
-          <ScrollView>
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+              />
+            }>
             {/* Ongoing Decks Section */}
             {isLoadingOngoingDecks && ongoingDecks.length !== 0 ? (
               <View style={styles.onGoingContainer}>

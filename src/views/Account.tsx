@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View, RefreshControl } from 'react-native'
 import {
   checkedAccountDecks,
   getAccountDecks,
@@ -23,6 +23,7 @@ export default function Account() {
   const [isLoadingAccountDecks, setIsLoadingAccountDecks] = useState(true)
   const [isLoadingNewDecks, setIsLoadingNewDecks] = useState(true)
   const [isLoadingFeaturedDecks, setIsLoadingFeaturedDecks] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
   const fetchAccountDecks = async () => {
@@ -101,11 +102,26 @@ export default function Account() {
     }
   }
 
-  useFocusEffect(
-    React.useCallback(() => {
-      refresh()
-    }, [])
-  )
+  const onRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await checkedAccountDecks()
+      await Promise.all([
+        fetchNewAccountDecks(),
+        fetchFeaturedDecks(),
+        fetchAccountDecks()
+      ])
+      setNewDecksSinceLastTime(false)
+    } catch (error) {
+      showError(error.message || 'Failed to refresh decks')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
+    refresh()
+  }, [])
 
   useEffect(() => {
     const accountDecksFolders = accountDecks.map((folder) => folder.folder.name)
@@ -150,7 +166,13 @@ export default function Account() {
             </View>
           ) : (
             <View style={styles.accountDecks}>
-              <ScrollView>
+              <ScrollView
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
+                }>
                 {/* Featured Decks Section */}
                 {(isLoadingFeaturedDecks || featuredDecks.length > 0) && (
                   <View style={{ marginBottom: 40 }}>
