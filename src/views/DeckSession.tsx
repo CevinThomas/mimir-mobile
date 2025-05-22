@@ -74,7 +74,6 @@ export default function DeckSession(props: {
   }, [])
 
   const answerCard = (choice: any) => {
-    console.log('ANSWERING')
     try {
       answerCardApi(deckSessionId, currentCard.id, choice.id)
 

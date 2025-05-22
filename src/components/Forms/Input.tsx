@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState, forwardRef } from 'react'
 import { StyleSheet, TextInputProps, View, TouchableWithoutFeedback } from 'react-native'
 import { useTheme } from '../../context/ThemeContext'
 import { getColorProperty } from '../../helpers'
@@ -12,14 +12,15 @@ import Animated, {
 import NormalText from '../Typography/NormalText'
 
 interface CustomTextInputProps extends TextInputProps {
-  label: string
+  label: string;
+  inputRef?: React.Ref<any>;
 }
 
 const CustomTextInput: React.FC<CustomTextInputProps> = memo(
-  ({ label, style, outline, onChangeText, ...props }) => {
+  ({ label, style, outline, onChangeText, inputRef, ...props }) => {
     const { theme } = useTheme()
     const inputValue = useRef(props.value || '')
-    const inputRef = useRef(null)
+    const internalInputRef = useRef(null)
     const [isFocused, setIsFocused] = useState(false)
     const animationProgress = useSharedValue(props.value ? 1 : 0)
 
@@ -76,7 +77,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
     return (
       <View style={styles.container}>
         <Input
-          ref={inputRef}
+          ref={inputRef || internalInputRef}
           onChangeText={(text) => {
             inputValue.current = text
             if (onChangeText) {
@@ -101,7 +102,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = memo(
           label={null} // Remove default label
           {...props}
         />
-        <TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
+        <TouchableWithoutFeedback onPress={() => (inputRef || internalInputRef).current?.focus()}>
           <Animated.View style={[styles.labelContainer, labelAnimatedStyle]}>
             <NormalText style={styles.labelText}>{label}</NormalText>
           </Animated.View>
@@ -137,4 +138,9 @@ const styles = StyleSheet.create({
   }
 })
 
-export default CustomTextInput
+// Create a forwardRef wrapper for CustomTextInput
+const ForwardedCustomTextInput = forwardRef<any, CustomTextInputProps>((props, ref) => {
+  return <CustomTextInput {...props} inputRef={ref} />
+})
+
+export default ForwardedCustomTextInput

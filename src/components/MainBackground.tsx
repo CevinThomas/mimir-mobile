@@ -19,7 +19,7 @@ export default function MainBackground({
           styles.container,
           {
             backgroundColor: getColorProperty(undefined, 'darkest'),
-            paddingTop: noSpace ? 0 : Platform.OS === 'android' ? insets.top + 20 : insets.top
+            paddingTop: noSpace ? 0 : Platform.OS === 'android' ? insets.top + 40 : insets.top + 40
           }
         ]}
       >

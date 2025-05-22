@@ -17,6 +17,7 @@ export default function Login() {
 
   const email = useRef('')
   const password = useRef('')
+  const passwordInputRef = useRef(null)
   const [rememberMe, setRememberMe] = React.useState(false)
 
   const onLoginPress = async () => {
@@ -42,11 +43,21 @@ export default function Login() {
   return (
     <MainBackground>
       <View style={styles.inputContainer}>
-        <CustomTextInput label="Email" onChangeText={(text: string) => (email.current = text)} />
+        <CustomTextInput 
+          label="Email" 
+          onChangeText={(text: string) => (email.current = text)}
+          returnKeyType="next"
+          onSubmitEditing={() => passwordInputRef.current?.focus()}
+          blurOnSubmit={false}
+        />
         <CustomTextInput
+          ref={passwordInputRef}
           label="Password"
           secureTextEntry
           onChangeText={(text: string) => (password.current = text)}
+          returnKeyType="go"
+          returnKeyLabel="login"
+          onSubmitEditing={onLoginPress}
         />
         <CustomCheckBox
           label={'Remember me'}
