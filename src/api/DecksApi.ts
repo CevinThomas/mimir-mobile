@@ -88,3 +88,8 @@ export const favoriteDeck = async (deckId: string) => {
 export const deleteDeck = async (deckId: string) => {
   return await axiosInstance.delete(`/decks/${deckId}`)
 }
+
+export const getFavoriteDecks = async () => {
+  const response = await axiosInstance.get('/decks/favorites')
+  return response.data
+}

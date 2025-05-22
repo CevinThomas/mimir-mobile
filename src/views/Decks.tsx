@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View, RefreshControl } from 'react-native'
-import { getDecks, getSharedDecks } from '../api/DecksApi'
+import { getDecks, getSharedDecks, getFavoriteDecks } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -20,10 +20,12 @@ export default function Decks() {
   const [completedDecks, setCompletedDecks] = useState([])
   const [expiredDeckSessions, setExpiredDeckSessions] = useState([])
   const [sharedWithMeDecks, setSharedDecks] = useState([])
+  const [favoriteDecks, setFavoriteDecks] = useState([])
   const [selectedExpiredDeck, setSelectedExpiredDeck] = useState(null)
   const [isLoadingDecks, setIsLoadingDecks] = useState(true)
   const [isLoadingOngoingDecks, setIsLoadingOngoingDecks] = useState(true)
   const [isLoadingSharedDecks, setIsLoadingSharedDecks] = useState(true)
+  const [isLoadingFavoriteDecks, setIsLoadingFavoriteDecks] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const { showError, errorSnackbar } = useErrorSnackbar()
 
@@ -114,18 +116,35 @@ export default function Decks() {
     }
   }
 
+  const fetchFavoriteDecks = async () => {
+    setIsLoadingFavoriteDecks(true)
+    try {
+      const decks = await getFavoriteDecks()
+      setFavoriteDecks(decks)
+    } catch (error) {
+      showError(error.message || 'Failed to fetch favorite decks')
+    } finally {
+      setIsLoadingFavoriteDecks(false)
+    }
+  }
+
   const refresh = () => {
     fetchDecks()
     fetchOnGoingDecks()
     fetchSharedDecks()
+    fetchFavoriteDecks()
   }
 
   const onRefresh = () => {
     setRefreshing(true)
-    Promise.all([fetchDecks(), fetchOnGoingDecks(), fetchSharedDecks()])
-      .finally(() => {
-        setRefreshing(false)
-      })
+    Promise.all([
+      fetchDecks(),
+      fetchOnGoingDecks(),
+      fetchSharedDecks(),
+      fetchFavoriteDecks()
+    ]).finally(() => {
+      setRefreshing(false)
+    })
   }
 
   // Helper function to render skeleton loaders
@@ -144,12 +163,8 @@ export default function Decks() {
       <View style={styles.mainContainer}>
         <View style={styles.privateSettingContainer}>
           <ScrollView
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-              />
-            }>
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          >
             {/* Ongoing Decks Section */}
             {isLoadingOngoingDecks && ongoingDecks.length !== 0 ? (
               <View style={styles.onGoingContainer}>
@@ -194,6 +209,41 @@ export default function Decks() {
                       />
                     )}
                     {loopDecks(ongoingDecks, true)}
+                  </View>
+                </View>
+              )
+            )}
+
+            {/* Favorites Section */}
+            {isLoadingFavoriteDecks && favoriteDecks.length !== 0 ? (
+              <View style={styles.onGoingContainer}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginBottom: 10
+                  }}
+                >
+                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Favorites</NormalText>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                  {renderSkeletons(favoriteDecks.length)}
+                </View>
+              </View>
+            ) : (
+              favoriteDecks.length > 0 && (
+                <View style={styles.onGoingContainer}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 10
+                    }}
+                  >
+                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Favorites</NormalText>
+                  </View>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                    {loopDecks(favoriteDecks, false)}
                   </View>
                 </View>
               )
@@ -304,9 +354,11 @@ export default function Decks() {
             {!isLoadingDecks &&
               !isLoadingSharedDecks &&
               !isLoadingOngoingDecks &&
+              !isLoadingFavoriteDecks &&
               decks.length === 0 &&
               sharedWithMeDecks.length === 0 &&
               ongoingDecks.length === 0 &&
+              favoriteDecks.length === 0 &&
               completedDecks.length === 0 && (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                   <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
