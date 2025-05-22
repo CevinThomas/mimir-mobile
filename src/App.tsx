@@ -12,6 +12,7 @@ import DeckSession from './views/DeckSession'
 import Profile from './views/Profile'
 import CreateDeck from './views/CreateDeck'
 import CreateCard from './views/CreateCard'
+import Account from './views/Account'
 import { Platform, View } from 'react-native'
 
 import { getColorProperty } from './helpers'
@@ -19,6 +20,7 @@ import { useTheme } from './context/ThemeContext'
 import DeckIcon from './svgs/DeckIcon'
 import SettingsIcon from './svgs/SettingsIcon'
 import DeckIconFilled from './svgs/DeckIconFilled'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -93,6 +95,22 @@ function TabStack() {
             )
           }
 
+          if (route.name === 'Account') {
+            if (focused) {
+              return (
+                <View style={{ marginTop: 20, marginBottom }}>
+                  <DeckIconFilled />
+                </View>
+              )
+            }
+
+            return (
+              <View style={{ marginTop: 20, marginBottom }}>
+                <DeckIcon fill={focused ? '' : '#FAF9F6'} />
+              </View>
+            )
+          }
+
           if (route.name === 'Settings') {
             return (
               <View style={{ marginTop: 20, marginBottom }}>
@@ -106,6 +124,7 @@ function TabStack() {
       })}
     >
       <Tab.Screen name="Decks" component={Decks} />
+      <Tab.Screen name="Account" component={Account} />
       <Tab.Screen name="Settings" component={Profile} />
     </Tab.Navigator>
   )
