@@ -7,25 +7,40 @@ import { CORRECT, WRONG, UNANSWERED } from '../constants/answerStates'
 import Animated, { 
   useAnimatedStyle, 
   useSharedValue, 
-  withTiming
+  withTiming,
+  withDelay
 } from 'react-native-reanimated'
 
-function Choice({ choice, answeredChoice, answeredState, answerCard }) {
+function Choice({ choice, answeredChoice, answeredState, answerCard, index }) {
   const { theme } = useTheme()
   const [backgroundColor, setBackgroundColor] = useState()
   const [shouldRender, setShouldRender] = useState(true)
 
   // Animation values
-  const opacity = useSharedValue(1)
+  const opacity = useSharedValue(0)
+  const translateY = useSharedValue(50)
   const translateX = useSharedValue(0)
 
   // Create animated style
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: opacity.value,
-      transform: [{ translateX: translateX.value }]
+      transform: [
+        { translateX: translateX.value },
+        { translateY: translateY.value }
+      ]
     }
   })
+
+  // Entrance animation when component mounts
+  useEffect(() => {
+    // Stagger the animations based on index (100ms delay between each choice)
+    const delay = (index || 0) * 100;
+
+    // Animate in with a fade and slide up effect
+    opacity.value = withDelay(delay, withTiming(1, { duration: 400 }));
+    translateY.value = withDelay(delay, withTiming(0, { duration: 400 }));
+  }, []);
 
   useEffect(() => {
     // Update background color based on answer state
@@ -49,13 +64,20 @@ function Choice({ choice, answeredChoice, answeredState, answerCard }) {
       }, 300)
 
       return () => clearTimeout(timeout)
-    } else {
-      // Reset animation values and ensure it's rendered
-      opacity.value = 1
+    } else if (answeredState === UNANSWERED) {
+      // Reset all animation values to trigger entrance animation again
       translateX.value = 0
+      // Reset opacity and translateY to initial values
+      opacity.value = 0
+      translateY.value = 50
       setShouldRender(true)
+
+      // Trigger entrance animation again with delay
+      const delay = (index || 0) * 100;
+      opacity.value = withDelay(delay, withTiming(1, { duration: 400 }));
+      translateY.value = withDelay(delay, withTiming(0, { duration: 400 }));
     }
-  }, [answeredChoice, answeredState, theme, opacity, translateX])
+  }, [answeredChoice, answeredState, theme, opacity, translateX, translateY, index])
 
   // If the choice is empty or has no id, don't render anything
   if (!choice || !choice.id) {

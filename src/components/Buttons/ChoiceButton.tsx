@@ -8,11 +8,10 @@ export default function ChoiceButton({ children, onPress, disabled, backgroundCo
       disabled={disabled}
       disabledStyle={{ backgroundColor }}
       title={children}
-      onPress={onPress}
+      onPressIn={onPress}
       buttonStyle={[styles.container, { backgroundColor }]}
       titleStyle={[styles.text]}
       titleProps={{ numberOfLines: 0 }}
-      onPress={onPress}
     />
   )
 }
