@@ -12,7 +12,7 @@ import DeckSession from './views/DeckSession'
 import Profile from './views/Profile'
 import CreateDeck from './views/CreateDeck'
 import CreateCard from './views/CreateCard'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 
 import { getColorProperty } from './helpers'
 import { useTheme } from './context/ThemeContext'
@@ -26,7 +26,6 @@ const Tab = createBottomTabNavigator()
 function WelcomeStack() {
   return (
     <Stack.Navigator
-      initialRouteName="Welcome"
       screenOptions={{
         headerShown: false,
         headerShadowVisible: false,
@@ -77,17 +76,18 @@ function TabStack() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarIcon: ({ focused, color, size }) => {
+          const marginBottom = Platform.OS === 'android' ? 45 : 0
           if (route.name === 'Decks') {
             if (focused) {
               return (
-                <View style={{ marginTop: 20 }}>
+                <View style={{ marginTop: 20, marginBottom }}>
                   <DeckIconFilled />
                 </View>
               )
             }
 
             return (
-              <View style={{ marginTop: 20 }}>
+              <View style={{ marginTop: 20, marginBottom }}>
                 <DeckIcon fill={focused ? '' : '#FAF9F6'} />
               </View>
             )
@@ -95,7 +95,7 @@ function TabStack() {
 
           if (route.name === 'Settings') {
             return (
-              <View style={{ marginTop: 20 }}>
+              <View style={{ marginTop: 20, marginBottom }}>
                 <SettingsIcon fill={focused ? '' : '#FAF9F6'} />
               </View>
             )
