@@ -34,6 +34,8 @@ export default function DeckSession(props: {
   const [refreshing, setRefreshing] = useState(false)
   const [percentage, setPercentage] = useState('0%')
   const [skipCardChecked, setSkipCardChecked] = useState(false)
+  // Create a fixed array of 4 empty choices
+  const [choiceElements, setChoiceElements] = useState(Array(4).fill({ id: null, title: '' }))
 
   const navigation = useNavigation()
   const { showError, errorSnackbar } = useErrorSnackbar()
@@ -180,8 +182,20 @@ export default function DeckSession(props: {
 
   useEffect(() => {
     if (!initLoaded) return
-    setCurrentCard(cards[currentCardIndex])
-  }, [currentCardIndex, setInitLoaded])
+    const card = cards[currentCardIndex]
+    setCurrentCard(card)
+
+    // Update the choice elements with the choices from the current card
+    if (card && card.choices) {
+      const updatedChoices = Array(4).fill({ id: null, title: '' })
+      card.choices.forEach((choice, index) => {
+        if (index < 4) {
+          updatedChoices[index] = choice
+        }
+      })
+      setChoiceElements(updatedChoices)
+    }
+  }, [currentCardIndex, cards, initLoaded])
 
   const displayCard = () => {
     if (!currentCard) return
@@ -191,14 +205,16 @@ export default function DeckSession(props: {
           <NormalText fontSize={32}>{currentCard.title}</NormalText>
         </View>
         <View>
-          {(answeredState === UNANSWERED 
-            ? currentCard.choices 
-            : currentCard.choices.filter((choice: any) => choice.id === answeredChoiceId)
-          ).map((choice: any) => {
+          {choiceElements.map((choice: any, index: number) => {
+            // Create a fixed set of Choice components that are always rendered
+            // The Choice component will handle visibility internally
+            if (!choice.id) return null
+
             const answeredChoice = answeredChoiceId === choice.id
+
             return (
               <Choice
-                key={choice.id}
+                key={index}
                 choice={choice}
                 answeredChoice={answeredChoice}
                 answeredState={answeredState}
