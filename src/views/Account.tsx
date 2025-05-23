@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+import React, { useEffect, useState, useRef } from 'react'
+import { Dimensions, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import {
   checkedAccountDecks,
   getAccountDecks,
@@ -12,6 +12,7 @@ import DeckListItemSwipe from '../components/DeckListItemSwipe'
 import NormalText from '../components/Typography/NormalText'
 import DeckWithFolder from '../components/Decks/DeckWithFolder'
 import DeckListItemSkeleton from '../components/Skeletons/DeckListItemSkeleton'
+import LottieView from 'lottie-react-native'
 
 export default function Account() {
   const [accountDecks, setAccountDecks] = useState([])
@@ -23,10 +24,13 @@ export default function Account() {
   const [isLoadingNewDecks, setIsLoadingNewDecks] = useState(true)
   const [isLoadingFeaturedDecks, setIsLoadingFeaturedDecks] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [forceShowLoading, setForceShowLoading] = useState(false)
   const { showError, errorSnackbar } = useErrorSnackbar()
+  const animation = useRef<LottieView>(null)
 
   const fetchAccountDecks = async () => {
     setIsLoadingAccountDecks(true)
+    setForceShowLoading(true)
     const startTime = Date.now()
     try {
       const decks = await getAccountDecks()
@@ -43,11 +47,20 @@ export default function Account() {
       } else {
         setIsLoadingAccountDecks(false)
       }
+
+      // Ensure the loading component is shown for at least 1 second
+      setTimeout(
+        () => {
+          setForceShowLoading(false)
+        },
+        Math.max(1000, elapsedTime)
+      )
     }
   }
 
   const fetchNewAccountDecks = async () => {
     setIsLoadingNewDecks(true)
+    setForceShowLoading(true)
     const startTime = Date.now()
     try {
       const response = await getNewDecks()
@@ -65,11 +78,20 @@ export default function Account() {
       } else {
         setIsLoadingNewDecks(false)
       }
+
+      // Ensure the loading component is shown for at least 1 second
+      setTimeout(
+        () => {
+          setForceShowLoading(false)
+        },
+        Math.max(1000, elapsedTime)
+      )
     }
   }
 
   const fetchFeaturedDecks = async () => {
     setIsLoadingFeaturedDecks(true)
+    setForceShowLoading(true)
     const startTime = Date.now()
     try {
       const decks = await getFeaturedDecks()
@@ -86,6 +108,14 @@ export default function Account() {
       } else {
         setIsLoadingFeaturedDecks(false)
       }
+
+      // Ensure the loading component is shown for at least 1 second
+      setTimeout(
+        () => {
+          setForceShowLoading(false)
+        },
+        Math.max(1000, elapsedTime)
+      )
     }
   }
 
@@ -141,83 +171,88 @@ export default function Account() {
   const newDecksToShow = () => newDecks.length > 0
   const featuredDecksToShow = () => featuredDecks.length > 0
 
-  // Helper function to render skeleton loaders
-  const renderSkeletons = (count = 1) => {
-    // Ensure at least 1 skeleton is shown
-    const skeletonCount = Math.max(1, count)
-    return Array(skeletonCount)
-      .fill(0)
-      .map((_, index) => <DeckListItemSkeleton key={`skeleton-${index}`} />)
-  }
+  // Check if any decks are loading
+  const isLoading = () =>
+    isLoadingAccountDecks ||
+    isLoadingNewDecks ||
+    isLoadingFeaturedDecks ||
+    forceShowLoading ||
+    refreshing
+
+  const { height: screenHeight } = Dimensions.get('window')
 
   return (
     <MainBackground noSpace>
       <View style={styles.mainContainer}>
-        <View style={styles.accountSettingContainer}>
-          {!accountDecksToShow() &&
-          !newDecksToShow() &&
-          !featuredDecksToShow() &&
-          !isLoadingAccountDecks &&
-          !isLoadingNewDecks &&
-          !isLoadingFeaturedDecks ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ScrollView
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {isLoading() ? (
+            <View style={[styles.loadingContainer, { height: screenHeight }]}>
+              <LottieView
+                autoPlay
+                ref={animation}
+                style={{
+                  width: 200,
+                  height: 200,
+                  backgroundColor: 'transparent'
+                }}
+                source={require('../../assets/lottie/loading.json')}
+              />
+            </View>
+          ) : !accountDecksToShow() && !newDecksToShow() && !featuredDecksToShow() ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: screenHeight
+              }}
+            >
               <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
             </View>
           ) : (
-            <View style={styles.accountDecks}>
-              <ScrollView
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-              >
-                {/* Featured Decks Section */}
-                {(isLoadingFeaturedDecks || featuredDecks.length > 0) && (
-                  <View style={{ marginBottom: 20 }}>
-                    <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
-                      Featured decks
-                    </NormalText>
-                    {isLoadingFeaturedDecks
-                      ? renderSkeletons(featuredDecks.length)
-                      : featuredDecks.map((deck) => (
-                          <DeckListItemSwipe key={deck.id} deck={deck} isFeatured={true} />
-                        ))}
-                  </View>
-                )}
+            <View style={{ flex: 1 }}>
+              {/* Featured Decks Section */}
+              {featuredDecks.length > 0 && (
+                <View style={{ marginBottom: 20 }}>
+                  <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
+                    Featured decks
+                  </NormalText>
+                  {featuredDecks.map((deck) => (
+                    <DeckListItemSwipe key={deck.id} deck={deck} isFeatured={true} />
+                  ))}
+                </View>
+              )}
 
-                {/* New Decks Section */}
-                {(isLoadingNewDecks || newDecks.length > 0) && (
-                  <View>
-                    {isLoadingNewDecks
-                      ? renderSkeletons(newDecks.length)
-                      : newDecks.map((deck) => (
-                          <View style={{ marginBottom: 20 }} key={deck.folder.id}>
-                            <DeckWithFolder
-                              deck={deck}
-                              hideFolder={hideFolders}
-                              onViewedPress={() => refresh()}
-                              isNew={true}
-                            />
-                          </View>
-                        ))}
+              {/* New Decks Section */}
+              {newDecks.length > 0 &&
+                newDecks.map((deck) => (
+                  <View style={{ marginBottom: 20 }} key={deck.folder.id}>
+                    <DeckWithFolder
+                      deck={deck}
+                      hideFolder={hideFolders}
+                      onViewedPress={() => refresh()}
+                      isNew={true}
+                    />
                   </View>
-                )}
+                ))}
 
-                {/* Account Decks Section */}
-                {isLoadingAccountDecks
-                  ? renderSkeletons(
-                      accountDecks.reduce((total, folder) => total + folder.decks.length, 0)
+              {/* Account Decks Section */}
+              {accountDecks.length > 0 &&
+                accountDecks.map(
+                  (folder) =>
+                    folder.decks.length > 0 && (
+                      <View style={{ marginBottom: 20 }} key={folder.folder.id}>
+                        <DeckWithFolder deck={folder} hideFolder={hideFolders} />
+                      </View>
                     )
-                  : accountDecks.map(
-                      (folder) =>
-                        folder.decks.length > 0 && (
-                          <View style={{ marginBottom: 20 }} key={folder.folder.id}>
-                            <DeckWithFolder deck={folder} hideFolder={hideFolders} />
-                          </View>
-                        )
-                    )}
-              </ScrollView>
+                )}
             </View>
           )}
-        </View>
+        </ScrollView>
       </View>
+
       {errorSnackbar()}
     </MainBackground>
   )
@@ -232,5 +267,10 @@ const styles = StyleSheet.create({
   },
   accountDecks: {
     flex: 1
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })

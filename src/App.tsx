@@ -24,6 +24,8 @@ import DeckIconFilled from './svgs/DeckIconFilled'
 import HomeIconFilled from './svgs/HomeIconFilled'
 import HomeIcon from './svgs/HomeIcon'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import * as NavigationBar from 'expo-navigation-bar'
+import { setStatusBarHidden } from 'expo-status-bar'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -144,6 +146,9 @@ function TabStack() {
 export default function App() {
   const { state, dispatch } = useStoreContext()
   const { theme } = useTheme()
+
+  NavigationBar.setBackgroundColorAsync(getColorProperty(theme, 'background')) // `rgba(0,0,0,0.5)`
+  setStatusBarHidden(true, 'none')
   return (
     <View style={{ flex: 1, backgroundColor: getColorProperty(theme, 'background') }}>
       <NavigationContainer>

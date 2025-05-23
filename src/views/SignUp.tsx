@@ -23,7 +23,9 @@ export default function SignUp() {
   const passwordInputRef = useRef(null)
 
   const onSignUp = async () => {
+    console.log('HELLO')
     try {
+      console.log('MAKING REQUEST')
       const response = await userSignUp(email.current, password.current, name.current)
       if (response.status.code === 200) {
         dispatch({ type: 'SET_USER', payload: response.data })
@@ -31,6 +33,8 @@ export default function SignUp() {
           email: email.current,
           password: password.current
         })
+      } else {
+        showError('Sign up failed. Please try again.')
       }
     } catch (error) {
       showError('Sign up failed. Please try again.')

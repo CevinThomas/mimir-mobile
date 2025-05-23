@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, View, RefreshControl, TouchableOpacity } from 'react-native'
+import React, { useEffect, useState, useRef } from 'react'
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  RefreshControl,
+  TouchableOpacity,
+  Dimensions
+} from 'react-native'
 import { getDecks, getSharedDecks, getFavoriteDecks } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
@@ -12,6 +19,7 @@ import { useStoreContext } from '../context/StoreContext'
 import ExpiredDeckModal from '../components/ExpiredDeckModal'
 import DeckListItemSkeleton from '../components/Skeletons/DeckListItemSkeleton'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import LottieView from 'lottie-react-native'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -27,8 +35,32 @@ export default function Decks() {
   const [isLoadingOngoingDecks, setIsLoadingOngoingDecks] = useState(true)
   const [isLoadingSharedDecks, setIsLoadingSharedDecks] = useState(true)
   const [isLoadingFavoriteDecks, setIsLoadingFavoriteDecks] = useState(true)
+  const [minLoadingTimeElapsed, setMinLoadingTimeElapsed] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const { showError, errorSnackbar } = useErrorSnackbar()
+  const animation = useRef<LottieView>(null)
+  const minLoadingTimerRef = useRef(null)
+
+  const startMinLoadingTimer = () => {
+    // Clear any existing timer
+    if (minLoadingTimerRef.current) {
+      clearTimeout(minLoadingTimerRef.current)
+    }
+
+    // Reset the state
+    setMinLoadingTimeElapsed(false)
+
+    // Set a new timer for 1 second
+    minLoadingTimerRef.current = setTimeout(() => {
+      setMinLoadingTimeElapsed(true)
+    }, 1000)
+  }
+
+  const isLoadingAnyDecks = () => {
+    const isLoading =
+      isLoadingDecks || isLoadingOngoingDecks || isLoadingSharedDecks || isLoadingFavoriteDecks
+    return isLoading || !minLoadingTimeElapsed
+  }
 
   const loopDecks = (decks: any[], ongoingDeck: boolean, completed: boolean = false) => (
     <ScrollView>
@@ -130,6 +162,8 @@ export default function Decks() {
   }
 
   const refresh = () => {
+    // Start the minimum loading timer
+    startMinLoadingTimer()
     fetchDecks()
     fetchOnGoingDecks()
     fetchSharedDecks()
@@ -138,6 +172,8 @@ export default function Decks() {
 
   const onRefresh = () => {
     setRefreshing(true)
+    // Start the minimum loading timer
+    startMinLoadingTimer()
     Promise.all([
       fetchDecks(),
       fetchOnGoingDecks(),
@@ -148,16 +184,12 @@ export default function Decks() {
     })
   }
 
-  // Helper function to render skeleton loaders
-  const renderSkeletons = (count) => {
-    return Array(count)
-      .fill(0)
-      .map((_, index) => <DeckListItemSkeleton key={`skeleton-${index}`} />)
-  }
-
   useEffect(() => {
+    // refresh() will call startMinLoadingTimer()
     refresh()
   }, [])
+
+  const { height: screenHeight } = Dimensions.get('window')
 
   return (
     <MainBackground noSpace>
@@ -166,214 +198,140 @@ export default function Decks() {
           <ScrollView
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           >
-            {/* Ongoing Decks Section */}
-            {isLoadingOngoingDecks && ongoingDecks.length !== 0 ? (
-              <View style={styles.onGoingContainer}>
-                <View
+            {isLoadingAnyDecks() ? (
+              <View style={[styles.loadingContainer, { height: screenHeight }]}>
+                <LottieView
+                  autoPlay
+                  ref={animation}
                   style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 10
+                    width: 200,
+                    height: 200,
+                    backgroundColor: 'transparent'
                   }}
-                >
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
-                </View>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {selectedExpiredDeck && (
-                    <ExpiredDeckModal
-                      refreshCallback={refresh}
-                      deckSession={selectedExpiredDeck}
-                      onAction={hideExpiredDeckModal}
-                    />
+                  source={require('../../assets/lottie/loading.json')}
+                />
+              </View>
+            ) : (
+              <>
+                {/* Ongoing Decks Section */}
+                {ongoingDecks.length > 0 && (
+                  <View style={styles.onGoingContainer}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
+                    </View>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                      {selectedExpiredDeck && (
+                        <ExpiredDeckModal
+                          refreshCallback={refresh}
+                          deckSession={selectedExpiredDeck}
+                          onAction={hideExpiredDeckModal}
+                        />
+                      )}
+                      {loopDecks(ongoingDecks, true)}
+                    </View>
+                  </View>
+                )}
+
+                {/* Favorites Section */}
+                {favoriteDecks.length > 0 && (
+                  <View style={styles.onGoingContainer}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
+                        Favorites
+                      </NormalText>
+                    </View>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                      {loopDecks(favoriteDecks, false)}
+                    </View>
+                  </View>
+                )}
+
+                {/* My Decks Section */}
+                {decks.length > 0 && (
+                  <View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
+                    </View>
+                    <View style={styles.myDecksContainer}>{loopDecks(decks, false)}</View>
+                  </View>
+                )}
+
+                {sharedWithMeDecks.length > 0 && (
+                  <View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
+                        Shared with me
+                      </NormalText>
+                    </View>
+                    {loopDecks(sharedWithMeDecks, false)}
+                  </View>
+                )}
+
+                {completedDecks.length > 0 && (
+                  <View style={styles.onGoingContainer}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 10
+                      }}
+                    >
+                      <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
+                        Completed
+                      </NormalText>
+                    </View>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+                      {loopDecks(completedDecks, false, true)}
+                    </View>
+                  </View>
+                )}
+
+                {/* No Decks Available Message */}
+                {decks.length === 0 &&
+                  sharedWithMeDecks.length === 0 &&
+                  ongoingDecks.length === 0 &&
+                  favoriteDecks.length === 0 &&
+                  completedDecks.length === 0 && (
+                    <View style={styles.noDecksContainer}>
+                      <NormalText style={styles.noDecksTitle}>No decks available</NormalText>
+                      <NormalText style={styles.noDecksMessage}>
+                        Create your first deck to start learning! Flashcards are a great way to
+                        memorize information and improve your knowledge.
+                      </NormalText>
+                      <TouchableOpacity
+                        style={styles.floatingButton}
+                        onPress={() => navigation.navigate('CreateDeck')}
+                      >
+                        <Ionicons name="add" size={30} color="white" />
+                      </TouchableOpacity>
+                    </View>
                   )}
-                  {renderSkeletons(ongoingDecks.length)}
-                </View>
-              </View>
-            ) : (
-              ongoingDecks.length > 0 && (
-                <View style={styles.onGoingContainer}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      marginBottom: 10
-                    }}
-                  >
-                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Ongoing</NormalText>
-                  </View>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                    {selectedExpiredDeck && (
-                      <ExpiredDeckModal
-                        refreshCallback={refresh}
-                        deckSession={selectedExpiredDeck}
-                        onAction={hideExpiredDeckModal}
-                      />
-                    )}
-                    {loopDecks(ongoingDecks, true)}
-                  </View>
-                </View>
-              )
+              </>
             )}
-
-            {/* Favorites Section */}
-            {isLoadingFavoriteDecks && favoriteDecks.length !== 0 ? (
-              <View style={styles.onGoingContainer}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 10
-                  }}
-                >
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Favorites</NormalText>
-                </View>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {renderSkeletons(favoriteDecks.length)}
-                </View>
-              </View>
-            ) : (
-              favoriteDecks.length > 0 && (
-                <View style={styles.onGoingContainer}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      marginBottom: 10
-                    }}
-                  >
-                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Favorites</NormalText>
-                  </View>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                    {loopDecks(favoriteDecks, false)}
-                  </View>
-                </View>
-              )
-            )}
-
-            {/* My Decks Section */}
-            {isLoadingDecks && decks.length !== 0 ? (
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 10
-                  }}
-                >
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
-                </View>
-                <View style={styles.myDecksContainer}>{renderSkeletons(decks.length)}</View>
-              </View>
-            ) : (
-              decks.length > 0 && (
-                <View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      marginBottom: 10
-                    }}
-                  >
-                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>My decks</NormalText>
-                  </View>
-                  <View style={styles.myDecksContainer}>{loopDecks(decks, false)}</View>
-                </View>
-              )
-            )}
-
-            {/* Shared Decks Section */}
-            {isLoadingSharedDecks && sharedWithMeDecks.length !== 0 ? (
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 10
-                  }}
-                >
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
-                    Shared with me
-                  </NormalText>
-                </View>
-                {renderSkeletons(sharedWithMeDecks.length)}
-              </View>
-            ) : (
-              sharedWithMeDecks.length > 0 && (
-                <View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      marginBottom: 10
-                    }}
-                  >
-                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>
-                      Shared with me
-                    </NormalText>
-                  </View>
-                  {loopDecks(sharedWithMeDecks, false)}
-                </View>
-              )
-            )}
-
-            {/* Completed Decks Section */}
-            {isLoadingOngoingDecks && completedDecks.length !== 0 ? (
-              <View style={styles.onGoingContainer}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: 10
-                  }}
-                >
-                  <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Completed</NormalText>
-                </View>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                  {renderSkeletons(completedDecks.length)}
-                </View>
-              </View>
-            ) : (
-              completedDecks.length > 0 && (
-                <View style={styles.onGoingContainer}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      marginBottom: 10
-                    }}
-                  >
-                    <NormalText style={{ fontWeight: 'bold', fontSize: 18 }}>Completed</NormalText>
-                  </View>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-                    {loopDecks(completedDecks, false, true)}
-                  </View>
-                </View>
-              )
-            )}
-
-            {/* No Decks Available Message */}
-            {!isLoadingDecks &&
-              !isLoadingSharedDecks &&
-              !isLoadingOngoingDecks &&
-              !isLoadingFavoriteDecks &&
-              decks.length === 0 &&
-              sharedWithMeDecks.length === 0 &&
-              ongoingDecks.length === 0 &&
-              favoriteDecks.length === 0 &&
-              completedDecks.length === 0 && (
-                <View style={styles.noDecksContainer}>
-                  <NormalText style={styles.noDecksTitle}>No decks available</NormalText>
-                  <NormalText style={styles.noDecksMessage}>
-                    Create your first deck to start learning! Flashcards are a great way to memorize information and improve your knowledge.
-                  </NormalText>
-                  <TouchableOpacity 
-                    style={styles.floatingButton}
-                    onPress={() => navigation.navigate('CreateDeck')}
-                  >
-                    <Ionicons name="add" size={30} color="white" />
-                  </TouchableOpacity>
-                </View>
-              )}
           </ScrollView>
 
           {(decks.length > 0 ||
@@ -381,7 +339,7 @@ export default function Decks() {
             ongoingDecks.length > 0 ||
             favoriteDecks.length > 0 ||
             completedDecks.length > 0) && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.floatingButton}
               onPress={() => navigation.navigate('CreateDeck')}
             >
@@ -413,6 +371,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginVertical: 5
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   floatingButton: {
     position: 'absolute',
     width: 60,
@@ -427,7 +390,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowRadius: 3.84
   },
   noDecksContainer: {
     flex: 1,
