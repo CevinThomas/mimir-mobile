@@ -36,6 +36,7 @@ export default function Deck(props: {
       completed?: boolean
       isNew?: boolean
       onViewedPress?: () => void
+      previousScreen?: string
     }
   }
 }) {
@@ -237,7 +238,31 @@ export default function Deck(props: {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <Header />
+      <Header onBack={() => {
+        // If we know where we came from, reset navigation to that screen
+        if (props.route.params.previousScreen) {
+          // If coming from Account or Decks, reset to that screen
+          if (props.route.params.previousScreen === 'Account' || props.route.params.previousScreen === 'Decks') {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'Home', params: { screen: props.route.params.previousScreen } }]
+              })
+            );
+          } else {
+            // For other screens, just go back
+            navigation.goBack();
+          }
+        } else {
+          // Default to Decks if we don't know where we came from
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+            })
+          );
+        }
+      }} />
       <View style={styles.banner}>
         <DeckBackground />
       </View>

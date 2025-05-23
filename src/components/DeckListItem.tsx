@@ -36,14 +36,17 @@ export default function DeckListItem({
     <View style={{ marginBottom: 10 }}>
       <ClickButton
         {...props}
-        onPress={() =>
+        onPress={() => {
+          // Get the current route name to track where we're coming from
+          const currentRouteName = navigation.getState().routes[navigation.getState().index].name;
           navigation.navigate('Deck', {
             deck: deckData,
             ongoingDeck,
             isNew,
-            onViewedPress: props.onViewedPress
-          })
-        }
+            onViewedPress: props.onViewedPress,
+            previousScreen: currentRouteName
+          });
+        }}
       >
         <View style={{ paddingHorizontal: 10, position: 'relative' }}>
           {isNew && (

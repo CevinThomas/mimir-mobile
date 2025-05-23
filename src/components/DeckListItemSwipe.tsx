@@ -212,7 +212,16 @@ export default function DeckListItemSwipe({
             <Animated.View style={[{ backgroundColor: 'white' }, animatedStyle]}>
               <ClickButton
                 {...props}
-                onPress={() => navigation.navigate('Deck', { deck: deckData, ongoingDeck, completed })}
+                onPress={() => {
+                  // Get the current route name to track where we're coming from
+                  const currentRouteName = navigation.getState().routes[navigation.getState().index].name;
+                  navigation.navigate('Deck', { 
+                    deck: deckData, 
+                    ongoingDeck, 
+                    completed,
+                    previousScreen: currentRouteName 
+                  });
+                }}
               >
                 <View style={{ paddingHorizontal: 10, position: 'relative' }}>
                   {isNew && (
