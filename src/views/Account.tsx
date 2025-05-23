@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, View, RefreshControl } from 'react-native'
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import {
   checkedAccountDecks,
   getAccountDecks,
@@ -7,7 +7,6 @@ import {
   getNewDecks
 } from '../api/DecksApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
-import { useFocusEffect } from '@react-navigation/native'
 import MainBackground from '../components/MainBackground'
 import DeckListItemSwipe from '../components/DeckListItemSwipe'
 import NormalText from '../components/Typography/NormalText'
@@ -28,7 +27,7 @@ export default function Account() {
 
   const fetchAccountDecks = async () => {
     setIsLoadingAccountDecks(true)
-    const startTime = Date.now();
+    const startTime = Date.now()
     try {
       const decks = await getAccountDecks()
       setAccountDecks(decks)
@@ -36,11 +35,11 @@ export default function Account() {
       showError(error.message || 'Failed to fetch account decks')
     } finally {
       // Ensure loading state is shown for at least 1 second
-      const elapsedTime = Date.now() - startTime;
+      const elapsedTime = Date.now() - startTime
       if (elapsedTime < 1000) {
         setTimeout(() => {
           setIsLoadingAccountDecks(false)
-        }, 1000 - elapsedTime);
+        }, 1000 - elapsedTime)
       } else {
         setIsLoadingAccountDecks(false)
       }
@@ -49,7 +48,7 @@ export default function Account() {
 
   const fetchNewAccountDecks = async () => {
     setIsLoadingNewDecks(true)
-    const startTime = Date.now();
+    const startTime = Date.now()
     try {
       const response = await getNewDecks()
       setNewDecksSinceLastTime(response.newly_added_since_last_time)
@@ -58,11 +57,11 @@ export default function Account() {
       showError(error.message || 'Failed to fetch new account decks')
     } finally {
       // Ensure loading state is shown for at least 1 second
-      const elapsedTime = Date.now() - startTime;
+      const elapsedTime = Date.now() - startTime
       if (elapsedTime < 1000) {
         setTimeout(() => {
           setIsLoadingNewDecks(false)
-        }, 1000 - elapsedTime);
+        }, 1000 - elapsedTime)
       } else {
         setIsLoadingNewDecks(false)
       }
@@ -71,7 +70,7 @@ export default function Account() {
 
   const fetchFeaturedDecks = async () => {
     setIsLoadingFeaturedDecks(true)
-    const startTime = Date.now();
+    const startTime = Date.now()
     try {
       const decks = await getFeaturedDecks()
       setFeaturedDecks(decks)
@@ -79,11 +78,11 @@ export default function Account() {
       showError(error.message || 'Failed to fetch featured decks')
     } finally {
       // Ensure loading state is shown for at least 1 second
-      const elapsedTime = Date.now() - startTime;
+      const elapsedTime = Date.now() - startTime
       if (elapsedTime < 1000) {
         setTimeout(() => {
           setIsLoadingFeaturedDecks(false)
-        }, 1000 - elapsedTime);
+        }, 1000 - elapsedTime)
       } else {
         setIsLoadingFeaturedDecks(false)
       }
@@ -106,11 +105,7 @@ export default function Account() {
     setRefreshing(true)
     try {
       await checkedAccountDecks()
-      await Promise.all([
-        fetchNewAccountDecks(),
-        fetchFeaturedDecks(),
-        fetchAccountDecks()
-      ])
+      await Promise.all([fetchNewAccountDecks(), fetchFeaturedDecks(), fetchAccountDecks()])
       setNewDecksSinceLastTime(false)
     } catch (error) {
       showError(error.message || 'Failed to refresh decks')
@@ -149,7 +144,7 @@ export default function Account() {
   // Helper function to render skeleton loaders
   const renderSkeletons = (count = 1) => {
     // Ensure at least 1 skeleton is shown
-    const skeletonCount = Math.max(1, count);
+    const skeletonCount = Math.max(1, count)
     return Array(skeletonCount)
       .fill(0)
       .map((_, index) => <DeckListItemSkeleton key={`skeleton-${index}`} />)
@@ -159,68 +154,65 @@ export default function Account() {
     <MainBackground noSpace>
       <View style={styles.mainContainer}>
         <View style={styles.accountSettingContainer}>
-          {!accountDecksToShow() && !newDecksToShow() && !featuredDecksToShow() && 
-           !isLoadingAccountDecks && !isLoadingNewDecks && !isLoadingFeaturedDecks ? (
+          {!accountDecksToShow() &&
+          !newDecksToShow() &&
+          !featuredDecksToShow() &&
+          !isLoadingAccountDecks &&
+          !isLoadingNewDecks &&
+          !isLoadingFeaturedDecks ? (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
             </View>
           ) : (
             <View style={styles.accountDecks}>
               <ScrollView
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                  />
-                }>
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+              >
                 {/* Featured Decks Section */}
                 {(isLoadingFeaturedDecks || featuredDecks.length > 0) && (
                   <View style={{ marginBottom: 40 }}>
                     <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
                       Featured decks
                     </NormalText>
-                    {isLoadingFeaturedDecks ? (
-                      renderSkeletons(featuredDecks.length)
-                    ) : (
-                      featuredDecks.map((deck) => (
-                        <DeckListItemSwipe key={deck.id} deck={deck} isFeatured={true} />
-                      ))
-                    )}
+                    {isLoadingFeaturedDecks
+                      ? renderSkeletons(featuredDecks.length)
+                      : featuredDecks.map((deck) => (
+                          <DeckListItemSwipe key={deck.id} deck={deck} isFeatured={true} />
+                        ))}
                   </View>
                 )}
 
                 {/* New Decks Section */}
                 {(isLoadingNewDecks || newDecks.length > 0) && (
-                  <View style={{ marginBottom: 30 }}>
-                    {isLoadingNewDecks ? (
-                      renderSkeletons(newDecks.length)
-                    ) : (
-                      newDecks.map((deck) => (
-                        <View style={{ marginBottom: 40 }} key={deck.folder.id}>
-                          <DeckWithFolder
-                            deck={deck}
-                            hideFolder={hideFolders}
-                            onViewedPress={() => refresh()}
-                            isNew={true}
-                          />
-                        </View>
-                      ))
-                    )}
+                  <View>
+                    {isLoadingNewDecks
+                      ? renderSkeletons(newDecks.length)
+                      : newDecks.map((deck) => (
+                          <View style={{ marginBottom: 20 }} key={deck.folder.id}>
+                            <DeckWithFolder
+                              deck={deck}
+                              hideFolder={hideFolders}
+                              onViewedPress={() => refresh()}
+                              isNew={true}
+                            />
+                          </View>
+                        ))}
                   </View>
                 )}
 
                 {/* Account Decks Section */}
-                {isLoadingAccountDecks ? (
-                  renderSkeletons(accountDecks.reduce((total, folder) => total + folder.decks.length, 0))
-                ) : (
-                  accountDecks.map((folder) => (
-                    folder.decks.length > 0 && (
-                      <View style={{ marginBottom: 40 }} key={folder.folder.id}>
-                        <DeckWithFolder deck={folder} hideFolder={hideFolders} />
-                      </View>
+                {isLoadingAccountDecks
+                  ? renderSkeletons(
+                      accountDecks.reduce((total, folder) => total + folder.decks.length, 0)
                     )
-                  ))
-                )}
+                  : accountDecks.map(
+                      (folder) =>
+                        folder.decks.length > 0 && (
+                          <View style={{ marginBottom: 20 }} key={folder.folder.id}>
+                            <DeckWithFolder deck={folder} hideFolder={hideFolders} />
+                          </View>
+                        )
+                    )}
               </ScrollView>
             </View>
           )}
