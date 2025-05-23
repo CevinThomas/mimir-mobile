@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Dimensions, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+import { Dimensions, RefreshControl, ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native'
 import {
   checkedAccountDecks,
   getAccountDecks,
@@ -201,15 +201,11 @@ export default function Account() {
               />
             </View>
           ) : !accountDecksToShow() && !newDecksToShow() && !featuredDecksToShow() ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: screenHeight
-              }}
-            >
-              <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
+            <View style={styles.noDecksContainer}>
+              <NormalText style={styles.noDecksTitle}>Your organisation has no decks yet</NormalText>
+              <NormalText style={styles.noDecksMessage}>
+                Flashcards are a great way to memorize information and improve your knowledge.
+              </NormalText>
             </View>
           ) : (
             <View style={{ flex: 1 }}>
@@ -272,5 +268,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  noDecksContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    height: 300,
+    marginTop: 50
+  },
+  noDecksTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center'
+  },
+  noDecksMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 20
   }
 })
