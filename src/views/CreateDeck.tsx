@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { Alert, BackHandler, ScrollView, View, KeyboardAvoidingView, Platform } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { Alert, BackHandler, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createDeck, deleteDeck, updateDeck } from '../api/DecksApi'
 import { getFolders } from '../api/FoldersApi'

@@ -360,17 +360,31 @@ export default function Decks() {
               ongoingDecks.length === 0 &&
               favoriteDecks.length === 0 &&
               completedDecks.length === 0 && (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                  <NormalText style={{ fontSize: 18 }}>No decks available</NormalText>
+                <View style={styles.noDecksContainer}>
+                  <NormalText style={styles.noDecksTitle}>No decks available</NormalText>
+                  <NormalText style={styles.noDecksMessage}>
+                    Create your first deck to start learning! Flashcards are a great way to memorize information and improve your knowledge.
+                  </NormalText>
+                  <View style={styles.noDecksButtonContainer}>
+                    <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
+                      Create new deck
+                    </FilledButton>
+                  </View>
                 </View>
               )}
           </ScrollView>
 
-          <View style={styles.createDeckContainer}>
-            <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
-              Create new deck
-            </FilledButton>
-          </View>
+          {(decks.length > 0 ||
+            sharedWithMeDecks.length > 0 ||
+            ongoingDecks.length > 0 ||
+            favoriteDecks.length > 0 ||
+            completedDecks.length > 0) && (
+            <View style={styles.createDeckContainer}>
+              <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
+                Create new deck
+              </FilledButton>
+            </View>
+          )}
         </View>
       </View>
       {errorSnackbar()}
@@ -395,5 +409,28 @@ const styles = StyleSheet.create({
   createDeckContainer: {
     justifyContent: 'flex-end',
     marginVertical: 5
+  },
+  noDecksContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    height: 300,
+    marginTop: 50
+  },
+  noDecksTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center'
+  },
+  noDecksMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24
+  },
+  noDecksButtonContainer: {
+    marginTop: 20,
+    width: '80%'
   }
 })
