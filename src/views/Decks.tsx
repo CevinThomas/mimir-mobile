@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, View, RefreshControl } from 'react-native'
+import { ScrollView, StyleSheet, View, RefreshControl, TouchableOpacity } from 'react-native'
 import { getDecks, getSharedDecks, getFavoriteDecks } from '../api/DecksApi'
 import { deleteDeckSession, getDeckSessions } from '../api/DeckSessionApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
@@ -11,6 +11,7 @@ import FilledButton from '../components/Buttons/FilledButton'
 import { useStoreContext } from '../context/StoreContext'
 import ExpiredDeckModal from '../components/ExpiredDeckModal'
 import DeckListItemSkeleton from '../components/Skeletons/DeckListItemSkeleton'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 export default function Decks() {
   const navigation = useNavigation()
@@ -365,11 +366,12 @@ export default function Decks() {
                   <NormalText style={styles.noDecksMessage}>
                     Create your first deck to start learning! Flashcards are a great way to memorize information and improve your knowledge.
                   </NormalText>
-                  <View style={styles.noDecksButtonContainer}>
-                    <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
-                      Create new deck
-                    </FilledButton>
-                  </View>
+                  <TouchableOpacity 
+                    style={styles.floatingButton}
+                    onPress={() => navigation.navigate('CreateDeck')}
+                  >
+                    <Ionicons name="add" size={30} color="white" />
+                  </TouchableOpacity>
                 </View>
               )}
           </ScrollView>
@@ -379,11 +381,12 @@ export default function Decks() {
             ongoingDecks.length > 0 ||
             favoriteDecks.length > 0 ||
             completedDecks.length > 0) && (
-            <View style={styles.createDeckContainer}>
-              <FilledButton onPress={() => navigation.navigate('CreateDeck')}>
-                Create new deck
-              </FilledButton>
-            </View>
+            <TouchableOpacity 
+              style={styles.floatingButton}
+              onPress={() => navigation.navigate('CreateDeck')}
+            >
+              <Ionicons name="add" size={30} color="white" />
+            </TouchableOpacity>
           )}
         </View>
       </View>
@@ -410,6 +413,22 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginVertical: 5
   },
+  floatingButton: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    bottom: 20,
+    right: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   noDecksContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -427,10 +446,7 @@ const styles = StyleSheet.create({
   noDecksMessage: {
     fontSize: 16,
     textAlign: 'center',
-    lineHeight: 24
-  },
-  noDecksButtonContainer: {
-    marginTop: 20,
-    width: '80%'
+    lineHeight: 24,
+    marginBottom: 20
   }
 })

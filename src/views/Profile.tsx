@@ -33,8 +33,8 @@ export default function Profile() {
         const users = await getUsers()
         if (users && users.length > 0) {
           // Find the user with matching email or just take the first one
-          const currentUser = storedEmail 
-            ? users.find(user => user.email === storedEmail) 
+          const currentUser = storedEmail
+            ? users.find((user) => user.email === storedEmail)
             : users[0]
 
           if (currentUser) {
@@ -79,19 +79,18 @@ export default function Profile() {
     <MainBackground>
       <ScrollView
         style={styles.scrollView}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.container}>
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
                 <NormalText style={styles.avatarText}>
-                  {name ? name.charAt(0).toUpperCase() : email ? email.charAt(0).toUpperCase() : '?'}
+                  {name
+                    ? name.charAt(0).toUpperCase()
+                    : email
+                      ? email.charAt(0).toUpperCase()
+                      : '?'}
                 </NormalText>
               </View>
             </View>

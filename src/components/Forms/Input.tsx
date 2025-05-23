@@ -12,8 +12,8 @@ import Animated, {
 import NormalText from '../Typography/NormalText'
 
 interface CustomTextInputProps extends TextInputProps {
-  label: string;
-  inputRef?: React.Ref<any>;
+  label: string
+  inputRef?: React.Ref<any>
 }
 
 const CustomTextInput: React.FC<CustomTextInputProps> = memo(
