@@ -1,28 +1,30 @@
-import Svg, { G, Mask, Path } from 'react-native-svg'
 import * as React from 'react'
+import Svg, { Path } from 'react-native-svg'
 
-export default function HomeIcon({ ...props }) {
+export default function HomeIcon(props) {
   return (
-    <Svg xmlns="http://www.w3.org/2000/svg" width={32} height={33} fill="none" {...props}>
-      <Mask
-        id="a"
-        width={32}
-        height={33}
-        x={0}
-        y={0}
-        maskUnits="userSpaceOnUse"
-        style={{
-          maskType: 'alpha'
-        }}
-      >
-        <Path fill="#D9D9D9" d="M0 .5h32v32H0z" />
-      </Mask>
-      <G mask="url(#a)">
-        <Path
-          fill={props.fill}
-          d="M8 25.833h4v-8h8v8h4v-12l-8-6-8 6v12ZM5.333 28.5v-16L16 4.5l10.667 8v16h-9.334v-8h-2.666v8H5.333Z"
-        />
-      </G>
+    <Svg
+      width={30}
+      height={30}
+      viewBox="0 0 30 30"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <Path
+        d="M18.75 26.25v-10A1.25 1.25 0 0017.5 15h-5a1.25 1.25 0 00-1.25 1.25v10"
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M3.75 12.5a2.5 2.5 0 01.886-1.91l8.75-7.499a2.5 2.5 0 013.228 0l8.75 7.499a2.502 2.502 0 01.886 1.91v11.25a2.5 2.5 0 01-2.5 2.5H6.25a2.5 2.5 0 01-2.5-2.5V12.5z"
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   )
 }

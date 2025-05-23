@@ -19,7 +19,10 @@ import { getColorProperty } from './helpers'
 import { useTheme } from './context/ThemeContext'
 import DeckIcon from './svgs/DeckIcon'
 import SettingsIcon from './svgs/SettingsIcon'
+import SettingsIconFilled from './svgs/SettingsIconFilled'
 import DeckIconFilled from './svgs/DeckIconFilled'
+import HomeIconFilled from './svgs/HomeIconFilled'
+import HomeIcon from './svgs/HomeIcon'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 const Stack = createNativeStackNavigator()
@@ -83,14 +86,14 @@ function TabStack() {
             if (focused) {
               return (
                 <View style={{ marginTop: 20, marginBottom }}>
-                  <DeckIconFilled />
+                  <HomeIconFilled />
                 </View>
               )
             }
 
             return (
               <View style={{ marginTop: 20, marginBottom }}>
-                <DeckIcon fill={focused ? '' : '#FAF9F6'} />
+                <HomeIcon />
               </View>
             )
           }
@@ -106,15 +109,23 @@ function TabStack() {
 
             return (
               <View style={{ marginTop: 20, marginBottom }}>
-                <DeckIcon fill={focused ? '' : '#FAF9F6'} />
+                <DeckIcon />
               </View>
             )
           }
 
           if (route.name === 'Settings') {
+            if (focused) {
+              return (
+                <View style={{ marginTop: 20, marginBottom }}>
+                  <SettingsIconFilled />
+                </View>
+              )
+            }
+
             return (
               <View style={{ marginTop: 20, marginBottom }}>
-                <SettingsIcon fill={focused ? '' : '#FAF9F6'} />
+                <SettingsIcon />
               </View>
             )
           }

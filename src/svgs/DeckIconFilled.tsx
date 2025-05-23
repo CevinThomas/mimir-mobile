@@ -1,19 +1,46 @@
-import Svg, { Path } from 'react-native-svg'
+import Svg, { Rect } from 'react-native-svg'
 import * as React from 'react'
 
 export default function DeckIconFilled({ ...props }) {
   return (
     <Svg
-      width={30}
-      height={29}
-      viewBox="0 0 30 29"
+      width={29}
+      height={30}
+      viewBox="0 0 29 30"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <Path
-        d="M19.667 19.583l1.677-6.052-5.177-3.573-1.677 6.052 5.177 3.573zm-16.334 5.87L2.13 24.87C1.377 24.554.866 24.013.6 23.247c-.267-.765-.231-1.525.11-2.278l2.624-5.688v10.172zm5.834 3.172c-.802 0-1.49-.292-2.06-.875-.571-.584-.857-1.276-.857-2.078v-8.714l3.901 10.719c.073.17.134.334.182.492.049.158.134.31.255.456H9.168zm7.51-.182c-.753.267-1.507.23-2.26-.11-.754-.34-1.264-.887-1.532-1.64L6.432 8.864c-.267-.753-.23-1.5.11-2.242.34-.741.887-1.245 1.64-1.513L19.156 1.1c.754-.268 1.501-.231 2.242.11.742.34 1.246.886 1.513 1.64l6.49 17.828c.267.753.23 1.5-.11 2.242-.34.741-.887 1.246-1.64 1.513l-10.974 4.01z"
-        fill="#FEFDFD"
+      <Rect
+        x={1.12941}
+        y={5.04522}
+        width={16.6011}
+        height={23.6104}
+        rx={2}
+        transform="rotate(-7.998 1.13 5.045)"
+        fill="#fff"
+        stroke="#fff"
+        strokeWidth={2}
+      />
+      <Rect
+        x={8.29883}
+        y={1}
+        width={19.7012}
+        height={27.4517}
+        rx={2}
+        fill="#1A2330"
+        stroke="#1A2330"
+        strokeWidth={2}
+      />
+      <Rect
+        x={9.84888}
+        y={2.55011}
+        width={16.6011}
+        height={24.3515}
+        rx={2}
+        fill="#fff"
+        stroke="#fff"
+        strokeWidth={2}
       />
     </Svg>
   )
