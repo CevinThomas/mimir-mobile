@@ -170,7 +170,7 @@ export default function Account() {
               >
                 {/* Featured Decks Section */}
                 {(isLoadingFeaturedDecks || featuredDecks.length > 0) && (
-                  <View style={{ marginBottom: 40 }}>
+                  <View style={{ marginBottom: 20 }}>
                     <NormalText style={{ fontSize: 18, marginBottom: 10, fontWeight: 'bold' }}>
                       Featured decks
                     </NormalText>
