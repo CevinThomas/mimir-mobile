@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Platform } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { getColorProperty } from '../helpers'
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -19,7 +19,7 @@ export default function MainBackground({
           styles.container,
           {
             backgroundColor: getColorProperty(undefined, 'darkest'),
-            paddingTop: noSpace ? 0 : Platform.OS === 'android' ? insets.top + 40 : insets.top + 40
+            paddingTop: noSpace ? 0 : Platform.OS === 'android' ? insets.top + 40 : insets.top
           }
         ]}
       >

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Alert, BackHandler, ScrollView, View, KeyboardAvoidingView, Platform } from 'react-native'
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native'
 import { createDeck, deleteDeck, updateDeck } from '../api/DecksApi'
@@ -27,6 +27,10 @@ export default function CreateDeck(props: {
   const [folders, setFolders] = useState([])
   const { showError, errorSnackbar } = useErrorSnackbar()
 
+  // Refs to track original title and description for change detection
+  const originalTitle = useRef('')
+  const originalDescription = useRef('')
+
   const validationRules = {
     name: {
       required: true,
@@ -45,17 +49,28 @@ export default function CreateDeck(props: {
 
   useEffect(() => {
     if (props.route.params?.deck) {
+      const deckName = props.route.params.deck.name
+      const deckDescription = props.route.params.deck.description || ''
+
+      // Store original values for change detection
+      originalTitle.current = deckName
+      originalDescription.current = deckDescription
+
       dispatch({
         type: 'SET_DECK',
         response: {
-          name: props.route.params.deck.name,
-          description: props.route.params.deck.description,
+          name: deckName,
+          description: deckDescription,
           id: props.route.params.deck.id,
           cards: props.route.params.deck.cards,
           featured: props.route.params.deck.featured,
           active: props.route.params.deck.active
         }
       })
+    } else {
+      // For new decks, initialize with empty strings
+      originalTitle.current = ''
+      originalDescription.current = ''
     }
     fetchFolders()
   }, [])
@@ -138,40 +153,57 @@ export default function CreateDeck(props: {
   }
 
   const onGoBack = () => {
-    Alert.alert(
-      'Save Changes',
-      'Do you want to save your changes?',
-      [
-        {
-          text: 'No',
-          onPress: () => {
-            dispatch({ type: 'RESET' })
-            navigation.dispatch(CommonActions.goBack())
+    // Check if title or description has changed
+    const titleChanged = state.name !== originalTitle.current
+    const descriptionChanged = state.description !== originalDescription.current
+
+    // Only show alert if changes were made
+    if (titleChanged || descriptionChanged) {
+      Alert.alert(
+        'Save Changes',
+        'Do you want to save your changes?',
+        [
+          {
+            text: 'No',
+            onPress: () => {
+              dispatch({ type: 'RESET' })
+              navigation.dispatch(CommonActions.goBack())
+            },
+            style: 'cancel'
           },
-          style: 'cancel'
-        },
-        {
-          text: 'Yes',
-          onPress: () => {
-            if (state.id) {
-              onSaveDeck().catch((error) => {
-                console.error('Failed to save deck:', error)
-                // Navigation is handled in onSaveDeck on success
-              })
-            } else {
-              onCreateDeck()
-                .then(() => {
-                  navigation.dispatch(CommonActions.goBack())
+          {
+            text: 'Yes',
+            onPress: () => {
+              if (state.id) {
+                onSaveDeck().catch((error) => {
+                  console.error('Failed to save deck:', error)
+                  // Navigation is handled in onSaveDeck on success
                 })
-                .catch((error) => {
-                  console.error('Failed to create deck:', error)
-                })
+              } else {
+                onCreateDeck()
+                  .then(() => {
+                    dispatch({ type: 'RESET' })
+                    navigation.dispatch(
+                      CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: 'Home', params: { screen: 'Decks' } }]
+                      })
+                    )
+                  })
+                  .catch((error) => {
+                    console.error('Failed to create deck:', error)
+                  })
+              }
             }
           }
-        }
-      ],
-      { cancelable: false }
-    )
+        ],
+        { cancelable: false }
+      )
+    } else {
+      // No changes, just go back without showing alert
+      dispatch({ type: 'RESET' })
+      navigation.dispatch(CommonActions.goBack())
+    }
   }
 
   const onPublishDeck = async () => {
