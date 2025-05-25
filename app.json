@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-test.png",
       "resizeMode": "contain",
-        "backgroundColor": "#1A2330"
+      "backgroundColor": "#1A2330"
     },
     "ios": {
       "supportsTablet": true,
@@ -31,11 +31,16 @@
       [
         "expo-splash-screen",
         {
-            "image": "./assets/splash-test.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#1A2330"
+          "image": "./assets/splash-test.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#1A2330"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "8685514e-4567-46df-a2a1-30723b72859f"
+      }
+    }
   }
 }
