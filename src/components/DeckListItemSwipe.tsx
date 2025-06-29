@@ -38,7 +38,7 @@ export default function DeckListItemSwipe({
 
   useEffect(() => {
     if (ongoingDeck) {
-      const totalCards = deck.deck.cards.length - deck.deck_session_excluded_cards.length
+      const totalCards = deck.deck.cards.length
       const correctCards = deck.filtered_answered_cards.filter((card) => card.correct).length
       setProgress(Math.round((correctCards / totalCards) * 100))
       const deckToUpdate = {
@@ -214,13 +214,14 @@ export default function DeckListItemSwipe({
                 {...props}
                 onPress={() => {
                   // Get the current route name to track where we're coming from
-                  const currentRouteName = navigation.getState().routes[navigation.getState().index].name;
-                  navigation.navigate('Deck', { 
-                    deck: deckData, 
-                    ongoingDeck, 
+                  const currentRouteName =
+                    navigation.getState().routes[navigation.getState().index].name
+                  navigation.navigate('Deck', {
+                    deck: deckData,
+                    ongoingDeck,
                     completed,
-                    previousScreen: currentRouteName 
-                  });
+                    previousScreen: currentRouteName
+                  })
                 }}
               >
                 <View style={{ paddingHorizontal: 10, position: 'relative' }}>
@@ -286,7 +287,7 @@ export default function DeckListItemSwipe({
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <ProgressBar
                               borderRadius={20}
-                              height={12}
+                              height={6}
                               unfilledColor={'#D4D4D4'}
                               color={'#68C281'}
                               progress={progress / 100}
@@ -312,7 +313,7 @@ export default function DeckListItemSwipe({
                   <View>
                     <NormalText style={{ color: '#000' }}>{deckData.description}</NormalText>
                   </View>
-                  <View>
+                  <View style={{ marginBottom: 5 }}>
                     <NormalText style={{ fontWeight: 'bold', fontSize: 24, color: '#000' }}>
                       {deckData.name}
                     </NormalText>

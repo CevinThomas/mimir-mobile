@@ -372,6 +372,10 @@ const styles = StyleSheet.create({
     marginVertical: 5
   },
   loadingContainer: {
+    position: 'absolute',
+    top: -50,
+    left: 0,
+    width: '100%',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'

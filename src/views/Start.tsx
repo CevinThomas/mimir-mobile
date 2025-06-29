@@ -1,9 +1,11 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import * as Linking from 'expo-linking'
 import { useNavigation } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
-import { login } from '../api/AuthApi'
+import { getUserInfo, googleSignIn, login } from '../api/AuthApi'
+import { Ionicons } from '@expo/vector-icons'
 import { getAccountInfo } from '../api/AccountsApi'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import MainBackground from '../components/MainBackground'
@@ -21,21 +23,15 @@ export default function Start() {
     return await SecureStore.getItemAsync('rememberMe')
   }
 
-  const emailAndPassword = async () => {
-    const email = await SecureStore.getItemAsync('email')
-    const password = await SecureStore.getItemAsync('password')
-    return { email, password }
-  }
-
   useEffect(() => {
     const autoLogin = async () => {
       try {
         const rememberMe = await rememberKey()
         if (rememberMe === 'true') {
-          const { email, password } = await emailAndPassword()
-          const response = await login(email, password)
-          if (response.status.code === 200) {
-            dispatch({ type: 'SET_USER', payload: response.status.data.user })
+          //const { email, password } = await emailAndPassword()
+          const response = await getUserInfo()
+          if (response) {
+            dispatch({ type: 'SET_USER', payload: response })
             const accountResponse = await getAccountInfo()
             dispatch({ type: 'SET_ACCOUNT', payload: accountResponse })
             dispatch({ type: 'LOG_IN' })
@@ -68,6 +64,16 @@ export default function Start() {
           </View>
         </View>
       </View>
+
+      <View style={styles.googleButtonContainer}>
+        <TouchableOpacity
+          style={styles.googleButton}
+          onPress={() => navigation.navigate('GoogleLogin')}
+        >
+          <Ionicons name="logo-google" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+
       {errorSnackbar()}
     </MainBackground>
   )
@@ -95,5 +101,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20,
     paddingBottom: 10
+  },
+  googleButtonContainer: {
+    bottom: 40,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  googleButton: {
+    backgroundColor: '#DB4437',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84
   }
 })

@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Dimensions, RefreshControl, ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native'
+import {
+  Dimensions,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  TouchableOpacity
+} from 'react-native'
 import {
   checkedAccountDecks,
   getAccountDecks,
@@ -202,7 +209,9 @@ export default function Account() {
             </View>
           ) : !accountDecksToShow() && !newDecksToShow() && !featuredDecksToShow() ? (
             <View style={styles.noDecksContainer}>
-              <NormalText style={styles.noDecksTitle}>Your organisation has no decks yet</NormalText>
+              <NormalText style={styles.noDecksTitle}>
+                Your organisation has no decks yet
+              </NormalText>
               <NormalText style={styles.noDecksMessage}>
                 Flashcards are a great way to memorize information and improve your knowledge.
               </NormalText>
@@ -265,6 +274,10 @@ const styles = StyleSheet.create({
     flex: 1
   },
   loadingContainer: {
+    position: 'absolute',
+    top: -50,
+    left: 0,
+    width: '100%',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'

@@ -8,16 +8,20 @@ import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import { getUsers } from '../api/UsersApi'
+import { useStoreContext } from '../context/StoreContext'
 
 export default function Profile() {
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [refreshing, setRefreshing] = useState(false)
-  const { state, dispatch } = useAuthContext()
   const { showError, errorSnackbar } = useErrorSnackbar()
+
+  const { state, dispatch } = useStoreContext()
 
   useEffect(() => {
     fetchUserData()
+    setName(state.user.name || '')
+    setEmail(state.user.email || '')
   }, [])
 
   const fetchUserData = async () => {
@@ -63,11 +67,11 @@ export default function Profile() {
 
   const onLogoutPress = async () => {
     try {
-      await logout()
       await SecureStore.deleteItemAsync('jwt')
       await SecureStore.deleteItemAsync('rememberMe')
       await SecureStore.deleteItemAsync('email')
       await SecureStore.deleteItemAsync('password')
+      //await logout()
       dispatch({ type: 'LOG_OUT' })
     } catch (error) {
       showError('Failed to log out')

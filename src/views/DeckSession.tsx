@@ -14,12 +14,14 @@ import useErrorSnackbar from '../hooks/useErrorSnackbar'
 import MainBackground from '../components/MainBackground'
 import NormalText from '../components/Typography/NormalText'
 import Choice from '../components/Choice'
-import OutlineButton from '../components/Buttons/OutlineButton'
 import FilledButton from '../components/Buttons/FilledButton'
 import Svg, { Path } from 'react-native-svg'
 import { Button } from '@rneui/base'
 import CheckboxClickItem from '../components/CheckboxClickItem'
 import { CORRECT, WRONG, UNANSWERED } from '../constants/answerStates'
+import { useTheme } from '../context/ThemeContext'
+import { getColorProperty } from '../helpers'
+import ProgressCircle from 'react-native-progress/Circle'
 
 export default function DeckSession(props: {
   route: { params: { deck: { name: string; id: string } } }
@@ -32,7 +34,7 @@ export default function DeckSession(props: {
   const [answeredChoiceId, setAnsweredId] = useState()
   const [deckSessionId, setDeckSessionId] = useState<number>()
   const [refreshing, setRefreshing] = useState(false)
-  const [percentage, setPercentage] = useState('0%')
+  const [percentage, setPercentage] = useState(0)
   const [skipCardChecked, setSkipCardChecked] = useState(false)
   // Create a fixed array of 4 empty choices
   const [choiceElements, setChoiceElements] = useState(Array(4).fill({ id: null, title: '' }))
@@ -40,14 +42,14 @@ export default function DeckSession(props: {
   const navigation = useNavigation()
   const { showError, errorSnackbar } = useErrorSnackbar()
 
+  const { theme } = useTheme()
+
   useDenyBackButton()
 
   const fetchPercentage = async (sessionId) => {
     try {
       const response = await getDeckSessionPercentage(sessionId)
-      if (response && response.percentage) {
-        setPercentage(response.percentage + '%')
-      }
+      setPercentage(response.percentage / 100)
     } catch (error) {
       showError(error.message || 'Failed to fetch percentage')
     }
@@ -73,19 +75,16 @@ export default function DeckSession(props: {
     sessionInit()
   }, [])
 
-  const answerCard = (choice: any) => {
+  const answerCard = async (choice: any) => {
     try {
-      answerCardApi(deckSessionId, currentCard.id, choice.id)
+      await answerCardApi(deckSessionId, currentCard.id, choice.id)
 
       setAnsweredId(choice.id)
+      await fetchPercentage(deckSessionId)
       if (choice.correct) {
         setAnsweredState(CORRECT)
-        // Fetch updated percentage after answering correctly
-        fetchPercentage(deckSessionId)
       } else {
         setAnsweredState(WRONG)
-        // Fetch updated percentage after answering incorrectly
-        fetchPercentage(deckSessionId)
       }
     } catch (error) {
       showError(error.message || 'Failed to submit answer')
@@ -110,19 +109,12 @@ export default function DeckSession(props: {
         setCurrentCardIndex(0)
         setAnsweredState(UNANSWERED)
         // Fetch updated percentage after moving to next card batch
-        await fetchPercentage(deckSessionId)
         return
-      }
-
-      // If we archived the card and it wasn't the last one, we need to update the cards array
-      if (shouldArchiveCard) {
-        setCards(cards.filter((card: any) => card.id !== currentCard.id))
       }
 
       setAnsweredState(UNANSWERED)
       setCurrentCardIndex(currentCardIndex + 1)
       // Fetch updated percentage after moving to next card
-      await fetchPercentage(deckSessionId)
     } catch (error) {
       showError()
     }
@@ -167,7 +159,6 @@ export default function DeckSession(props: {
       setCurrentCard(response.cards[0])
       setCurrentCardIndex(0)
       // Fetch updated percentage after fetching next card batch
-      await fetchPercentage(deckSessionId)
     } catch (error) {
       showError()
     }
@@ -280,18 +271,17 @@ export default function DeckSession(props: {
             <BackIcon />
           </Button>
         </View>
-        <View
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: 25,
-            borderWidth: 2,
-            borderColor: 'green',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-        >
-          <NormalText>{percentage}</NormalText>
+        <View>
+          <ProgressCircle
+            size={50}
+            progress={percentage}
+            color={'#68C281'}
+            unfilledColor={getColorProperty(theme, 'inputBackground')}
+            borderColor={getColorProperty(theme, 'inputBackground')}
+            animated={true}
+            showsText={true}
+            textStyle={{ fontSize: 14, color: 'white' }}
+          />
         </View>
       </View>
       <ScrollView

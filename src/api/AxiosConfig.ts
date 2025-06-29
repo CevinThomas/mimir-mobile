@@ -1,8 +1,10 @@
 import axios from 'axios'
 import * as SecureStore from 'expo-secure-store'
+const production_url = 'https://backend-976522134397.europe-west1.run.app'
+const development_url = 'http://192.168.1.185:3001'
 
 const axiosInstance = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  baseURL: production_url,
   headers: { 'Content-Type': 'application/json' }
 })
 

@@ -26,7 +26,6 @@ export default function Login() {
       if (rememberMe) {
         await SecureStore.setItemAsync('rememberMe', 'true')
         await SecureStore.setItemAsync('email', email.current)
-        await SecureStore.setItemAsync('password', password.current)
       }
 
       if (response.status.code === 200) {

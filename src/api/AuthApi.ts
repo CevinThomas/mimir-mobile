@@ -10,6 +10,24 @@ export const login = async (email: string, password: string) => {
   return response.data
 }
 
+export const getUserInfo = async () => {
+  const response = await axiosInstance.get('/users/user_info')
+  return response.data
+}
+
+export const googleSignIn = async (email: string) => {
+  const response = await axiosInstance.post('/omniauth', {
+    provider: 'google',
+    email: email
+  })
+  return response.data
+}
+
+export const expireAuthRequest = async (token: string) => {
+  const response = await axiosInstance.delete(`/omniauth/expire?token=${token}`)
+  return response.data
+}
+
 export const userSignUp = async (email: string, password: string, name: string) => {
   const response = await axiosInstance.post('/users/registrations', {
     user: { email, password, name }
@@ -29,5 +47,15 @@ export const logout = async () => {
 
 export const getDecks = async () => {
   const response = await axiosInstance.get('/decks')
+  return response.data
+}
+
+export const pollGoogleAuthSuccess = async (email: string, token: string) => {
+  const response = await axiosInstance.post('/omniauth/poll_success', {
+    email,
+    token
+  })
+
+  console.log(response)
   return response.data
 }

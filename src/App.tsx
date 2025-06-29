@@ -4,6 +4,7 @@ import Start from './views/Start'
 import Login from './views/Login'
 import SignUp from './views/SignUp'
 import SignUpConfirmation from './views/SignUpConfirmation'
+import GoogleLogin from './views/GoogleLogin'
 import { useStoreContext } from './context/StoreContext'
 import Deck from './views/Deck'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -42,6 +43,7 @@ function WelcomeStack() {
       <Stack.Screen name="Welcome" component={Start} options={{ headerTitle: '' }} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="GoogleLogin" component={GoogleLogin} />
       <Stack.Screen
         name="SignUpConfirmation"
         component={SignUpConfirmation}
